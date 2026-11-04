@@ -1,5 +1,5 @@
-const C = 'decade-mf-v2';
-const FILES = ['./', 'index.html', 'tokens.css', 'manifest.json', 'icon-192.png', 'icon-512.png',
+const C = 'decade-mf-v3';
+const FILES = ['./', 'index.html', 'tokens.css', 'app-marketplace.webmanifest', 'icon-192.png', 'icon-512.png',
   'fonts/GT-Walsheim-Regular-Trial.otf', 'fonts/GT-Walsheim-Medium-Trial.otf',
   'fonts/RecklessStandardS-TRIAL-Regular.woff2', 'fonts/RecklessStandardS-TRIAL-Medium.woff2'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(C).then((c) => Promise.all(FILES.map((f) => c.add(f).catch(() => {}))))); self.skipWaiting(); });
