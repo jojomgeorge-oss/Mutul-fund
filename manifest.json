@@ -1,10 +1,10 @@
 {
-  "name": "Decade \u2014 Mutual funds",
+  "name": "Decade Marketplace",
   "short_name": "Decade MF",
   "description": "Decade mutual fund marketplace prototype",
-  "id": "./",
-  "start_url": "./index.html",
-  "scope": "./",
+  "id": "/Mutul-fund/",
+  "start_url": "/Mutul-fund/index.html",
+  "scope": "/Mutul-fund/",
   "display": "fullscreen",
   "display_override": [
     "fullscreen",
