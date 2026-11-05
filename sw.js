@@ -1,4 +1,4 @@
-const C = 'decade-app-v9';
+const C = 'decade-app-v10';
 const FILES = ['./', 'index.html', 'tokens.css', 'app-marketplace.webmanifest', 'icon-192.png', 'icon-512.png',
   'fonts/GT-Walsheim-Regular-Trial.otf', 'fonts/GT-Walsheim-Medium-Trial.otf',
   'fonts/RecklessStandardS-TRIAL-Regular.woff2', 'fonts/RecklessStandardS-TRIAL-Medium.woff2'];
