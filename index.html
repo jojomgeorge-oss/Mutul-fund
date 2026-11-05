@@ -29,6 +29,7 @@ body{margin:0}
 @keyframes mf-scan{from{transform:translateX(-70px)}to{transform:translateX(360px)}}
 .mf-pix{position:absolute;width:3px;height:3px;background:#169c28;opacity:0;animation:mf-blink 1.6s ease-in-out infinite}
 @keyframes mf-blink{0%{opacity:0}50%{opacity:.22}100%{opacity:0}}
+@keyframes mf-blink2{0%,49%{opacity:1}50%,100%{opacity:0}}.mf-caret{animation:mf-blink2 1s step-end infinite}
 .pp-scroll{scrollbar-width:none}.pp-scroll::-webkit-scrollbar{display:none}
 @keyframes pp-spin{to{transform:rotate(360deg)}}
 .pp-spin{animation:pp-spin .9s linear infinite}
@@ -472,6 +473,121 @@ body{margin:0}
 
   </div>
 
+  <div aria-label="Fixed deposit" style="position: absolute; left: 0; top: 0; width: 390px; height: 849px; overflow: hidden; background: #fafafa; font-family: var(--font-sans); color: #000000; transform: translateX({{fdX}}px); transition: transform .42s cubic-bezier(.2,.8,.2,1); box-shadow: -20px 0 60px rgba(0, 0, 0, 0.12);">
+    <div class="mf-scroll" ref="{{setFdScroller}}" style="position: absolute; left: 0; top: 0; width: 390px; height: 849px; overflow-y: auto;">
+      <div style="position: relative; width: 390px; height: 1700px;">
+  <button type="button" aria-label="Back" onClick="{{goHome}}" style="position: absolute; left: 21px; top: 54px; display: inline-flex; width: 52px; height: 43px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 28px; background: #ffffff; box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); cursor: pointer;">
+    <svg width="10" height="17" viewBox="0 0 10 17" fill="none" aria-hidden="true"><path d="M0 8.5C0.00987167 8.06512 0.157947 7.7093 0.513327 7.36337L7.62093 0.395349C7.88746 0.138372 8.21323 0 8.59822 0C9.36821 0 10 0.622674 10 1.40349C10 1.77907 9.84205 2.13488 9.55577 2.42151L3.30701 8.49012L9.55577 14.5785C9.84205 14.8651 10 15.211 10 15.6064C10 16.3773 9.36821 17 8.59822 17C8.21323 17 7.88746 16.8715 7.62093 16.6047L0.513327 9.62674C0.157947 9.2907 0 8.925 0 8.5Z" fill="#000000" fill-opacity="0.76"/></svg>
+  </button>
+  <button type="button" aria-label="Search fixed deposits" style="position: absolute; left: 260px; top: 54px; display: inline-flex; width: 52px; height: 43px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 28px; background: #ffffff; box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); cursor: pointer;">
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true"><path d="M18 18L13.8981 13.8981M13.8981 13.8981C15.2654 12.5309 16.1111 10.642 16.1111 8.55556C16.1111 4.38274 12.7284 1 8.55556 1C4.38274 1 1 4.38274 1 8.55556C1 12.7284 4.38274 16.1111 8.55556 16.1111C10.642 16.1111 12.5309 15.2654 13.8981 13.8981Z" stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button type="button" aria-label="More options" style="position: absolute; left: 317px; top: 54px; display: inline-flex; width: 52px; height: 43px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 28px; background: #ffffff; box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); cursor: pointer;">
+    <svg width="17" height="4" viewBox="0 0 17 4" fill="none" aria-hidden="true"><path d="M1.92174 3.825C0.859239 3.825 0 2.96576 0 1.9125C0 0.85 0.859239 0 1.92174 0C2.975 0 3.83424 0.85 3.83424 1.9125C3.83424 2.96576 2.975 3.825 1.92174 3.825ZM8.5 3.825C7.44674 3.825 6.5875 2.96576 6.5875 1.9125C6.5875 0.85 7.44674 0 8.5 0C9.5625 0 10.4217 0.85 10.4217 1.9125C10.4217 2.96576 9.5625 3.825 8.5 3.825ZM15.0875 3.825C14.0342 3.825 13.175 2.96576 13.175 1.9125C13.175 0.85 14.0342 0 15.0875 0C16.15 0 17 0.85 17 1.9125C17 2.96576 16.15 3.825 15.0875 3.825Z" fill="#000000"/></svg>
+  </button>
+
+  <h1 style="position: absolute; left: 25px; top: 124px; margin: 0; font-family: var(--font-display); font-size: 43px; line-height: 49px; font-weight: 500; color: #212121;">Fixed deposit</h1>
+
+  <section aria-label="Research" style="position: absolute; left: 11px; top: 190px; width: 368px; height: 191px; border-radius: 23px; background: #5e3b26; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08);">
+    <div aria-hidden="true" style="position: absolute; left: 12px; top: 21px; width: 17px; height: 149px; opacity: 0.5;">
+      <span style="position: absolute; left: 1px; top: 0;"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M15 7.5C15 9.57147 14.1515 11.4465 12.7789 12.8032C11.4072 14.1607 9.51147 15 7.4171 15H1.86757V13.1536L7.58368 7.5L6.74453 6.67002L3.91736 9.4655H1.86757V1.84638L0 0H7.4171C11.6051 0 15 3.35783 15 7.5Z" fill="#ffffff"/></svg></span>
+      <span style="position: absolute; left: -24px; top: 107px; width: 64px; transform: rotate(-90deg); font-family: var(--font-display); font-size: 14.6px; line-height: 17px; font-weight: 500; color: #ffffff; white-space: nowrap;">Research_</span>
+    </div>
+    <div style="position: absolute; left: 39px; top: 7px; width: 322px; height: 177px; border-radius: 19px; background: #ffffff;">
+      <h2 style="position: absolute; left: 17px; top: 22px; display: flex; align-items: baseline; gap: 7px; margin: 0; font-weight: 400; white-space: nowrap;"><span style="font-size: 17px; color: #857c8e;">Invest :</span><span style="font-size: 27px; line-height: 30px; font-weight: 500; color: #000000;">₹50,000</span><span style="font-size: 17px; color: #857c8e;">@8.30%</span></h2>
+      <span aria-hidden="true" style="position: absolute; left: 0; top: 63px; width: 322px; height: 1px; background: #e9e9e9;"></span>
+      <p style="position: absolute; left: 17px; top: 76px; width: 290px; margin: 0; font-size: 15px; line-height: 19.5px; color: rgba(0, 0, 0, 0.7);">Left for 5 years, ₹50,000 grows to about ₹75,000. It’s DICGC insured up to ₹5 lakh.</p>
+      <button type="button" style="position: absolute; left: 17px; top: 127px; display: inline-flex; height: 33px; align-items: center; gap: 8px; padding: 0 14px 0 16px; border: 0; border-radius: 24px; background: rgba(0, 0, 0, 0.06); font-family: var(--font-sans); font-size: 15px; line-height: 19.5px; font-weight: 500; color: #000000; cursor: pointer;">Show more <svg width="5" height="8" viewBox="0 0 5 8" fill="none" aria-hidden="true"><path d="M0.75 6.75L3.75 3.75L0.750001 0.75" stroke="#929292" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </section>
+
+  <h2 style="position: absolute; left: 27px; top: 416px; margin: 0; font-size: 15px; line-height: 23px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(0, 0, 0, 0.46);">FD planner</h2>
+  <section aria-label="FD planner" style="position: absolute; left: 11px; top: 448px; width: 368px; height: 229px; border-radius: 23px; background: #ffffff; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08);">
+    <label style="position: absolute; left: 11px; top: 11px; box-sizing: border-box; width: 346px; height: 101px; border: 1px solid #ebebeb; border-radius: 16px; background: #f3f9fb;">
+      <span style="position: absolute; left: 17px; top: 16px; font-size: 15px; line-height: 19.5px; letter-spacing: 0.07em; color: rgba(0, 0, 0, 0.6);">Amount</span>
+      <span style="position: absolute; left: 17px; top: 38px; display: flex; align-items: center; gap: 6px; font-size: 35px; line-height: 45px; font-weight: 500; color: #000000;">₹50,000<span class="mf-caret" aria-hidden="true" style="width: 1.5px; height: 30px; background: #000000;"></span></span>
+    </label>
+    <div role="group" aria-label="Tenure" style="position: absolute; left: 17px; top: 133px; display: grid; grid-template-columns: repeat(3, 40px); gap: 9px 8px;">
+      <button type="button" onClick="{{fdPick.k0}}" aria-pressed="{{fdSel.k0}}" style="display: inline-flex; width: 40px; height: 35px; align-items: center; justify-content: center; padding: 0; box-sizing: border-box; border: 1px solid {{fdBd.k0}}; border-radius: 20px; background: {{fdBg.k0}}; color: {{fdFg.k0}}; font-family: var(--font-sans); font-size: 15px; letter-spacing: 0.07em; cursor: pointer; transition: background .2s, color .2s;">6M</button><button type="button" onClick="{{fdPick.k1}}" aria-pressed="{{fdSel.k1}}" style="display: inline-flex; width: 40px; height: 35px; align-items: center; justify-content: center; padding: 0; box-sizing: border-box; border: 1px solid {{fdBd.k1}}; border-radius: 20px; background: {{fdBg.k1}}; color: {{fdFg.k1}}; font-family: var(--font-sans); font-size: 15px; letter-spacing: 0.07em; cursor: pointer; transition: background .2s, color .2s;">1Y</button><button type="button" onClick="{{fdPick.k2}}" aria-pressed="{{fdSel.k2}}" style="display: inline-flex; width: 40px; height: 35px; align-items: center; justify-content: center; padding: 0; box-sizing: border-box; border: 1px solid {{fdBd.k2}}; border-radius: 20px; background: {{fdBg.k2}}; color: {{fdFg.k2}}; font-family: var(--font-sans); font-size: 15px; letter-spacing: 0.07em; cursor: pointer; transition: background .2s, color .2s;">2Y</button><button type="button" onClick="{{fdPick.k3}}" aria-pressed="{{fdSel.k3}}" style="display: inline-flex; width: 40px; height: 35px; align-items: center; justify-content: center; padding: 0; box-sizing: border-box; border: 1px solid {{fdBd.k3}}; border-radius: 20px; background: {{fdBg.k3}}; color: {{fdFg.k3}}; font-family: var(--font-sans); font-size: 15px; letter-spacing: 0.07em; cursor: pointer; transition: background .2s, color .2s;">3Y</button><button type="button" onClick="{{fdPick.k4}}" aria-pressed="{{fdSel.k4}}" style="display: inline-flex; width: 40px; height: 35px; align-items: center; justify-content: center; padding: 0; box-sizing: border-box; border: 1px solid {{fdBd.k4}}; border-radius: 20px; background: {{fdBg.k4}}; color: {{fdFg.k4}}; font-family: var(--font-sans); font-size: 15px; letter-spacing: 0.07em; cursor: pointer; transition: background .2s, color .2s;">5Y</button>
+      <button type="button" aria-label="Custom tenure" style="display: inline-flex; width: 40px; height: 35px; align-items: center; justify-content: center; padding: 0; box-sizing: border-box; border: 1px solid #efefef; border-radius: 20px; background: #ffffff; cursor: pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+    <a href="#" style="position: absolute; left: 214px; top: 133px; color: #413737; font-size: 15px; line-height: 15px; text-decoration: underline; text-underline-offset: 3px;">Advanced search</a>
+    <button type="button" style="position: absolute; left: 193px; top: 167px; width: 158px; height: 45px; padding: 0; border: 0; border-radius: 32px; background: #413737; color: #ffffff; font-family: var(--font-sans); font-size: 17px; font-weight: 500; cursor: pointer;">Search</button>
+  </section>
+
+  <h2 style="position: absolute; left: 25px; top: 712px; margin: 0; font-size: 15px; line-height: 23px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(0, 0, 0, 0.46);">FDs for you</h2>
+  <div style="position: absolute; left: 11px; top: 744px; display: flex; flex-direction: column; gap: 9px;">
+      <a href="#" style="position: relative; display: block; width: 368px; height: 89px; border-radius: 23px; background: #ffffff; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08); color: #000000; text-decoration: none;">
+        <span aria-hidden="true" style="position: absolute; left: 17px; top: 17px; display: flex; width: 55px; height: 55px; align-items: center; justify-content: center; border-radius: 15px; background: #1f6f78; color: #ffffff; font-family: var(--font-display); font-size: 21px; line-height: 1; font-weight: 500;">Sh</span>
+        <span style="position: absolute; left: 87px; top: 23px; width: 175px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 17px; line-height: 19px; font-weight: 500;">Shivalik SF Bank</span>
+        <span style="position: absolute; left: 87px; top: 49px; display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 17px; font-weight: 500;"><span style="color: rgba(0, 0, 0, 0.4);">SFB</span><span aria-hidden="true" style="width: 1px; height: 10px; background: rgba(0, 0, 0, 0.1);"></span><span style="color: #8f5cbf;">DICGC insured</span></span>
+        <span style="position: absolute; left: 272px; top: 17px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; width: 79px; height: 55px; border: 1px solid #f0f0f0; border-radius: 15px;">
+          <span style="color: #01b405; font-size: 23px; line-height: 25px; font-weight: 500;">8.30<span style="font-size: 15px;">%</span></span>
+          <span style="font-size: 13px; line-height: 17px; color: rgba(0, 0, 0, 0.5);">a year</span>
+        </span>
+      </a>
+      <a href="#" style="position: relative; display: block; width: 368px; height: 89px; border-radius: 23px; background: #ffffff; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08); color: #000000; text-decoration: none;">
+        <span aria-hidden="true" style="position: absolute; left: 17px; top: 17px; display: flex; width: 55px; height: 55px; align-items: center; justify-content: center; border-radius: 15px; background: #2f3194; color: #ffffff; font-family: var(--font-display); font-size: 21px; line-height: 1; font-weight: 500;">Ja</span>
+        <span style="position: absolute; left: 87px; top: 23px; width: 175px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 17px; line-height: 19px; font-weight: 500;">Jana SF Bank</span>
+        <span style="position: absolute; left: 87px; top: 49px; display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 17px; font-weight: 500;"><span style="color: rgba(0, 0, 0, 0.4);">SFB</span><span aria-hidden="true" style="width: 1px; height: 10px; background: rgba(0, 0, 0, 0.1);"></span><span style="color: #8f5cbf;">DICGC insured</span></span>
+        <span style="position: absolute; left: 272px; top: 17px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; width: 79px; height: 55px; border: 1px solid #f0f0f0; border-radius: 15px;">
+          <span style="color: #01b405; font-size: 23px; line-height: 25px; font-weight: 500;">8.25<span style="font-size: 15px;">%</span></span>
+          <span style="font-size: 13px; line-height: 17px; color: rgba(0, 0, 0, 0.5);">a year</span>
+        </span>
+      </a>
+      <a href="#" style="position: relative; display: block; width: 368px; height: 89px; border-radius: 23px; background: #ffffff; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08); color: #000000; text-decoration: none;">
+        <span aria-hidden="true" style="position: absolute; left: 17px; top: 17px; display: flex; width: 55px; height: 55px; align-items: center; justify-content: center; border-radius: 15px; background: #a2402c; color: #ffffff; font-family: var(--font-display); font-size: 21px; line-height: 1; font-weight: 500;">Sr</span>
+        <span style="position: absolute; left: 87px; top: 23px; width: 175px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 17px; line-height: 19px; font-weight: 500;">Shriram Finance</span>
+        <span style="position: absolute; left: 87px; top: 49px; display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 17px; font-weight: 500;"><span style="color: rgba(0, 0, 0, 0.4);">NBFC</span><span aria-hidden="true" style="width: 1px; height: 10px; background: rgba(0, 0, 0, 0.1);"></span><span style="color: rgba(0, 0, 0, 0.4);">Not DICGC insured</span></span>
+        <span style="position: absolute; left: 272px; top: 17px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; width: 79px; height: 55px; border: 1px solid #f0f0f0; border-radius: 15px;">
+          <span style="color: #01b405; font-size: 23px; line-height: 25px; font-weight: 500;">7.85<span style="font-size: 15px;">%</span></span>
+          <span style="font-size: 13px; line-height: 17px; color: rgba(0, 0, 0, 0.5);">a year</span>
+        </span>
+      </a>
+  </div>
+  <a href="#" style="position: absolute; left: 127px; top: 1044px; display: inline-flex; box-sizing: border-box; width: 137px; height: 39px; align-items: center; justify-content: center; gap: 7px; border: 1px solid rgba(65, 55, 55, 0.4); border-radius: 37px; background: #ffffff; color: #413737; text-decoration: none; font-size: 17px;">View all FDs <svg width="5" height="8" viewBox="0 0 5 8" fill="none" aria-hidden="true"><path d="M0.75 6.75L3.75 3.75L0.750001 0.75" stroke="#413737" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+  <h2 style="position: absolute; left: 25px; top: 1118px; margin: 0; font-size: 15px; line-height: 23px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(0, 0, 0, 0.46);">More FDs</h2>
+  <div style="position: absolute; left: 11px; top: 1150px; display: grid; grid-template-columns: 179px 178px; gap: 11px;">
+      <a href="#" style="display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; height: 150px; padding: 17px; border: 1px solid #eaeaea; border-radius: 23px; background: #ffffff; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08); color: #000000; text-decoration: none;">
+        <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="#676bb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+        <span style="display: flex; flex-direction: column; gap: 5px;"><span style="font-size: 19px; line-height: 21px; font-weight: 500;">High returns</span><span style="font-size: 13px; line-height: 16px; color: rgba(0, 0, 0, 0.4);">Up to 8.30% a year</span></span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; height: 150px; padding: 17px; border: 1px solid #eaeaea; border-radius: 23px; background: #ffffff; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08); color: #000000; text-decoration: none;">
+        <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="#cc6160" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3 10h18"/><path d="M9.5 12.6h5"/><path d="M9.5 14.6h5"/><path d="M10.2 12.6h1.1a2 2 0 0 1 0 4h-1.1l3.2 2.8"/></svg>
+        <span style="display: flex; flex-direction: column; gap: 5px;"><span style="font-size: 19px; line-height: 21px; font-weight: 500;">Monthly payouts</span><span style="font-size: 13px; line-height: 16px; color: rgba(0, 0, 0, 0.4);">Interest paid monthly</span></span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; height: 150px; padding: 17px; border: 1px solid #eaeaea; border-radius: 23px; background: #ffffff; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08); color: #000000; text-decoration: none;">
+        <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="#7dc188" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12L13 2z"/></svg>
+        <span style="display: flex; flex-direction: column; gap: 5px;"><span style="font-size: 19px; line-height: 21px; font-weight: 500;">Instant withdraw</span><span style="font-size: 13px; line-height: 16px; color: rgba(0, 0, 0, 0.4);">Break it anytime</span></span>
+      </a>
+      <a href="#" style="display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; height: 150px; padding: 17px; border: 1px solid #eaeaea; border-radius: 23px; background: #ffffff; box-shadow: 0 4px 100px 12px rgba(0, 0, 0, 0.08); color: #000000; text-decoration: none;">
+        <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="#9c6eac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.4-7 10-4-1.6-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span style="display: flex; flex-direction: column; gap: 5px;"><span style="font-size: 19px; line-height: 21px; font-weight: 500;">No penalty withdrawals</span><span style="font-size: 13px; line-height: 16px; color: rgba(0, 0, 0, 0.4);">Exit early at no charge</span></span>
+      </a>
+  </div>
+
+  <span aria-hidden="true" style="position: absolute; left: 0; top: 1496px; width: 390px; height: 1px; background: #dcdcdc;"></span>
+  <div style="position: absolute; left: 25px; top: 1523px; width: 345px; display: flex; flex-wrap: wrap; align-items: center; gap: 13px 9px;">
+    <h2 style="display: flex; align-items: center; gap: 6px; margin: 0 9px 0 0; font-family: var(--font-display); font-size: 19px; line-height: 25px; font-weight: 500;"><span style="display: inline-flex; width: 17px; height: 17px;"><svg width="17" height="17" viewBox="0 0 25 26" fill="none" aria-hidden="true"><path d="M24.9252 12.6004C24.9252 16.0805 23.5152 19.2306 21.2345 21.51C18.9551 23.7907 15.805 25.2007 12.3249 25.2007H3.10331V22.0987L12.6017 12.6004L11.2073 11.206L6.50941 15.9025H3.10331V3.10201L0 0H12.3249C19.2839 0 24.9252 5.64131 24.9252 12.6004Z" fill="#6C4126"/></svg></span>Ask Decade</h2>
+    <a href="#" style="display: inline-flex; height: 33px; align-items: center; gap: 8px; padding: 0 14px 0 16px; border-radius: 24px; background: rgba(0, 0, 0, 0.06); color: #000000; text-decoration: none; font-size: 15px; line-height: 19.5px;">Best FD for me <svg width="5" height="8" viewBox="0 0 5 8" fill="none" aria-hidden="true"><path d="M0.75 6.75L3.75 3.75L0.750001 0.75" stroke="#929292" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a href="#" style="display: inline-flex; height: 33px; align-items: center; gap: 8px; padding: 0 14px 0 16px; border-radius: 24px; background: rgba(0, 0, 0, 0.06); color: #000000; text-decoration: none; font-size: 15px; line-height: 19.5px;">Tax on FD interest <svg width="5" height="8" viewBox="0 0 5 8" fill="none" aria-hidden="true"><path d="M0.75 6.75L3.75 3.75L0.750001 0.75" stroke="#929292" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a href="#" style="display: inline-flex; height: 33px; align-items: center; gap: 8px; padding: 0 14px 0 16px; border-radius: 24px; background: rgba(0, 0, 0, 0.06); color: #000000; text-decoration: none; font-size: 15px; line-height: 19.5px;">Why FD? <svg width="5" height="8" viewBox="0 0 5 8" fill="none" aria-hidden="true"><path d="M0.75 6.75L3.75 3.75L0.750001 0.75" stroke="#929292" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a href="#" style="display: inline-flex; height: 33px; align-items: center; gap: 8px; padding: 0 14px 0 16px; border-radius: 24px; background: rgba(0, 0, 0, 0.06); color: #000000; text-decoration: none; font-size: 15px; line-height: 19.5px;">Is my FD insured? <svg width="5" height="8" viewBox="0 0 5 8" fill="none" aria-hidden="true"><path d="M0.75 6.75L3.75 3.75L0.750001 0.75" stroke="#929292" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a href="#" style="display: inline-flex; height: 33px; align-items: center; gap: 8px; padding: 0 14px 0 16px; border-radius: 24px; background: rgba(0, 0, 0, 0.06); color: #000000; text-decoration: none; font-size: 15px; line-height: 19.5px;">FD vs debt fund <svg width="5" height="8" viewBox="0 0 5 8" fill="none" aria-hidden="true"><path d="M0.75 6.75L3.75 3.75L0.750001 0.75" stroke="#929292" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+
+      </div>
+    </div>
+  <div aria-hidden="true" style="position: absolute; left: 0; top: 761px; width: 390px; height: 88px; background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #ffffff); pointer-events: none;"></div>
+  <form style="position: absolute; left: 16px; top: 765px; box-sizing: border-box; width: 286px; height: 63px; margin: 0; border: 1px solid #e2e2e2; border-radius: 37px; background: #ffffff; box-shadow: 0 4px 16px 2px rgba(0, 0, 0, 0.08);">
+    <label style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);" for="fd-ask-p">Ask Decade</label>
+    <input id="fd-ask-p" class="mf-ask" type="text" placeholder="Ask Decade" style="position: absolute; left: 27px; top: 0; width: 196px; height: 61px; padding: 0; border: 0; outline: none; background: none; font-family: var(--font-sans); font-size: 18px; color: #000000;">
+    <button type="submit" aria-label="Send" style="position: absolute; left: 226px; top: 6px; display: inline-flex; width: 52px; height: 49px; align-items: center; justify-content: center; padding: 0 0 0 3px; border: 0; border-radius: 28px; background: #6c4126; cursor: pointer;"><svg width="13" height="18" viewBox="0 0 13 18" fill="none" aria-hidden="true"><path d="M1.78206 17.7922L12.1258 10.7227C13.2669 9.94523 13.2671 8.04139 12.1261 7.26429L1.78139 0.194704C0.835209 -0.451425 -0.295847 0.617101 0.0734176 1.8106L1.99815 8.01967L5.70714 8.99146L1.99795 9.96428L0.0719019 16.1739C-0.297615 17.3675 0.833214 18.4357 1.77953 17.7893L1.78206 17.7922Z" fill="#ffffff"/></svg></button>
+  </form>
+  <button type="button" aria-label="Quick actions" style="position: absolute; left: 312px; top: 765px; display: inline-flex; width: 63px; height: 63px; align-items: center; justify-content: center; padding: 0; box-sizing: border-box; border: 1px solid #e2e2e2; border-radius: 50%; background: #ffffff; box-shadow: 0 4px 16px 2px rgba(0, 0, 0, 0.08); cursor: pointer;"><svg width="13" height="21" viewBox="0 0 13 21" fill="none" aria-hidden="true"><path d="M6.62604 0.473943C6.83736 0.10156 7.26579 -0.0793153 7.67066 0.0330426C8.07561 0.145583 8.35709 0.523704 8.35709 0.954925V7.63648H12.0713C12.4038 7.63648 12.7109 7.81923 12.8765 8.1156C13.042 8.4119 13.0412 8.77679 12.8738 9.07197L6.37396 20.5261C6.16264 20.8984 5.73421 21.0793 5.32934 20.967C4.92439 20.8544 4.64291 20.4763 4.64291 20.0451V13.3635H0.92873C0.59625 13.3635 0.289102 13.1808 0.123507 12.8844C-0.0420393 12.5881 -0.0411959 12.2232 0.126227 11.928L6.62604 0.473943Z" fill="#656565"/></svg></button>
+  </div>
+
   <button type="button" aria-label="Close menu" tabindex="-1" onClick="{{closeMenu}}" style="position: absolute; left: 0; top: 0; width: 390px; height: 849px; padding: 0; border: 0; background: rgba(0, 0, 0, 0.4); cursor: default; opacity: {{ovO}}; pointer-events: {{ovPE}}; transition: opacity .34s ease;"></button>
   <nav aria-label="Main menu" style="position: absolute; left: 0; top: 0; width: 317px; height: 849px; background: #ffffff; transform: translateX({{drawerX}}px); transition: transform .34s cubic-bezier(.2,.8,.2,1); box-shadow: 0 0 60px rgba(0, 0, 0, {{drawerSh}});">
     <div style="position: absolute; left: 19px; top: 77px; display: flex; align-items: center; gap: 7px;">
@@ -489,6 +605,10 @@ body{margin:0}
     <button type="button" onClick="{{openFunds}}" aria-current="{{fundsCur}}" style="position: absolute; left: 9px; top: 199px; display: flex; align-items: center; gap: 9px; box-sizing: border-box; width: 299px; height: 48px; padding: 0 10px; border: 0; border-radius: 14px; background: {{navFundsBg}}; cursor: pointer; font-family: var(--font-sans); color: rgba(0, 0, 0, 0.71); font-size: 23px; line-height: 30px; font-weight: 500; text-align: left;">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M11.3074 9.73851L15 9L14.2615 12.6926C14.1031 13.4843 13.4843 14.1031 12.6926 14.2615L9 15L9.73851 11.3074C9.89686 10.5157 10.5157 9.89686 11.3074 9.73851Z"/></g></svg>
       Mutual funds
+    </button>
+    <button type="button" onClick="{{openFd}}" aria-current="{{fdCur}}" style="position: absolute; left: 9px; top: 251px; display: flex; align-items: center; gap: 9px; box-sizing: border-box; width: 299px; height: 48px; padding: 0 10px; border: 0; border-radius: 14px; background: {{navFdBg}}; cursor: pointer; font-family: var(--font-sans); color: rgba(0, 0, 0, 0.71); font-size: 23px; line-height: 30px; font-weight: 500; text-align: left;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="15" rx="3"/><circle cx="12" cy="11.5" r="3"/><path d="M12 8.5v-1M15 11.5h1M7 21v-2M17 21v-2"/></g></svg>
+      Fixed deposit
     </button>
   </nav>
 </div>
@@ -703,6 +823,9 @@ class Component extends PPComponent {
     h.setMfScroller = (el) => { this.mfScroller = el; };
     h.openMenu = () => this.setState({ menu: true });
     h.closeMenu = () => this.setState({ menu: false });
+    h.setFdScroller = (el) => { this.fdScroller = el; };
+    h.openFd = () => { clearInterval(this.timer); if (this.fdScroller) this.fdScroller.scrollTop = 0; this.setState({ screen: 'fd', menu: false }); };
+    h.fdPick = {}; [0, 1, 2, 3, 4].forEach((k) => { h.fdPick['k' + k] = () => this.setState({ fdT: k }); });
     h.openConv = () => { clearInterval(this.timer); this.setState({ screen: 'conv', menu: false }); };
     h.goHome = () => { clearInterval(this.timer); this.setState({ screen: 'home', menu: false }); };
     h.openFunds = () => {
@@ -740,9 +863,9 @@ class Component extends PPComponent {
     const typing = e >= 0 && e < END + 250;
     const shrunk = e > END + 1700;
     return {
-      openMenu: h.openMenu, openConv: h.openConv, closeMenu: h.closeMenu, openFunds: h.openFunds, goHome: h.goHome, setMfScroller: h.setMfScroller,
+      openMenu: h.openMenu, openConv: h.openConv, openFd: h.openFd, setFdScroller: h.setFdScroller, fdPick: h.fdPick, ...this.fdChips(), closeMenu: h.closeMenu, openFunds: h.openFunds, goHome: h.goHome, setMfScroller: h.setMfScroller,
       drawerX: s.menu ? 0 : -330, drawerSh: s.menu ? 0.18 : 0, ovO: s.menu ? 1 : 0, ovPE: s.menu ? 'auto' : 'none',
-      fundsX: s.screen === 'funds' ? 0 : 400, convX: s.screen === 'conv' ? 0 : 400,
+      fundsX: s.screen === 'funds' ? 0 : 400, convX: s.screen === 'conv' ? 0 : 400, fdX: s.screen === 'fd' ? 0 : 400, navFdBg: s.screen === 'fd' ? '#f3f3f3' : 'transparent', fdCur: s.screen === 'fd' ? 'page' : 'false',
       navConvBg: s.screen === 'conv' ? '#f3f3f3' : 'transparent', navFundsBg: s.screen === 'funds' ? '#f3f3f3' : 'transparent',
       convCur: s.screen === 'conv' ? 'page' : 'false', fundsCur: s.screen === 'funds' ? 'page' : 'false',
       ...Object.fromEntries(T.map((t, k) => ['tw' + k, word(t, k)])), ...Object.fromEntries(B.map((t, k) => ['bw' + k, word(t, k + T.length)])),
@@ -752,6 +875,7 @@ class Component extends PPComponent {
     };
   }
 
+  fdChips() { const t = (this.state && this.state.fdT != null) ? this.state.fdT : 4; const o = { fdSel: {}, fdBg: {}, fdFg: {}, fdBd: {} }; for (let k = 0; k < 5; k++) { const on = k === t; o.fdSel['k' + k] = on ? 'true' : 'false'; o.fdBg['k' + k] = on ? '#413737' : '#ffffff'; o.fdFg['k' + k] = on ? '#ffffff' : 'rgba(0, 0, 0, 0.6)'; o.fdBd['k' + k] = on ? '#413737' : '#efefef'; } return o; }
   renderVals() { return Object.assign({}, this.convVals(), this.mfVals()); }
 }
 
