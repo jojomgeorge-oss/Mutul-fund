@@ -905,7 +905,10 @@ PP.comp = new Component();
 PP.compile(stage);
 PP.render();
 document.body.classList.add('ready');
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => { reg.update(); }).catch(() => {});
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (reloaded) return; reloaded = true; location.reload(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') navigator.serviceWorker.getRegistration().then((r) => r && r.update()); });
 // Outside an installed app, the first tap switches the page to true full screen (hides Chrome's bars).
 const standalone = matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
 const el = document.documentElement;
