@@ -28,7 +28,7 @@ body{margin:0}
 @keyframes mf-scan{from{transform:translateX(-70px)}to{transform:translateX(360px)}}
 .mf-pix{position:absolute;width:3px;height:3px;background:#169c28;opacity:0;animation:mf-blink 1.6s ease-in-out infinite}
 @keyframes mf-blink{0%{opacity:0}50%{opacity:.22}100%{opacity:0}}
-@keyframes bk-blink{0%,49%{opacity:1}50%,100%{opacity:0}}.bk-caret{animation:bk-blink 1s step-end infinite}
+.bk-k:active{filter:brightness(.82)}@keyframes bk-blink{0%,49%{opacity:1}50%,100%{opacity:0}}.bk-caret{animation:bk-blink 1s step-end infinite}
 @keyframes mf-blink2{0%,49%{opacity:1}50%,100%{opacity:0}}.mf-caret{animation:mf-blink2 1s step-end infinite}
 .pp-scroll{scrollbar-width:none}.pp-scroll::-webkit-scrollbar{display:none}
 @keyframes pp-spin{to{transform:rotate(360deg)}}
@@ -687,19 +687,68 @@ body{margin:0}
   <button type="button" aria-label="More options" style="position: absolute; left: 317px; top: 54px; display: inline-flex; width: 52px; height: 43px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 28px; background: #ffffff; box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); cursor: pointer;">
     <svg width="17" height="4" viewBox="0 0 17 4" fill="none" aria-hidden="true"><path d="M1.92174 3.825C0.859239 3.825 0 2.96576 0 1.9125C0 0.85 0.859239 0 1.92174 0C2.975 0 3.83424 0.85 3.83424 1.9125C3.83424 2.96576 2.975 3.825 1.92174 3.825ZM8.5 3.825C7.44674 3.825 6.5875 2.96576 6.5875 1.9125C6.5875 0.85 7.44674 0 8.5 0C9.5625 0 10.4217 0.85 10.4217 1.9125C10.4217 2.96576 9.5625 3.825 8.5 3.825ZM15.0875 3.825C14.0342 3.825 13.175 2.96576 13.175 1.9125C13.175 0.85 14.0342 0 15.0875 0C16.15 0 17 0.85 17 1.9125C17 2.96576 16.15 3.825 15.0875 3.825Z" fill="#000000"/></svg>
   </button>
-  <div role="group" aria-label="Quick actions" style="position: absolute; left: 13px; top: 752px; width: 365px; height: 69px; border-radius: 59px; background: rgba(255, 255, 255, 0.4); -webkit-backdrop-filter: blur(50px); backdrop-filter: blur(50px); box-shadow: 0 2px 30px rgba(0, 0, 0, 0.15); z-index: 2;">
-    <div role="button" tabindex="0" aria-label="Ask Decade" onClick="{{bkOpen}}" style="position: absolute; left: 7px; top: 7px; width: {{bkAskW}}px; height: 55px; box-sizing: border-box; overflow: hidden; border: 1px solid rgba(226, 226, 226, 0.84); border-radius: 31px; background: #ffffff; box-shadow: 0 3.4px 13.5px rgba(0, 0, 0, 0.08); cursor: pointer; transition: width .55s cubic-bezier(.65,0,.35,1);">
+  <div aria-hidden="true" onClick="{{bkClose}}" style="position: absolute; left: 0; top: 0; width: 390px; height: 849px; background: rgba(0, 0, 0, 0.12); opacity: {{bkOvO}}; pointer-events: {{bkOvPE}}; transition: opacity .3s ease; z-index: 2;"></div>
+  <div role="group" aria-label="Quick actions" style="position: absolute; left: 13px; top: {{bkPillTop}}px; width: 365px; height: 69px; border-radius: 59px; background: rgba(255, 255, 255, 0.4); -webkit-backdrop-filter: blur(50px); backdrop-filter: blur(50px); box-shadow: 0 2px 30px rgba(0, 0, 0, 0.15); z-index: 3; transition: top .34s cubic-bezier(.2,.8,.2,1);">
+    <div role="button" tabindex="0" aria-label="Ask Decade" onClick="{{bkOpen}}" style="position: absolute; left: 7px; top: 7px; width: {{bkAskW}}px; height: 55px; box-sizing: border-box; overflow: hidden; border: 1px solid rgba(226, 226, 226, 0.84); border-radius: 31px; background: #ffffff; box-shadow: 0 3.4px 13.5px rgba(0, 0, 0, 0.08); cursor: text; transition: width .55s cubic-bezier(.65,0,.35,1);">
       <span style="position: absolute; left: {{bkMarkL}}px; top: 16px; display: flex; transition: left .55s cubic-bezier(.65,0,.35,1);">
         <svg width="20" height="20" viewBox="0 0 17 17" fill="none" aria-hidden="true"><path d="M17 8.5C17 10.8477 16.0383 12.9727 14.4828 14.5103C12.9282 16.0488 10.7797 17 8.40605 17H2.11658V14.9074L8.59484 8.5L7.6438 7.55935L4.43968 10.7276H2.11658V2.09256L0 0H8.40605C13.1524 0 17 3.80554 17 8.5Z" style="fill: {{bkMarkC}}; transition: fill .45s ease;"/></svg>
       </span>
-      <span style="position: absolute; left: 48px; top: 15px; display: flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 18px; line-height: 23px; color: #9a9a9a; opacity: {{bkAskO}}; transform: translateX({{bkAskX}}px); transition: opacity .35s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};">Ask Decade <span class="bk-caret" aria-hidden="true" style="display: inline-block; width: 1.5px; height: 24px; background: #9a9a9a;"></span></span>
-      <span aria-hidden="true" style="position: absolute; left: 231px; top: 4px; display: flex; width: 52px; height: 45px; align-items: center; justify-content: center; border-radius: 28px; background: #4d1c14; opacity: {{bkAskO}}; transform: scale({{bkSendS}}); transition: opacity .35s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};"><svg width="14" height="19" viewBox="0 0 13 18" fill="none" aria-hidden="true"><path d="M1.78206 17.7922L12.1258 10.7227C13.2669 9.94523 13.2671 8.04139 12.1261 7.26429L1.78139 0.194704C0.835209 -0.451425 -0.295847 0.617101 0.0734176 1.8106L1.99815 8.01967L5.70714 8.99146L1.99795 9.96428L0.0719019 16.1739C-0.297615 17.3675 0.833214 18.4357 1.77953 17.7893L1.78206 17.7922Z" fill="#ffffff"/></svg></span>
+      <span aria-hidden="true" style="position: absolute; left: 52px; top: 15px; white-space: nowrap; font-size: 18px; line-height: 23px; color: #9a9a9a; opacity: {{bkPhO}}; transition: opacity .2s ease {{bkAskD}};">Ask Decade</span>
+      <span style="position: absolute; left: 48px; top: 14px; display: inline-flex; max-width: 236px; overflow: hidden; justify-content: flex-end; align-items: center; opacity: {{bkAskO}}; transform: translateX({{bkAskX}}px); transition: opacity .35s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};">
+        <span style="flex: none; white-space: pre; font-size: 18px; line-height: 25px; color: #1f1513;">{{bkTxt}}</span><span class="bk-caret" aria-hidden="true" style="flex: none; width: 2px; height: 24px; margin-left: 1px; border-radius: 1px; background: #4d1c14;"></span>
+      </span>
+      <button type="button" aria-label="Send" onClick="{{bkSend}}" style="position: absolute; left: 293px; top: 4px; display: flex; width: 52px; height: 45px; padding: 0; border: 0; align-items: center; justify-content: center; border-radius: 28px; background: #4d1c14; cursor: pointer; opacity: {{bkAskO}}; transform: scale({{bkSendS}}); pointer-events: {{bkOvPE}}; transition: opacity .35s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};"><svg width="14" height="19" viewBox="0 0 13 18" fill="none" aria-hidden="true"><path d="M1.78206 17.7922L12.1258 10.7227C13.2669 9.94523 13.2671 8.04139 12.1261 7.26429L1.78139 0.194704C0.835209 -0.451425 -0.295847 0.617101 0.0734176 1.8106L1.99815 8.01967L5.70714 8.99146L1.99795 9.96428L0.0719019 16.1739C-0.297615 17.3675 0.833214 18.4357 1.77953 17.7893L1.78206 17.7922Z" fill="#ffffff"/></svg></button>
     </div>
-    <button type="button" style="position: absolute; left: 69px; top: 7px; width: 141px; height: 55px; box-sizing: border-box; padding: 0; border: 1px solid rgba(226, 226, 226, 0.84); border-radius: 31px; background: #ffffff; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); font-family: var(--font-sans); font-size: 17px; line-height: 23px; font-weight: 500; color: #413737; cursor: pointer; opacity: {{bkRdO}}; transform: translateX({{bkRdX}}px) scale({{bkRdS}}); pointer-events: {{bkRdPE}}; transition: opacity .3s ease, transform .55s cubic-bezier(.65,0,.35,1);">Start RD</button>
-    <button type="button" aria-label="{{bkFdLbl}}" onClick="{{bkFdTap}}" style="position: absolute; left: {{bkFdL}}px; top: 7px; width: {{bkFdW}}px; height: 55px; padding: 0; overflow: hidden; border: 0; border-radius: 31px; background: #1f1513; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); font-family: var(--font-sans); font-size: 17px; line-height: 23px; font-weight: 500; color: #ffffff; cursor: pointer; transition: left .55s cubic-bezier(.65,0,.35,1), width .55s cubic-bezier(.65,0,.35,1);">
-      <span style="position: absolute; left: 0; top: 16px; width: 141px; text-align: center; white-space: nowrap; opacity: {{bkFdTO}}; transition: opacity .25s ease;">Start FD</span>
-      <span style="position: absolute; left: 24px; top: 22px; display: flex; opacity: {{bkChevO}}; transition: opacity .3s ease {{bkAskD}};"><svg width="6" height="10" viewBox="0 0 6 10" fill="none" aria-hidden="true"><path d="M5 1L1 5l4 4" stroke="#b9acac" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    </button>
+    <button type="button" style="position: absolute; left: 69px; top: 7px; width: 141px; height: 55px; box-sizing: border-box; padding: 0; border: 1px solid rgba(226, 226, 226, 0.84); border-radius: 31px; background: #ffffff; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); font-family: var(--font-sans); font-size: 17px; line-height: 23px; font-weight: 500; color: #413737; cursor: pointer; opacity: {{bkRdO}}; transform: translateX({{bkRdX}}px) scale({{bkRdS}}); pointer-events: {{bkBtnPE}}; transition: opacity .3s ease, transform .55s cubic-bezier(.65,0,.35,1);">Start RD</button>
+    <button type="button" style="position: absolute; left: 217px; top: 7px; width: 141px; height: 55px; padding: 0; border: 0; border-radius: 31px; background: #1f1513; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); font-family: var(--font-sans); font-size: 17px; line-height: 23px; font-weight: 500; color: #ffffff; cursor: pointer; opacity: {{bkFdO}}; transform: translateX({{bkFdX}}px) scale({{bkFdS}}); pointer-events: {{bkBtnPE}}; transition: opacity .3s ease, transform .55s cubic-bezier(.65,0,.35,1);">Start FD</button>
+  </div>
+  <div aria-label="Keyboard" style="position: absolute; left: 0; top: 558px; z-index: 4; transform: translateY({{bkKbY}}px); transition: transform .34s cubic-bezier(.2,.8,.2,1); width: 390px; height: 291px; background: #d1d3d9; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif;">
+    <div style="position: absolute; left: 3px; top: 8px; display: flex; gap: 6px;">
+      <span class="bk-k" onClick="{{bkKey.q}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.q}}</span>
+      <span class="bk-k" onClick="{{bkKey.w}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.w}}</span>
+      <span class="bk-k" onClick="{{bkKey.e}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.e}}</span>
+      <span class="bk-k" onClick="{{bkKey.r}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.r}}</span>
+      <span class="bk-k" onClick="{{bkKey.t}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.t}}</span>
+      <span class="bk-k" onClick="{{bkKey.y}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.y}}</span>
+      <span class="bk-k" onClick="{{bkKey.u}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.u}}</span>
+      <span class="bk-k" onClick="{{bkKey.i}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.i}}</span>
+      <span class="bk-k" onClick="{{bkKey.o}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.o}}</span>
+      <span class="bk-k" onClick="{{bkKey.p}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.p}}</span>
+    </div>
+    <div style="position: absolute; left: 22.5px; top: 62px; display: flex; gap: 6px;">
+      <span class="bk-k" onClick="{{bkKey.a}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.a}}</span>
+      <span class="bk-k" onClick="{{bkKey.s}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.s}}</span>
+      <span class="bk-k" onClick="{{bkKey.d}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.d}}</span>
+      <span class="bk-k" onClick="{{bkKey.f}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.f}}</span>
+      <span class="bk-k" onClick="{{bkKey.g}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.g}}</span>
+      <span class="bk-k" onClick="{{bkKey.h}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.h}}</span>
+      <span class="bk-k" onClick="{{bkKey.j}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.j}}</span>
+      <span class="bk-k" onClick="{{bkKey.k}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.k}}</span>
+      <span class="bk-k" onClick="{{bkKey.l}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.l}}</span>
+    </div>
+    <div style="position: absolute; left: 3px; top: 116px; display: flex; gap: 6px;">
+      <span aria-label="Shift" class="bk-k" onClick="{{bkShift}}" style="cursor: pointer; display: inline-flex; width: 42px; height: 42px; align-items: center; justify-content: center; margin-right: 10.5px; border-radius: 5px; background: {{bkShiftBg}}; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);">
+        <svg width="20" height="19" viewBox="0 0 20 19" fill="none" aria-hidden="true"><path d="M10 1.5 1.8 10.2h4.7v7h7v-7h4.7z" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="bk-k" onClick="{{bkKey.z}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.z}}</span>
+      <span class="bk-k" onClick="{{bkKey.x}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.x}}</span>
+      <span class="bk-k" onClick="{{bkKey.c}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.c}}</span>
+      <span class="bk-k" onClick="{{bkKey.v}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.v}}</span>
+      <span class="bk-k" onClick="{{bkKey.b}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.b}}</span>
+      <span class="bk-k" onClick="{{bkKey.n}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.n}}</span>
+      <span class="bk-k" onClick="{{bkKey.m}}" style="display: inline-flex; width: 33px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 22.5px; cursor: pointer;">{{bkL.m}}</span>
+      <span aria-label="Delete" class="bk-k" onClick="{{bkDel}}" style="cursor: pointer; display: inline-flex; width: 42px; height: 42px; align-items: center; justify-content: center; margin-left: 10.5px; border-radius: 5px; background: #acb0b9; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);">
+        <svg width="24" height="18" viewBox="0 0 24 18" fill="none" aria-hidden="true"><path d="M7.5 1.5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-13L1.5 9z" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/><path d="m11 5.5 7 7m0-7-7 7" stroke="#000" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+    <div style="position: absolute; left: 3px; top: 170px; display: flex; gap: 6px;">
+      <span style="display: inline-flex; width: 87px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #acb0b9; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 16px;">123</span>
+      <span class="bk-k" onClick="{{bkKey.sp}}" style="cursor: pointer; display: inline-flex; width: 198px; height: 42px; align-items: center; justify-content: center; border-radius: 5px; background: #ffffff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-size: 16px;">space</span>
+      <button type="button" onClick="{{bkSend}}" style="display: inline-flex; width: 87px; height: 42px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 5px; background: #acb0b9; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); font-family: inherit; font-size: 16px; color: #000000; cursor: pointer;">return</button>
+    </div>
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" style="position: absolute; left: 24px; top: 225px;"><circle cx="14" cy="14" r="11.5" stroke="#55575e" stroke-width="1.6"/><circle cx="10" cy="11.5" r="1.4" fill="#55575e"/><circle cx="18" cy="11.5" r="1.4" fill="#55575e"/><path d="M8.8 16.2c1.2 2.4 3 3.4 5.2 3.4s4-1 5.2-3.4" stroke="#55575e" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <svg width="20" height="28" viewBox="0 0 20 28" fill="none" aria-hidden="true" style="position: absolute; left: 345px; top: 225px;"><rect x="5.5" y="1.5" width="9" height="16" rx="4.5" stroke="#55575e" stroke-width="1.6"/><path d="M2 13c0 4.4 3.6 8 8 8s8-3.6 8-8M10 21v5" stroke="#55575e" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span aria-hidden="true" style="position: absolute; left: 128px; top: 278px; width: 134px; height: 5px; border-radius: 3px; background: #000000;"></span>
   </div>
   </div>
 
@@ -947,11 +996,9 @@ class Component extends PPComponent {
     h.openFd = () => { clearInterval(this.timer); if (this.fdScroller) this.fdScroller.scrollTop = 0; this.setState({ screen: 'fd', menu: false, e: -1 }); const start = Date.now() + 450; const END = this.ANIM_END || 3000; this.timer = setInterval(() => { const e = Date.now() - start; this.setState({ e: e }); if (e > END) clearInterval(this.timer); }, 40); };
     h.fdPick = {}; [0, 1, 2, 3, 4].forEach((k) => { h.fdPick['k' + k] = () => this.setState({ fdT: k }); });
     h.setBankScroller = (el) => { this.bankScroller = el; };
-    h.openBank = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this.bankScroller) this.bankScroller.scrollTop = 0; this.setState({ screen: 'bank', bAsk: false, bTop: false }); };
+    h.openBank = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this.bankScroller) this.bankScroller.scrollTop = 0; this.setState({ screen: 'bank', bAsk: false, bTxt: '', bTop: false }); };
     h.bankScroll = (e) => { const on = e.target.scrollTop > 330; if (on !== !!this.state.bTop) this.setState({ bTop: on }); };
-    h.bankBack = () => this.setState({ screen: 'fd', bAsk: false });
-    h.bkOpen = () => { if (!this.state.bAsk) this.setState({ bAsk: true }); };
-    h.bkFdTap = () => { if (this.state.bAsk) this.setState({ bAsk: false }); };
+    h.bankBack = () => this.setState({ screen: 'fd', bAsk: false, bTxt: '' });
     h.openConv = () => { clearInterval(this.timer); this.setState({ screen: 'conv', menu: false }); };
     h.goHome = () => { clearInterval(this.timer); this.setState({ screen: 'home', menu: false }); };
     h.openFunds = () => {
@@ -995,7 +1042,7 @@ class Component extends PPComponent {
     const s = this.mfSt();
     const e = s.screen === 'funds' ? s.e : -1;
     return {
-      openMenu: h.openMenu, openBank: h.openBank, bankScroll: h.bankScroll, bkTopO: (this.state && this.state.bTop) ? 1 : 0, bankBack: h.bankBack, setBankScroller: h.setBankScroller, bkOpen: h.bkOpen, bkFdTap: h.bkFdTap, ...this.bankPill(!!(this.state && this.state.bAsk)), bankX: s.screen === 'bank' ? 0 : 400, bankSh: s.screen === 'bank' ? '-12px 0 40px rgba(0, 0, 0, 0.08)' : 'none', openConv: h.openConv, openFd: h.openFd, setFdScroller: h.setFdScroller, fdPick: h.fdPick, ...this.fdChips(), ...this.researchAnim('f', s.screen === 'fd' ? s.e : -1, ['Invest :', '₹50,000', '@8.30%'].concat('Grows to about ₹75,000 in 5 years. DICGC insured up to ₹5 lakh.'.split(' ')), [11], [7, 354], [39, 322]), closeMenu: h.closeMenu, openFunds: h.openFunds, goHome: h.goHome, setMfScroller: h.setMfScroller,
+      openMenu: h.openMenu, openBank: h.openBank, bankScroll: h.bankScroll, bkTopO: (this.state && this.state.bTop) ? 1 : 0, bankBack: h.bankBack, setBankScroller: h.setBankScroller, ...this.bankVals(), bankX: s.screen === 'bank' ? 0 : 400, bankSh: s.screen === 'bank' ? '-12px 0 40px rgba(0, 0, 0, 0.08)' : 'none', openConv: h.openConv, openFd: h.openFd, setFdScroller: h.setFdScroller, fdPick: h.fdPick, ...this.fdChips(), ...this.researchAnim('f', s.screen === 'fd' ? s.e : -1, ['Invest :', '₹50,000', '@8.30%'].concat('Grows to about ₹75,000 in 5 years. DICGC insured up to ₹5 lakh.'.split(' ')), [11], [7, 354], [39, 322]), closeMenu: h.closeMenu, openFunds: h.openFunds, goHome: h.goHome, setMfScroller: h.setMfScroller,
       drawerX: s.menu ? 0 : -330, drawerSh: s.menu ? 0.18 : 0, ovO: s.menu ? 1 : 0, ovPE: s.menu ? 'auto' : 'none',
       fundsX: s.screen === 'funds' ? 0 : 400, convX: s.screen === 'conv' ? 0 : 400, fdX: (s.screen === 'fd' || s.screen === 'bank') ? 0 : 400, navFdBg: (s.screen === 'fd' || s.screen === 'bank') ? '#f3f3f3' : 'transparent', fdCur: (s.screen === 'fd' || s.screen === 'bank') ? 'page' : 'false',
       navConvBg: s.screen === 'conv' ? '#f3f3f3' : 'transparent', navFundsBg: s.screen === 'funds' ? '#f3f3f3' : 'transparent',
@@ -1004,15 +1051,46 @@ class Component extends PPComponent {
     };
   }
 
-  bankPill(ask) {
+  bankHandlers() {
+    if (this.bkH) return this.bkH;
+    const st = () => this.state || {};
+    const put = (t) => this.setState({ bTxt: t.slice(0, 80), bShift: false });
+    const h = {};
+    h.bkOpen = () => { if (!st().bAsk) this.setState({ bAsk: true, bTxt: '', bShift: false }); };
+    h.bkClose = () => this.setState({ bAsk: false });
+    h.bkSend = (e) => { if (e && e.stopPropagation) e.stopPropagation(); if (!st().bAsk) return; this.setState({ bAsk: false, bTxt: '' }); };
+    h.bkDel = () => this.setState({ bTxt: (st().bTxt || '').slice(0, -1) });
+    h.bkShift = () => this.setState({ bShift: !st().bShift });
+    h.bkKey = { sp: () => put((st().bTxt || '') + ' ') };
+    'qwertyuiopasdfghjklzxcvbnm'.split('').forEach((c) => { h.bkKey[c] = () => put((st().bTxt || '') + (st().bShift ? c.toUpperCase() : c)); });
+    if (typeof document !== 'undefined') document.addEventListener('keydown', (e) => {
+      if (!st().bAsk || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'Backspace') { h.bkDel(); e.preventDefault(); }
+      else if (e.key === 'Enter') { h.bkSend(); e.preventDefault(); }
+      else if (e.key === 'Escape') h.bkClose();
+      else if (e.key.length === 1) { put((st().bTxt || '') + e.key); e.preventDefault(); }
+    });
+    this.bkH = h;
+    return h;
+  }
+  bankVals() {
+    const h = this.bankHandlers();
+    const s = this.state || {};
+    const ask = !!s.bAsk, txt = s.bTxt || '', sh = !!s.bShift;
+    const L = {};
+    'qwertyuiopasdfghjklzxcvbnm'.split('').forEach((c) => { L[c] = sh ? c.toUpperCase() : c; });
     return {
-      bkAskW: ask ? 289 : 55, bkMarkL: ask ? 20 : 16, bkMarkC: ask ? '#9a9a9a' : '#4d1c14',
-      bkAskO: ask ? 1 : 0, bkAskX: ask ? 0 : -8, bkSendS: ask ? 1 : 0.6, bkAskD: ask ? '.3s' : '0s',
-      bkRdO: ask ? 0 : 1, bkRdX: ask ? 110 : 0, bkRdS: ask ? 0.85 : 1, bkRdPE: ask ? 'none' : 'auto',
-      bkFdL: ask ? 303 : 217, bkFdW: ask ? 55 : 141, bkFdTO: ask ? 0 : 1, bkChevO: ask ? 1 : 0,
-      bkFdLbl: ask ? 'Close Ask Decade' : 'Start FD',
+      bkOpen: h.bkOpen, bkClose: h.bkClose, bkSend: h.bkSend, bkDel: h.bkDel, bkShift: h.bkShift, bkKey: h.bkKey, bkL: L,
+      bkShiftBg: sh ? '#ffffff' : '#acb0b9',
+      bkTxt: txt, bkPhO: ask && !txt ? 1 : 0,
+      bkAskW: ask ? 351 : 55, bkMarkL: ask ? 20 : 16, bkMarkC: ask ? '#9a9a9a' : '#4d1c14',
+      bkAskO: ask ? 1 : 0, bkAskX: ask ? 0 : -8, bkSendS: ask ? 1 : 0.6, bkAskD: ask && !txt ? '.3s' : '0s',
+      bkRdO: ask ? 0 : 1, bkRdX: ask ? 120 : 0, bkRdS: ask ? 0.85 : 1,
+      bkFdO: ask ? 0 : 1, bkFdX: ask ? 60 : 0, bkFdS: ask ? 0.6 : 1, bkBtnPE: ask ? 'none' : 'auto',
+      bkPillTop: ask ? 481 : 752, bkKbY: ask ? 0 : 300, bkOvO: ask ? 1 : 0, bkOvPE: ask ? 'auto' : 'none',
     };
   }
+
   fdChips() { const t = (this.state && this.state.fdT != null) ? this.state.fdT : 4; const o = { fdSel: {}, fdBg: {}, fdFg: {}, fdBd: {} }; for (let k = 0; k < 5; k++) { const on = k === t; o.fdSel['k' + k] = on ? 'true' : 'false'; o.fdBg['k' + k] = on ? '#413737' : '#ffffff'; o.fdFg['k' + k] = on ? '#ffffff' : 'rgba(0, 0, 0, 0.6)'; o.fdBd['k' + k] = on ? '#413737' : '#efefef'; } return o; }
   renderVals() { return Object.assign({}, this.convVals(), this.mfVals()); }
 }
