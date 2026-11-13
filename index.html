@@ -693,14 +693,17 @@ body{margin:0}
       <span style="position: absolute; left: {{bkMarkL}}px; top: 16px; display: flex; transition: left .55s cubic-bezier(.65,0,.35,1);">
         <svg width="20" height="20" viewBox="0 0 17 17" fill="none" aria-hidden="true"><path d="M17 8.5C17 10.8477 16.0383 12.9727 14.4828 14.5103C12.9282 16.0488 10.7797 17 8.40605 17H2.11658V14.9074L8.59484 8.5L7.6438 7.55935L4.43968 10.7276H2.11658V2.09256L0 0H8.40605C13.1524 0 17 3.80554 17 8.5Z" style="fill: {{bkMarkC}}; transition: fill .45s ease;"/></svg>
       </span>
-      <span aria-hidden="true" style="position: absolute; left: 52px; top: 15px; white-space: nowrap; font-size: 18px; line-height: 23px; color: #9a9a9a; opacity: {{bkPhO}}; transition: opacity .2s ease {{bkAskD}};">Ask Decade</span>
-      <span style="position: absolute; left: 48px; top: 14px; display: inline-flex; max-width: 236px; overflow: hidden; justify-content: flex-end; align-items: center; opacity: {{bkAskO}}; transform: translateX({{bkAskX}}px); transition: opacity .35s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};">
-        <span style="flex: none; white-space: pre; font-size: 18px; line-height: 25px; color: #1f1513;">{{bkTxt}}</span><span class="bk-caret" aria-hidden="true" style="flex: none; width: 2px; height: 24px; margin-left: 1px; border-radius: 1px; background: #4d1c14;"></span>
+      <span aria-hidden="true" style="position: absolute; left: 52px; top: 15px; display: flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 18px; line-height: 23px; color: #9a9a9a; opacity: {{bkPhO}}; transform: translateX({{bkPhX}}px); transition: opacity .3s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};">Ask Decade<span class="bk-caret" style="display: {{bkPhCD}}; width: 1.5px; height: 24px; margin-left: 4px; background: #9a9a9a;"></span></span>
+      <span style="position: absolute; left: 48px; top: 14px; display: inline-flex; max-width: {{bkTxtMW}}px; overflow: hidden; justify-content: flex-end; align-items: center; opacity: {{bkTypO}}; transform: translateX({{bkAskX}}px); transition: opacity .35s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};">
+        <span style="flex: none; white-space: pre; font-size: 18px; line-height: 25px; color: #1f1513;">{{bkTxt}}</span><span class="bk-caret" aria-hidden="true" style="display: {{bkCaretD}}; flex: none; width: 2px; height: 24px; margin-left: 1px; border-radius: 1px; background: #4d1c14;"></span>
       </span>
-      <button type="button" aria-label="Send" onClick="{{bkSend}}" style="position: absolute; left: 293px; top: 4px; display: flex; width: 52px; height: 45px; padding: 0; border: 0; align-items: center; justify-content: center; border-radius: 28px; background: #4d1c14; cursor: pointer; opacity: {{bkAskO}}; transform: scale({{bkSendS}}); pointer-events: {{bkOvPE}}; transition: opacity .35s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};"><svg width="14" height="19" viewBox="0 0 13 18" fill="none" aria-hidden="true"><path d="M1.78206 17.7922L12.1258 10.7227C13.2669 9.94523 13.2671 8.04139 12.1261 7.26429L1.78139 0.194704C0.835209 -0.451425 -0.295847 0.617101 0.0734176 1.8106L1.99815 8.01967L5.70714 8.99146L1.99795 9.96428L0.0719019 16.1739C-0.297615 17.3675 0.833214 18.4357 1.77953 17.7893L1.78206 17.7922Z" fill="#ffffff"/></svg></button>
+      <button type="button" aria-label="Send" onClick="{{bkSend}}" style="position: absolute; left: {{bkSendL}}px; top: 4px; display: flex; width: 52px; height: 45px; padding: 0; border: 0; align-items: center; justify-content: center; border-radius: 28px; background: #4d1c14; cursor: pointer; opacity: {{bkAskO}}; transform: scale({{bkSendS}}); pointer-events: {{bkSendPE}}; transition: left .55s cubic-bezier(.65,0,.35,1), opacity .35s ease {{bkAskD}}, transform .45s cubic-bezier(.65,0,.35,1) {{bkAskD}};"><svg width="14" height="19" viewBox="0 0 13 18" fill="none" aria-hidden="true"><path d="M1.78206 17.7922L12.1258 10.7227C13.2669 9.94523 13.2671 8.04139 12.1261 7.26429L1.78139 0.194704C0.835209 -0.451425 -0.295847 0.617101 0.0734176 1.8106L1.99815 8.01967L5.70714 8.99146L1.99795 9.96428L0.0719019 16.1739C-0.297615 17.3675 0.833214 18.4357 1.77953 17.7893L1.78206 17.7922Z" fill="#ffffff"/></svg></button>
     </div>
     <button type="button" style="position: absolute; left: 69px; top: 7px; width: 141px; height: 55px; box-sizing: border-box; padding: 0; border: 1px solid rgba(226, 226, 226, 0.84); border-radius: 31px; background: #ffffff; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); font-family: var(--font-sans); font-size: 17px; line-height: 23px; font-weight: 500; color: #413737; cursor: pointer; opacity: {{bkRdO}}; transform: translateX({{bkRdX}}px) scale({{bkRdS}}); pointer-events: {{bkBtnPE}}; transition: opacity .3s ease, transform .55s cubic-bezier(.65,0,.35,1);">Start RD</button>
-    <button type="button" style="position: absolute; left: 217px; top: 7px; width: 141px; height: 55px; padding: 0; border: 0; border-radius: 31px; background: #1f1513; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); font-family: var(--font-sans); font-size: 17px; line-height: 23px; font-weight: 500; color: #ffffff; cursor: pointer; opacity: {{bkFdO}}; transform: translateX({{bkFdX}}px) scale({{bkFdS}}); pointer-events: {{bkBtnPE}}; transition: opacity .3s ease, transform .55s cubic-bezier(.65,0,.35,1);">Start FD</button>
+    <button type="button" aria-label="{{bkFdLbl}}" onClick="{{bkFdTap}}" style="position: absolute; left: {{bkFdL}}px; top: 7px; width: {{bkFdW}}px; height: 55px; padding: 0; overflow: hidden; border: 0; border-radius: 31px; background: #1f1513; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); font-family: var(--font-sans); font-size: 17px; line-height: 23px; font-weight: 500; color: #ffffff; cursor: pointer; opacity: {{bkFdO}}; transform: scale({{bkFdS}}); pointer-events: {{bkFdPE}}; transition: left .55s cubic-bezier(.65,0,.35,1), width .55s cubic-bezier(.65,0,.35,1), opacity .3s ease, transform .45s cubic-bezier(.65,0,.35,1);">
+      <span style="position: absolute; left: 0; top: 16px; width: 141px; text-align: center; white-space: nowrap; opacity: {{bkFdTO}}; transition: opacity .25s ease;">Start FD</span>
+      <span style="position: absolute; left: 24px; top: 22px; display: flex; opacity: {{bkChevO}}; transition: opacity .3s ease {{bkAskD}};"><svg width="6" height="10" viewBox="0 0 6 10" fill="none" aria-hidden="true"><path d="M5 1L1 5l4 4" stroke="#b9acac" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
   </div>
   <div aria-label="Keyboard" style="position: absolute; left: 0; top: 558px; z-index: 4; transform: translateY({{bkKbY}}px); transition: transform .34s cubic-bezier(.2,.8,.2,1); width: 390px; height: 291px; background: #d1d3d9; font-family: -apple-system, 'SF Pro Text', system-ui, sans-serif;">
     <div style="position: absolute; left: 3px; top: 8px; display: flex; gap: 6px;">
@@ -996,9 +999,9 @@ class Component extends PPComponent {
     h.openFd = () => { clearInterval(this.timer); if (this.fdScroller) this.fdScroller.scrollTop = 0; this.setState({ screen: 'fd', menu: false, e: -1 }); const start = Date.now() + 450; const END = this.ANIM_END || 3000; this.timer = setInterval(() => { const e = Date.now() - start; this.setState({ e: e }); if (e > END) clearInterval(this.timer); }, 40); };
     h.fdPick = {}; [0, 1, 2, 3, 4].forEach((k) => { h.fdPick['k' + k] = () => this.setState({ fdT: k }); });
     h.setBankScroller = (el) => { this.bankScroller = el; };
-    h.openBank = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this.bankScroller) this.bankScroller.scrollTop = 0; this.setState({ screen: 'bank', bAsk: false, bTxt: '', bTop: false }); };
+    h.openBank = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this.bankScroller) this.bankScroller.scrollTop = 0; this.setState({ screen: 'bank', bMode: 0, bTxt: '', bTop: false }); };
     h.bankScroll = (e) => { const on = e.target.scrollTop > 330; if (on !== !!this.state.bTop) this.setState({ bTop: on }); };
-    h.bankBack = () => this.setState({ screen: 'fd', bAsk: false, bTxt: '' });
+    h.bankBack = () => this.setState({ screen: 'fd', bMode: 0, bTxt: '' });
     h.openConv = () => { clearInterval(this.timer); this.setState({ screen: 'conv', menu: false }); };
     h.goHome = () => { clearInterval(this.timer); this.setState({ screen: 'home', menu: false }); };
     h.openFunds = () => {
@@ -1054,17 +1057,20 @@ class Component extends PPComponent {
   bankHandlers() {
     if (this.bkH) return this.bkH;
     const st = () => this.state || {};
+    const mode = () => st().bMode || 0;
     const put = (t) => this.setState({ bTxt: t.slice(0, 80), bShift: false });
     const h = {};
-    h.bkOpen = () => { if (!st().bAsk) this.setState({ bAsk: true, bTxt: '', bShift: false }); };
-    h.bkClose = () => this.setState({ bAsk: false });
-    h.bkSend = (e) => { if (e && e.stopPropagation) e.stopPropagation(); if (!st().bAsk) return; this.setState({ bAsk: false, bTxt: '' }); };
+    // 0 = buttons, 1 = Ask Decade field (no keyboard), 2 = typing with keyboard
+    h.bkOpen = () => { const m = mode(); if (m === 0) this.setState({ bMode: 1, bTxt: '', bShift: false }); else if (m === 1) this.setState({ bMode: 2 }); };
+    h.bkClose = () => { if (mode() === 2) this.setState({ bMode: 1 }); };
+    h.bkFdTap = () => { if (mode() === 1) this.setState({ bMode: 0, bTxt: '' }); };
+    h.bkSend = (e) => { if (e && e.stopPropagation) e.stopPropagation(); if (mode() === 0) return; this.setState({ bMode: 0, bTxt: '' }); };
     h.bkDel = () => this.setState({ bTxt: (st().bTxt || '').slice(0, -1) });
     h.bkShift = () => this.setState({ bShift: !st().bShift });
     h.bkKey = { sp: () => put((st().bTxt || '') + ' ') };
     'qwertyuiopasdfghjklzxcvbnm'.split('').forEach((c) => { h.bkKey[c] = () => put((st().bTxt || '') + (st().bShift ? c.toUpperCase() : c)); });
     if (typeof document !== 'undefined') document.addEventListener('keydown', (e) => {
-      if (!st().bAsk || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (mode() !== 2 || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === 'Backspace') { h.bkDel(); e.preventDefault(); }
       else if (e.key === 'Enter') { h.bkSend(); e.preventDefault(); }
       else if (e.key === 'Escape') h.bkClose();
@@ -1076,18 +1082,20 @@ class Component extends PPComponent {
   bankVals() {
     const h = this.bankHandlers();
     const s = this.state || {};
-    const ask = !!s.bAsk, txt = s.bTxt || '', sh = !!s.bShift;
+    const m = s.bMode || 0, ex = m > 0, ty = m === 2, txt = s.bTxt || '', sh = !!s.bShift;
     const L = {};
     'qwertyuiopasdfghjklzxcvbnm'.split('').forEach((c) => { L[c] = sh ? c.toUpperCase() : c; });
     return {
-      bkOpen: h.bkOpen, bkClose: h.bkClose, bkSend: h.bkSend, bkDel: h.bkDel, bkShift: h.bkShift, bkKey: h.bkKey, bkL: L,
+      bkOpen: h.bkOpen, bkClose: h.bkClose, bkFdTap: h.bkFdTap, bkSend: h.bkSend, bkDel: h.bkDel, bkShift: h.bkShift, bkKey: h.bkKey, bkL: L,
       bkShiftBg: sh ? '#ffffff' : '#acb0b9',
-      bkTxt: txt, bkPhO: ask && !txt ? 1 : 0,
-      bkAskW: ask ? 351 : 55, bkMarkL: ask ? 20 : 16, bkMarkC: ask ? '#9a9a9a' : '#4d1c14',
-      bkAskO: ask ? 1 : 0, bkAskX: ask ? 0 : -8, bkSendS: ask ? 1 : 0.6, bkAskD: ask && !txt ? '.3s' : '0s',
-      bkRdO: ask ? 0 : 1, bkRdX: ask ? 120 : 0, bkRdS: ask ? 0.85 : 1,
-      bkFdO: ask ? 0 : 1, bkFdX: ask ? 60 : 0, bkFdS: ask ? 0.6 : 1, bkBtnPE: ask ? 'none' : 'auto',
-      bkPillTop: ask ? 481 : 752, bkKbY: ask ? 0 : 300, bkOvO: ask ? 1 : 0, bkOvPE: ask ? 'auto' : 'none',
+      bkTxt: txt, bkPhO: ex && !txt ? 1 : 0, bkPhX: ex ? 0 : -8, bkPhCD: m === 1 ? 'inline-block' : 'none', bkTypO: (ty || (m === 1 && txt)) ? 1 : 0, bkCaretD: ty ? 'inline-block' : 'none', bkTxtMW: ty ? 236 : 172,
+      bkAskW: m === 0 ? 55 : (ty ? 351 : 289), bkMarkL: ex ? 20 : 16, bkMarkC: ex ? '#9a9a9a' : '#4d1c14',
+      bkAskO: ex ? 1 : 0, bkAskX: 0, bkSendS: ex ? 1 : 0.6, bkAskD: m === 1 ? '.3s' : '0s',
+      bkSendL: ty ? 293 : 231, bkSendPE: ex ? 'auto' : 'none',
+      bkRdO: ex ? 0 : 1, bkRdX: ex ? 120 : 0, bkRdS: ex ? 0.85 : 1, bkBtnPE: ex ? 'none' : 'auto',
+      bkFdL: ex ? 303 : 217, bkFdW: ex ? 55 : 141, bkFdTO: ex ? 0 : 1, bkChevO: m === 1 ? 1 : 0,
+      bkFdO: ty ? 0 : 1, bkFdS: ty ? 0.6 : 1, bkFdPE: ty ? 'none' : 'auto', bkFdLbl: m === 1 ? 'Close Ask Decade' : 'Start FD',
+      bkPillTop: ty ? 481 : 752, bkKbY: ty ? 0 : 300, bkOvO: ty ? 1 : 0, bkOvPE: ty ? 'auto' : 'none',
     };
   }
 
