@@ -242,9 +242,14 @@ img { display: block; -webkit-user-drag: none; }
   background: rgba(240,240,238,.94); box-shadow: inset 0 0 0 1px rgba(255,255,255,.6), 0 4px 100px rgba(0,0,0,.08);
   opacity: 0; transform: scale(.96, .8); transition: opacity .35s, transform .5s cubic-bezier(.2,.9,.25,1); }
 .scrolled .bpill { opacity: 1; transform: none; }
-.bank .cbtn { transition: transform .5s cubic-bezier(.2,.9,.25,1); }
-.bank.scrolled .cbtn.l { transform: translateX(6px); }
-.bank.scrolled .cbtn.r { transform: translateX(-6px); }
+/* top nav on scroll (every scrolling page): capsule forms behind, buttons tuck in */
+.page .hdr .cbtn { transition: transform .5s cubic-bezier(.2,.9,.25,1), box-shadow .4s; }
+.scrolled .hdr .cbtn { box-shadow: 0 1px 6px rgba(0,0,0,.06); }
+.scrolled .hdr .cbtn.l { transform: translateX(6px); }
+.scrolled .hdr .cbtn.r { transform: translateX(-6px); }
+.scrolled .hdr .cbtn.r2 { transform: translateX(-6px); }
+.scrolled .hdr .cbtn:active { transform: scale(.9); }
+.hdr::before { display: none; }
 
 /* bank bar: [Decade 55×55 | View plans 289×55] in a 365×69 tray */
 .vbar { position: absolute; left: 13px; width: 365px; bottom: 19px; height: 69px; border-radius: 35px; z-index: 12;
@@ -479,3 +484,17 @@ img { display: block; -webkit-user-drag: none; }
 .dplan .chev { opacity: .6; }
 .dots4 { letter-spacing: 0; margin-right: 2px; }
 .pkv:has(+ .pkv) { height: 95px; padding-top: 37px; }
+
+/* FD details */
+.details { background: var(--bg); }
+.dband { background: #ebebe8; padding: 154px 34px 46px; }
+.dslot .dep { margin: 0; }
+.again { position: relative; display: flex; align-items: center; justify-content: center; width: 322px; height: 55px; margin-top: 22px; border-radius: 31px; background: var(--dark); color: #fff; font-size: 17px; line-height: 23px; font-weight: 500; box-shadow: 0 3px 13px rgba(0,0,0,.08); }
+.again svg { position: absolute; right: 18px; }
+.dtable { margin: 35px 24px 0; width: 342px; background: #fff; border: 1px solid var(--line); border-radius: 23px; overflow: hidden; }
+.dtable .kv { height: 65.5px; padding: 0 23px; }
+.dtable .kv b { display: flex; align-items: center; font-weight: 400; color: var(--ink); }
+.dtable .kv b.n { letter-spacing: .09em; }
+.dtable u { text-underline-offset: 3px; cursor: pointer; }
+.dtable u.n { letter-spacing: .09em; }
+.toast { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); background: rgba(31,21,19,.94); color: #fff; font-size: 14px; line-height: 20px; padding: 10px 16px; border-radius: 20px; white-space: nowrap; z-index: 30; pointer-events: none; }

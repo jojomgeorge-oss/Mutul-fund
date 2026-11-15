@@ -268,10 +268,13 @@ function sendAsk(b) {
   A($('.send', b), [{ transform: 'scale(1)' }, { transform: 'scale(.75) translateX(6px)' }, { transform: 'scale(1)' }], BOUNCE);
   if (b.classList.contains('inl')) chatSend(q); else { chatSheet(q); }
 }
-function hdrFade(p) {
+// once you scroll, a frosted capsule forms behind the header and the buttons tuck in (same as the bank page)
+function hdrFade(p, at = 40) {
   const sc = $('.scroll', p), h = $('.hdr', p);
+  if (!sc || !h) return;
+  if (!$('.bpill', p)) { const b = document.createElement('div'); b.className = 'bpill'; p.insertBefore(b, h); }
   let on = false;
-  if (sc && h) sc.addEventListener('scroll', () => { const n = sc.scrollTop > 8; if (n !== on) { on = n; h.classList.toggle('on', n); } }, { passive: true });
+  sc.addEventListener('scroll', () => { const n = sc.scrollTop > at; if (n !== on) { on = n; p.classList.toggle('scrolled', n); } }, { passive: true });
 }
 function segPill(seg, i, anim = true) {
   const bs = $$('button', seg), pill = $('.pill', seg), b = bs[i];
@@ -296,7 +299,7 @@ function recCard(i) {
 const REC_TEXT = (bank = 'Suryoday SF Bank') => `Hi Arunima, Decade suggests moving part of your savings to a fixed deposit, and we found a great option at ${bank}.`;
 const askd = () => `<button class="askd press" data-a="askchat">${I.mark('rgba(255,255,255,.85)', 17)}Ask Decade ${I.chevs('rgba(255,255,255,.75)')}</button>`;
 function depCard(d, i) {
-  return `<div class="dep card ${d.isNew ? 'new' : ''}" data-st>
+  return `<div class="dep card press ${d.isNew ? 'new' : ''}" data-st data-a="depopen" data-k="${d.key}" data-i="${i}">
     <div class="t">${logo('sur', 'sm')}<span>Suryoday SF bank FD</span>${I.chevs('rgba(0,0,0,.6)')}<span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
     <div class="r1"><div><small>Invested amount</small><b>${inr(d.a)}</b></div><div class="rt"><small>Interest rate</small><b class="green">${d.r.toFixed(2)}%</b></div></div>
     <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog"><i style="transform:scaleX(${Math.max(d.p, .03)})"></i></div><div class="row">${d.s === 'matured' ? 'Matured on' : 'Tenure'}<b class="t2">${d.left}</b></div></div>
@@ -310,8 +313,50 @@ function deposits() {
     matured: [Object.assign({}, base, { s: 'matured', p: 1, left: '12 Mar 2026', m: 54380 }), Object.assign({}, base, { s: 'matured', p: 1, left: '02 Jan 2026', a: 100000, m: 108250 })],
   };
   if (S.newDep) L.pending.unshift(S.newDep);
+  for (const k in L) L[k].forEach((d) => { d.key = k; });
   return L;
 }
+/* =====================================================================
+   FD DETAILS
+   ===================================================================== */
+function detailsPage(d) {
+  const isNew = d === S.newDep;
+  const nom = isNew ? S.noms[S.nom] : { n: 'Roshni Singh', r: 'Wife' }, acc = isNew ? S.accts[S.acc] : { s: 'HDFC', n: '4563' };
+  const row = (l, v, extra = '', cls = '') => `<div class="kv"><span>${l}</span><b class="${cls}">${v}${extra}</b></div>`;
+  const chip = (icon, a) => `<button class="pen press-s press" data-a="${a}" aria-label="${a}">${icon}</button>`;
+  const dl = '<svg width="12" height="13" viewBox="0 0 12 13" fill="none"><path d="M6 1v8M2.5 5.5L6 9l3.5-3.5M1 12h10" stroke="#292929" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const cr = '<svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1l4 4-4 4" stroke="#292929" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const date = isNew ? new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).replace(/ (\w{3}) /, ' $1. ') : '16 Nov. 2026';
+  const p = mkPage('details', `
+    <div class="scroll">
+      <div class="dband">
+        <div class="dslot">${depCard(d, 0).replace('data-a="depopen"', '')}</div>
+        <button class="again press" data-a="again">Invest again${I.chevs('#fff')}</button>
+      </div>
+      <div class="dtable" data-st>
+        ${row('Investment date', date, '', 'n')}${row('Investment amount', inr(d.a), '', 'n')}${row('Tenure', isNew ? titleTen(S.sel.ten) : '4Y 5M 14D', '', 'n')}
+        ${row('Maturity instruction', `<span id="mi">${S.reinv ? 'Reinvest' : 'Reinvest'}</span>`, chip(I.pen, 'mi'))}
+        ${row('Transaction ID', '23456781098354721083')}${row('Payment method', 'UPI')}${row('Nominee', esc(nom.n))}${row('Nominee relation', esc(nom.r))}
+        ${row('Receipt', '<u data-a="dl">Download</u>', chip(dl, 'dl'))}${row('Form 121', '<u data-a="f121">Apply</u>', chip(cr, 'f121'))}
+      </div>
+      <h2 class="h2" style="margin:35px 31px 21px">Withdrawal details</h2>
+      <div class="dtable" data-st style="height:130px;margin-top:0">
+        ${row('Account', `<u class="n">xxxx${acc.n}</u>`, chip(cr, 'noop'))}${row('Bank', acc.s === 'HDFC' ? 'HDFC Bank' : esc(acc.s + ' Bank'))}
+      </div>
+      <div style="height:187px"></div>
+    </div>
+    <div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle">FD details</div><button class="cbtn r press press-s" data-a="noop" aria-label="Search">${I.search}</button></div>
+    ${askbar()}`);
+  p._dep = d;
+  hdrFade(p); bindAsk(p);
+  return p;
+}
+function toast(text) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = text; layer.appendChild(t);
+  A(t, [{ opacity: 0, transform: 'translate(-50%, 16px) scale(.96)' }, { opacity: 1, transform: 'translate(-50%, 0)' }], SOFT);
+  setTimeout(() => A(t, [{ opacity: 1 }, { opacity: 0 }], FADE).then(() => t.remove()), 1800);
+}
+
 function homePage() {
   const cats = Object.entries(CATS).map(([k, [t, s]]) => `<button class="cat press" data-a="cat" data-c="${k}">${I.cat[k]}<span><b data-lbl>${t}</b><small>${s}</small></span>${I.chev('#b5b5b5')}</button>`).join('');
   const banks = ['shiv', 'shri', 'sur', 'shiv'].map((k) => `<button class="bcard card press" data-st data-a="bank" data-b="${k}">
@@ -713,12 +758,8 @@ function bankPage(k) {
   const sc = $('.scroll', p), img = $('.bhero .img', p), h = $('.hdr', p);
   h.style.setProperty('--hb', 0);
   let barsDone = false;
-  let scd = false;
-  sc.addEventListener('scroll', () => {
-    const y = sc.scrollTop, on = y > 70;
-    if (on !== scd) { scd = on; p.classList.toggle('scrolled', on); }
-    if (p._discOpen && Math.abs(y - p._discY) > 30) discClose(p);
-  }, { passive: true });
+  hdrFade(p, 70);
+  sc.addEventListener('scroll', () => { if (p._discOpen && Math.abs(sc.scrollTop - p._discY) > 30) discClose(p); }, { passive: true });
   const io = new IntersectionObserver((es) => {
     if (barsDone || !es.some((e) => e.isIntersecting)) return;
     barsDone = true; io.disconnect();
@@ -1236,6 +1277,31 @@ const ACT = {
     openSheet(`<div class="esheet"><h3>Your FD</h3><div class="box fill">${[['Bank', B[S.sel.bank].n], ['Amount', inr(S.amt)], ['Tenure', titleTen(S.sel.ten)], ['Interest rate', S.sel.rate.toFixed(2) + '%'], ['At maturity', inr(mat(S.amt, S.sel.rate, S.sel.yrs))]].map(([l, v]) => `<div class="kv"><span>${l}</span><b>${v}</b></div>`).join('')}</div></div>`);
   },
   vkyc() { vkycCall(); },
+  depopen(el) { // the card lifts out of the list and settles at the top of FD details
+    if (busy) return;
+    const L = deposits(), d = L[el.dataset.k][+el.dataset.i];
+    const p = detailsPage(d), from = R(el);
+    p.style.opacity = 0; pagesEl.appendChild(p); const slot = $('.dslot .dep', p), to = R(slot); p.remove(); p.style.opacity = '';
+    slot.style.opacity = 0; el.style.visibility = 'hidden';
+    push(p, 'fade', { noStagger: true });
+    $$('[data-st]', p).forEach((x, i) => A(x, [{ opacity: 0, transform: 'translateY(30px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: 140 + i * 50 }));
+    A($('.again', p), [{ opacity: 0, transform: 'translateY(-20px) scale(.96)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: 160 });
+    A($('.dband', p), [{ opacity: 0 }, { opacity: 1 }], FADE);
+    morphEl(el, from, to, SOFT).then((g) => { slot.style.opacity = ''; g.remove(); el.style.visibility = ''; });
+  },
+  again(el) { const d = top()._dep; S.sel = { bank: 'sur', ten: '5 years', yrs: 5, rate: d.r }; S.planAmt = d.a; openBooking(['amount'], el, { dark: true, r0: 28 }); },
+  mi() {
+    S.form = S.form || {};
+    const cur = $('#mi', top()).textContent;
+    openSheet(`<div class="esheet"><h3>Maturity instruction</h3><div class="box">${['Reinvest', 'Reinvest principal only', 'Pay out to bank account'].map((o) => `<button class="kv pk ${o === cur ? 'on' : ''}" data-a="miset" data-v="${o}"><b style="font-weight:400;font-size:17px;letter-spacing:0">${o}</b><span class="radio"></span></button>`).join('')}</div></div>`);
+  },
+  miset(el) {
+    $$('.pk', el.parentElement).forEach((x) => x.classList.toggle('on', x === el));
+    const v = el.dataset.v;
+    setTimeout(() => closeSheet().then(() => { const m = $('#mi', top()); if (!m) return; m.textContent = v.replace('Pay out to bank account', 'Payout'); A(m, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], SOFT); }), 160);
+  },
+  dl(el) { const c = el.closest('.kv').querySelector('.pen'); A(c, [{ transform: 'translateY(0)' }, { transform: 'translateY(4px)' }, { transform: 'none' }], BOUNCE); toast('Receipt downloaded'); },
+  f121() { toast('Form 121 opens on the bank’s site'); },
   done() {
     S.tab = 1; S.dtab = 0;
     const home = homePage(); const cur = top();
