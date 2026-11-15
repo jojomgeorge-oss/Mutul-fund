@@ -76,8 +76,16 @@ const PLANS = {
 const S = {
   tab: 0, dtab: 1, calcT: 3, calcAmt: 1292, recI: 0, ptab: 0,
   sel: { bank: 'sur', ten: '5 Years', yrs: 5, rate: 8.25 }, amt: 50000, fresh: true,
-  steps: [], pan: [1, 0, 0], nom: 1, acc: 0, reinv: false, newDep: null,
+  steps: [], pan: [1, 0, 0], nom: 1, acc: 0, reinv: false, newDep: null, form: {},
+  noms: [{ n: 'Jojo Maria George', r: 'Husband', d: '14/10/1991' }, { n: 'Roshni Singh', r: 'Sister', d: '22/06/1995' }],
+  accts: [{ b: 'HDFC bank savings', s: 'HDFC', n: '3456', lg: 'hdfc' }, { b: 'HDFC bank savings', s: 'HDFC', n: '8821', lg: 'hdfc' }, { b: 'HDFC bank savings', s: 'HDFC', n: '1047', lg: 'hdfc' }],
 };
+const REC = [
+  { bank: 'sur', amt: 500000, rate: 8.31, ten: '5Y 3M 16D', yrs: 5.29 },
+  { bank: 'shiv', amt: 300000, rate: 8.2, ten: '3Y 6M', yrs: 3.5 },
+];
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const bankName = (k) => B[k].n.replace(' bank', ' Bank');
 const CALC_T = [['5Y', 5, '5 Years'], ['3Y', 3, '3 Years'], ['1Y', 1, '1 Year'], ['6M', .5, '6 Months'], ['3M', .25, '3 Months']];
 
 /* ---------------- icons ---------------- */
@@ -100,6 +108,7 @@ const I = {
   dicgc: '<svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 1.2l5.6 2.3v4.1c0 3.4-2.3 6.1-5.6 7.2C4.7 13.7 2.4 11 2.4 7.6V3.5z" fill="#e0306a"/><path d="M5.6 8l1.7 1.7 3.2-3.3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   tick: '<svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1.5 5l3.5 3.5 6.5-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   x: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="#292929" stroke-width="2" stroke-linecap="round"/></svg>',
+  xw: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>',
   del: '<svg width="30" height="22" viewBox="0 0 24 18" fill="none"><path d="M7.5 1.5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-13L1.5 9z" stroke="#645f5f" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 5.5l7 7m0-7l-7 7" stroke="#645f5f" stroke-width="1.6" stroke-linecap="round"/></svg>',
   lock: '<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="1" y="6" width="10" height="7" rx="2" fill="#1a8d1a"/><path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1a8d1a" stroke-width="1.6"/></svg>',
   bars: (c, s = 39, r = 12) => `<svg width="${s}" height="${s}" viewBox="0 0 39 39" style="flex:none"><rect width="39" height="39" rx="${r * 39 / s}" fill="${c}"/><rect x="10.5" y="21.5" width="3" height="4" rx="1.5" fill="#fff" opacity=".75"/><rect x="15.5" y="19.5" width="3" height="6" rx="1.5" fill="#fff" opacity=".85"/><rect x="20.5" y="16.5" width="3" height="9" rx="1.5" fill="#fff"/><rect x="25.5" y="13.5" width="3" height="12" rx="1.5" fill="#fff"/></svg>`,
@@ -209,15 +218,16 @@ stage.addEventListener('click', (e) => { if (endSwipe.block) { e.stopPropagation
 function blockClick() { endSwipe.block = true; clearTimeout(blockClick.t); blockClick.t = setTimeout(() => { endSwipe.block = false; }, 80); }
 
 /* ---------------- shared-element morph ---------------- */
-function ghost(r, style) {
+function ghost(r, style, parent = stage) {
   const g = document.createElement('div'); g.className = 'ghost'; g.style.transformOrigin = '0 0';
   Object.assign(g.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' }, style);
-  stage.appendChild(g); return g;
+  if (parent === stage) parent.appendChild(g); else parent.insertBefore(g, parent.children[1] || null);
+  return g;
 }
 // The box is drawn once at its final size, then scaled from the source rect: compositor-only, no relayout or repaint per frame.
 function morphBox(from, to, o = {}) {
   const bg1 = o.bg1 || o.bg0 || '#fff';
-  const g = ghost(to, { background: bg1, borderRadius: (o.r1 ?? 20) + 'px', boxShadow: o.sh || '0 10px 30px rgba(0,0,0,.08)', willChange: 'transform' });
+  const g = ghost(to, { background: bg1, borderRadius: (o.r1 ?? 20) + 'px', boxShadow: o.sh || '0 10px 30px rgba(0,0,0,.08)', willChange: 'transform', zIndex: o.z ?? 50 }, o.parent);
   if (o.bg0 && o.bg0 !== bg1) { // colour change = a second layer fading out, not an animated background
     const dk = document.createElement('div');
     dk.style.cssText = `position:absolute;inset:0;border-radius:inherit;background:${o.bg0};will-change:opacity`;
@@ -253,9 +263,10 @@ function bindAsk(root) {
   });
 }
 function sendAsk(b) {
-  const inp = $('input', b); if (!inp.value) { inp.focus(); return; }
-  inp.value = ''; b.classList.remove('typed'); inp.blur();
+  const inp = $('input', b), q = inp.value.trim(); if (!q) { inp.focus(); return; }
+  inp.value = ''; b.classList.remove('typed');
   A($('.send', b), [{ transform: 'scale(1)' }, { transform: 'scale(.75) translateX(6px)' }, { transform: 'scale(1)' }], BOUNCE);
+  if (b.classList.contains('inl')) chatSend(q); else { chatSheet(q); }
 }
 function hdrFade(p) {
   const sc = $('.scroll', p), h = $('.hdr', p);
@@ -275,16 +286,15 @@ function segPill(seg, i, anim = true) {
    HOME — All / Your deposits
    ===================================================================== */
 function recCard(i) {
-  const g = (l, v, c = '') => `<div><label>${l}</label><div class="v ${c}">${v}</div></div>`;
-  const m = inr(mat(500000, 8.31, 5.29));
-  const top = `<div class="top"><i class="dot-logo"></i>Suryoday SF Bank${i === 2 ? '<button class="go" data-a="recstart" style="position:static;margin-left:auto;height:32px">Start FD</button>' : ''}</div>`;
-  const grids = [
-    g('Invest', '₹5,00,000') + g('Tenure', '5Y 3M 16D'),
-    g('Interest rate', '8.31%', 'green') + g('Tenure', '5Y 3M 16D'),
-    g('Invest', '₹5,00,000') + g('Interest rate', '8.31%', 'green') + g('Tenure', '5Y 3M 16D') + g('At maturity', m, 'green'),
-  ];
-  return `<div class="dcard" data-i="${i}"><i class="shade"></i>${top}<div class="grid">${grids[i]}</div>${i < 2 ? '<button class="go press" data-a="recstart">Start FD</button>' : ''}</div>`;
+  const r = REC[i], b = B[r.bank];
+  return `<div class="dcard" data-i="${i}" data-a="recplan">
+    <div class="top"><span class="rlogo"><img src="img/${b.img}.png" alt=""></span>${bankName(r.bank)}</div>
+    <div class="grid"><div><label>Invest</label><div class="v">${inr(r.amt)}</div></div><div><label>Interest rate</label><div class="v green">${r.rate.toFixed(2)}%</div></div>
+      <div><label>Tenure</label><div class="v">${r.ten}</div></div></div>
+    <button class="go press" data-a="recstart" data-i="${i}">Start FD</button></div>`;
 }
+const REC_TEXT = (bank = 'Suryoday SF Bank') => `Hi Arunima, Decade suggests moving part of your savings to a fixed deposit, and we found a great option at ${bank}.`;
+const askd = () => `<button class="askd press" data-a="askchat">${I.mark('rgba(255,255,255,.85)', 17)}Ask Decade ${I.chevs('rgba(255,255,255,.75)')}</button>`;
 function depCard(d, i) {
   return `<div class="dep card ${d.isNew ? 'new' : ''}" data-st>
     <div class="t">${logo('sur', 'round').replace('class="logo', 'style="width:26px;height:26px" class="logo')}<span>Suryoday SF bank FD ›</span><span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
@@ -314,10 +324,9 @@ function homePage() {
     <div class="cats card" data-st>${cats}</div>
     <h2 class="h2" style="margin:48px 26px 20px">Recommendation</h2>
     <div class="rec" data-st data-a="recopen">
-      <div class="deck">${[0, 1, 2].map(recCard).join('')}</div>
-      <div class="dots"><i class="on"></i><i></i><i></i></div>
-      <p>Hi Arunima, Decade suggests moving part of your savings to a fixed deposit, and we found a great option at Suryoday SF Bank.</p>
-      <button class="askd press" data-a="askfocus">${I.mark('rgba(255,255,255,.85)', 15)}Ask Decade ${I.chevs('rgba(255,255,255,.7)')}</button>
+      <div class="deck">${REC.map((_, i) => recCard(i)).join('')}</div>
+      <p>${REC_TEXT()}</p>
+      ${askd()}
     </div>
     <h2 class="h2" style="margin:46px 26px 20px">Browse all banks</h2>
     ${banks}
@@ -353,7 +362,7 @@ function homePage() {
     segPill($('#chips', p), S.calcT, false);
     renderDeps(p, false);
     $('#sumv', p).textContent = inr(500000 + (S.newDep ? S.newDep.a : 0));
-    deckLayout(p, false); deckTimer(p);
+    deckLayout(p); deckTimer(p);
   };
   p._top = () => deckTimer(p);
   hdrFade(p); bindAsk(p);
@@ -406,43 +415,129 @@ function renderDeps(p, anim = true, dir = 1) {
 }
 
 /* recommendation deck: front card lifts up, tucks behind; the next one slides forward */
-const SHADE = [0, .07, .14];
-const POS = ['translateY(0) scale(1)', 'translateY(25px) scale(.94)', 'translateY(48px) scale(.88)'];
-function deckLayout(p, anim) {
-  const cards = $$('.dcard', p);
-  cards.forEach((c, i) => {
-    const pos = (i - S.recI + 3) % 3;
-    c.style.zIndex = 3 - pos;
-    c.style.pointerEvents = pos === 0 ? '' : 'none';
-    if (!anim) { c.style.transform = POS[pos]; $('.shade', c).style.opacity = SHADE[pos]; }
-  });
-  $$('.dots i', p).forEach((d, i) => d.classList.toggle('on', i === S.recI));
+// front card, and the one behind it peeking out narrower and translucent (as in the design)
+const POS = ['translateY(0) scale(1)', 'translateY(43px) scale(.893)'], OP = [1, .32];
+function deckLayout(p) {
+  $$('.deck', p).forEach((dk) => $$('.dcard', dk).forEach((c, i) => {
+    const pos = (i - S.recI + 2) % 2;
+    c.style.zIndex = 2 - pos; c.style.pointerEvents = pos === 0 ? '' : 'none';
+    c.style.transform = POS[pos]; c.style.opacity = OP[pos];
+  }));
 }
 function deckNext(p) {
-  const cards = $$('.dcard', p), front = cards[S.recI];
-  S.recI = (S.recI + 1) % 3;
+  const dk = $('.deck', p); if (!dk) return;
+  const cards = $$('.dcard', dk), front = cards[S.recI], back = cards[(S.recI + 1) % 2];
+  S.recI = (S.recI + 1) % 2;
+  // front lifts up, slips behind; the one behind slides up to the front
   const a = front.animate([
-    { transform: POS[0] },
-    { transform: 'translateY(-64px) scale(1.02) rotate(-1.2deg)', offset: .42 },
-    { transform: POS[2] }], { duration: 880, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
-  A($('.shade', front), [{ opacity: 0 }, { opacity: SHADE[2] }], { e: 'ease', d: 500 }, { delay: 380 });
-  setTimeout(() => { front.style.zIndex = 0; }, 380);
-  a.finished.then(() => { front.style.transform = POS[2]; a.cancel(); deckLayout(p, false); }).catch(() => {});
-  cards.forEach((c) => {
-    if (c === front) return;
-    const pos = (+c.dataset.i - S.recI + 3) % 3;
-    c.style.zIndex = 3 - pos;
-    A(c, [{ transform: c.style.transform }, { transform: POS[pos] }], SOFT, { delay: 260 });
-    const sh = $('.shade', c); A(sh, [{ opacity: sh.style.opacity || 0 }, { opacity: SHADE[pos] }], SOFT, { delay: 260 });
-  });
-  $$('.dots i', p).forEach((d, i) => d.classList.toggle('on', i === S.recI));
+    { transform: POS[0], opacity: 1 },
+    { transform: 'translateY(-58px) scale(.99)', opacity: 1, offset: .42 },
+    { transform: POS[1], opacity: OP[1] }], { duration: 900, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
+  setTimeout(() => { front.style.zIndex = 1; back.style.zIndex = 2; }, 380);
+  a.finished.then(() => { a.cancel(); deckLayout(p); }).catch(() => {});
+  A(back, [{ transform: POS[1], opacity: OP[1] }, { transform: POS[0], opacity: 1 }], SOFT, { delay: 300 });
 }
 function deckTimer(p) {
   clearInterval(deckTimer.t);
   deckTimer.t = setInterval(() => {
-    if (top() !== p || S.tab !== 0 || layer.children.length || deckTimer.hold || document.hidden) return;
+    if (top() !== p || S.tab !== 0 || layer.children.length || deckTimer.hold || recM || document.hidden) return;
     deckNext(p);
   }, 3600);
+}
+
+/* tapping the banner (anywhere but its buttons) opens it full height; the cards spread into a list */
+let recM = null;
+function openRecModal(banner) {
+  if (busy || recM || sheet) return; lock(650);
+  deckTimer.hold = true;
+  const order = [S.recI, (S.recI + 1) % 2];
+  const wrap = document.createElement('div'); wrap.style.cssText = 'position:absolute;inset:0;isolation:isolate';
+  wrap.innerHTML = `<div class="backdrop" data-a="recclose"></div>
+    <div class="rmodal"><div class="rmscroll">${order.map((i) => recCard(i)).join('')}<p>${REC_TEXT()}</p>${askd()}</div></div>
+    <button class="rmx press press-s" data-a="recclose" aria-label="Close">${I.xw}</button>`;
+  layer.appendChild(wrap);
+  const mod = $('.rmodal', wrap), sc = $('.rmscroll', mod), bd = $('.backdrop', wrap), x = $('.rmx', wrap);
+  recM = { wrap, banner, order };
+  const to = R(mod), from = R(banner);
+  // where every piece starts: its spot inside the banner
+  const pieces = $$('.dcard', sc).map((c, k) => [c, $(`.dcard[data-i="${order[k]}"]`, banner)]);
+  pieces.push([$('p', sc), $('p', banner)], [$('.askd', sc), $('.askd', banner)]);
+  const firsts = pieces.map(([, s]) => [R(s), +getComputedStyle(s).opacity]);
+  banner.style.visibility = 'hidden';
+  mod.classList.add('flying');
+  morphBox(from, to, { r0: 23, r1: 24, bg1: 'linear-gradient(180deg,#4f1d15,#7e3125)', sh: 'none', parent: wrap, z: 0 }).then((g) => { mod.classList.remove('flying'); g.remove(); });
+  pieces.forEach(([el], k) => {
+    const f = firsts[k][0], l = R(el), o0 = firsts[k][1];
+    const t0 = `translate(${f.x - l.x}px, ${f.y - l.y}px) scale(${f.w / l.w})`;
+    el.style.transformOrigin = '0 0';
+    A(el, [{ transform: t0, opacity: o0 }, { transform: 'none', opacity: 1 }], SOFT, { delay: k === 1 ? 30 : 0 });
+  });
+  A(bd, [{ opacity: 0 }, { opacity: .45 }], EASE);
+  A(x, [{ transform: 'translateY(16px) scale(.6)', opacity: 0 }, { transform: 'none', opacity: 1 }], BOUNCE, { delay: 140 });
+}
+function closeRecModal(fast) {
+  if (!recM) return Promise.resolve();
+  const { wrap, banner, order } = recM; recM = null; lock(500);
+  const mod = $('.rmodal', wrap), sc = $('.rmscroll', mod);
+  if (fast) {
+    banner.style.visibility = ''; deckTimer.hold = false;
+    return A(wrap, [{ opacity: 1 }, { opacity: 0 }], { e: 'ease', d: 200 }).then(() => wrap.remove());
+  }
+  const from = R(mod), to = R(banner);
+  const pieces = $$('.dcard', sc).map((c, k) => [c, $(`.dcard[data-i="${order[k]}"]`, banner)]);
+  pieces.push([$('p', sc), $('p', banner)], [$('.askd', sc), $('.askd', banner)]);
+  const targets = pieces.map(([, t]) => [R(t), +getComputedStyle(t).opacity]);
+  mod.classList.add('flying');
+  morphBox(from, to, { r0: 24, r1: 23, bg1: 'linear-gradient(180deg,#4d1c14,#7e3125)', sh: 'none', parent: wrap, z: 0, sp: SNAP });
+  pieces.forEach(([el], k) => {
+    const l = R(el), t = targets[k][0];
+    el.style.transformOrigin = '0 0';
+    A(el, [{ transform: 'none', opacity: 1 }, { transform: `translate(${t.x - l.x}px, ${t.y - l.y}px) scale(${t.w / l.w})`, opacity: targets[k][1] }], SNAP);
+  });
+  A($('.backdrop', wrap), [{ opacity: .45 }, { opacity: 0 }], EASE);
+  A($('.rmx', wrap), [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.6)' }], QUICK);
+  return wait(SNAP.d).then(() => { banner.style.visibility = ''; wrap.remove(); deckTimer.hold = false; });
+}
+
+/* =====================================================================
+   ASK DECADE — chat sheet; opens with the keyboard up
+   ===================================================================== */
+const CHIPS = ['Is Suryoday SF Bank safe?', 'Can I withdraw early?', 'How is FD interest taxed?'];
+function reply(q) {
+  const t = q.toLowerCase();
+  if (/safe|risk|insur|dicgc|rbi/.test(t)) return 'Suryoday is an RBI-licensed small finance bank, and DICGC insures your deposits there up to ₹5 lakh, including interest.';
+  if (/withdraw|break|early|lock|liquid/.test(t)) return 'You can break this FD anytime. After the first year there is no penalty; before that, the bank pays a slightly lower rate for the time your money was in.';
+  if (/tax|tds|15g|15h/.test(t)) return 'FD interest is added to your income and taxed at your slab rate. The bank deducts 10% TDS once your interest crosses ₹40,000 in a year, unless you submit Form 15G/15H.';
+  if (/rate|return|maturity|much|earn|interest/.test(t)) return `At 8.31% a year, ₹5,00,000 grows to about ${inr(mat(500000, 8.31, 5.29))} in 5 years 3 months — roughly ${inr(mat(500000, 8.31, 5.29) - 500000)} in interest.`;
+  return 'Good question. For this FD at Suryoday SF Bank you get 8.31% a year, deposits insured up to ₹5 lakh, and you can withdraw anytime. Want me to compare it with other banks?';
+}
+function chatSheet(q) {
+  if (sheet) return;
+  const s = openSheet(`<div class="chat">
+      <div class="chd"><span class="serif">${I.mark('#6c4126', 20)}Ask Decade</span><button class="chx press press-s" data-a="closesheet" aria-label="Close">${I.x}</button></div>
+      <div class="msgs"><div class="m d">Hi Arunima, ask me anything about this fixed deposit at Suryoday SF Bank.</div></div>
+      <div class="qchips">${CHIPS.map((c) => `<button class="press" data-a="chatq">${c}</button>`).join('')}</div>
+      <div class="askbar inl"><label class="f">${I.mark('#9a9a9a', 19)}<input type="text" placeholder="Ask Decade" enterkeyhint="send" aria-label="Message Decade"><button type="button" class="send press press-s" data-a="send" aria-label="Send">${I.send}</button></label></div>
+    </div>`, { noScale: true });
+  if (!s) return;
+  const inp = $('.chat input', s.el);
+  inp.focus({ preventScroll: true }); // same tap → the keyboard comes up straight away
+  if (q) chatSend(q);
+}
+function chatSend(q) {
+  if (!sheet) return;
+  const el = sheet.el, box = $('.msgs', el), chips = $('.qchips', el);
+  if (chips && chips.offsetHeight) { A(chips, [{ opacity: 1 }, { opacity: 0, transform: 'translateY(8px)' }], QUICK).then(() => { chips.style.display = 'none'; }); }
+  const add = (cls, html) => { const m = document.createElement('div'); m.className = 'm ' + cls; m.innerHTML = html; box.appendChild(m); box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' }); return m; };
+  const u = add('u', esc(q));
+  A(u, [{ opacity: 0, transform: 'translateY(14px) scale(.96)' }, { opacity: 1, transform: 'none' }], SOFT);
+  const ty = add('d typing', '<i></i><i></i><i></i>');
+  A(ty, [{ opacity: 0 }, { opacity: 1 }], FADE, { delay: 200 });
+  setTimeout(() => {
+    ty.classList.remove('typing'); ty.textContent = reply(q);
+    A(ty, [{ opacity: .4, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], SOFT);
+    box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+  }, 1100);
 }
 
 /* =====================================================================
@@ -500,6 +595,7 @@ function openSheet(html, o = {}) {
 function closeSheet(o = {}) {
   if (!sheet) return Promise.resolve();
   const s = sheet; sheet = null;
+  deckTimer.hold = false;
   if (!o.keepPage) scaleBehind(false); else { const p = top(); if (p) { p.style.transform = ''; p.style.borderRadius = ''; } }
   if (s.src) { s.src.style.visibility = ''; A(s.src, [{ opacity: 0 }, { opacity: 1 }], FADE, { delay: 120 }); }
   if (s.onClose) s.onClose();
@@ -599,9 +695,9 @@ function bankPage(k) {
         <div class="blabels"><span>HDFC<br>SAVINGS</span><span>HDFC<br>FD</span><span>${b.n.split(' ')[0].toUpperCase()}<br>FD</span></div>
       </div>
       <div class="bsec">Recommendation</div>
-      <div class="rec" style="height:380px" data-a="recopen"><div class="deck"><div class="dcard" style="transform:none">${recCard(0).replace(/^<div class="dcard" data-i="0">/, '').replace(/<\/div>$/, '')}</div></div>
-        <p style="top:250px">Hi Arunima, Decade suggests moving part of your savings to a fixed deposit, and we found a great option at ${b.n}.</p>
-        <button class="askd press" data-a="askfocus">${I.mark('rgba(255,255,255,.85)', 15)}Ask Decade ${I.chevs('rgba(255,255,255,.7)')}</button></div>
+      <div class="rec" data-a="recopen"><div class="deck">${REC.map((_, i) => recCard(i)).join('')}</div>
+        <p>${REC_TEXT()}</p>
+        ${askd()}</div>
       <div class="bsec" style="text-align:center">Get instant receipt</div>
       <div class="receipt"><div style="width:64px;height:64px;border-radius:50%;margin:0 auto;border:1px dashed rgba(255,255,255,.4);display:grid;place-items:center">${I.mark('#fff', 22)}</div>
         <h4>Fixed deposit receipt</h4><div class="s">Arunima Chandra, your deposit of ₹1,00,000<br>on Decade was successful on 25 June 2026</div>
@@ -615,6 +711,7 @@ function bankPage(k) {
     <div class="vbar"><label class="disc press" data-a="disc">${I.mark('#5a2a1f', 21)}<input type="text" placeholder="Ask Decade" aria-label="Ask Decade" tabindex="-1"><button type="button" class="send" data-a="send" aria-label="Send">${I.send}</button></label>
       <button class="vp press" data-a="viewplans2">View plans ${I.chevs('#fff')}</button></div>`);
   p.dataset.bank = k;
+  deckLayout(p);
   const sc = $('.scroll', p), img = $('.bhero .img', p), h = $('.hdr', p);
   h.style.setProperty('--hb', 0);
   let barsDone = false;
@@ -661,7 +758,52 @@ function discClose(p) {
 /* =====================================================================
    BOOKING — one card; the steps slide inside it and the button stays put
    ===================================================================== */
-const CTA = { amount: 'Continue', pan: 'Confirm', aadhaar: 'Proceed', nominee: 'Confirm', addnom: 'Save nominee', acct: 'Confirm', addacct: 'Save account', review: 'Confirm' };
+const CTA = { amount: 'Continue', pan: 'Confirm', aadhaar: 'Proceed', nominee: 'Confirm', addnom: 'Confirm', acct: 'Confirm', addacct: 'Confirm', review: 'Confirm' };
+const PICK = {
+  rel: ['Relationship', ['Spouse', 'Father', 'Mother', 'Son', 'Daughter', 'Brother', 'Sister']],
+  bank: ['Bank name', ['HDFC Bank', 'ICICI Bank', 'State Bank of India', 'Axis Bank', 'Kotak Mahindra Bank', 'Federal Bank']],
+};
+function dobOk(v) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v || ''); if (!m) return false;
+  const d = +m[1], mo = +m[2], y = +m[3], dt = new Date(y, mo - 1, d);
+  return y > 1900 && dt.getMonth() === mo - 1 && dt.getDate() === d && dt < new Date();
+}
+function formErrors(st) {
+  const f = S.form, e = [];
+  if (st === 'addnom') {
+    if (!f.name || f.name.trim().length < 2) e.push(['name', 'Enter the nominee’s full name']);
+    if (!f.rel) e.push(['rel', 'Choose how they’re related to you']);
+    if (!dobOk(f.dob)) e.push(['dob', f.dob && f.dob.length === 10 ? 'That date of birth isn’t valid' : 'Enter date of birth as DD/MM/YYYY']);
+  } else if (st === 'addacct') {
+    const n = (f.accno || '').replace(/\D/g, '');
+    if (n.length < 9) e.push(['accno', 'Account numbers have 9 to 18 digits']);
+    if (!f.bank) e.push(['bank', 'Choose your bank']);
+    if (!f.holder || f.holder.trim().length < 2) e.push(['holder', 'Enter the name on the account']);
+  }
+  return e;
+}
+// typing into the booking forms: format as you go, keep the button state live
+stage.addEventListener('input', (e) => {
+  const t = e.target, f = S.form;
+  if (t.id === 'fName') f.name = t.value;
+  else if (t.id === 'fHolder') f.holder = t.value;
+  else if (t.id === 'fDob') {
+    const d = t.value.replace(/\D/g, '').slice(0, 8);
+    t.value = f.dob = d.length > 4 ? `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}` : d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+  } else if (t.id === 'fAcc') {
+    const d = t.value.replace(/\D/g, '').slice(0, 18);
+    t.value = f.accno = d.replace(/(\d{4})(?=\d)/g, '$1 ');
+  } else return;
+  const fe = t.closest('.field'); if (fe) fe.classList.remove('err');
+  const er = $('#ferr'); if (er) er.textContent = '';
+  updateCta();
+});
+stage.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const nx = { fName: null, fAcc: null }[e.target.id];
+  if (e.target.id === 'fName' || e.target.id === 'fAcc') { e.preventDefault(); e.target.blur(); const b = e.target.closest('.step').querySelector('[data-a="pick"]'); if (b) b.click(); }
+  else if (e.target.id === 'fDob' || e.target.id === 'fHolder') { e.preventDefault(); e.target.blur(); }
+});
 function bookPage() {
   const b = B[S.sel.bank];
   const p = mkPage('bk', `
@@ -702,28 +844,34 @@ function stepHTML(st) {
         <div data-st style="position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:center;gap:6px;color:var(--green-d);font-size:15px">${I.shield('#1a8d1a', 16)}Shared directly with the bank KYC</div>`;
     case 'nominee':
       return `<div class="st">Choose your nominee</div>` +
-        [['Jojo Maria George', 'Husband', '14/10/1991'], ['Roshni Singh', 'Sister', '22/06/1995']].map(([n, r, d], i) => `<button class="opt person ${S.nom === i ? 'on' : ''}" data-st data-a="nom" data-i="${i}"><b>${n}</b><small>${r}</small><small>DOB : ${d}</small><span class="radio"></span></button>`).join('') +
+        S.noms.map((m, i) => `<button class="opt person ${S.nom === i ? 'on' : ''}" data-st data-a="nom" data-i="${i}" ${m.isNew ? 'data-new' : ''}><b>${esc(m.n)}</b><small>${esc(m.r)}</small><small>DOB : ${m.d}</small><span class="radio"></span></button>`).join('') +
         `<button class="addnew press" data-st data-a="goto" data-s="addnom">Add new +</button>`;
-    case 'addnom':
+    case 'addnom': {
+      const f = S.form;
       return `<div class="st">Add nominee details</div>
-        <div class="field" data-st><small>Name</small><div>Jojo Maria George<i class="caret"></i></div></div>
-        <div class="field" data-st><small>Relationship</small><div class="ph">Select one ${I.chevd}</div></div>
-        <div class="field" data-st><small>Date of birth</small><div class="ph">DD/MM/YYYY</div></div>`;
+        <label class="field" data-st data-f="name"><small>Name</small><input id="fName" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next" placeholder="Enter full name" value="${esc(f.name || '')}"></label>
+        <button class="field" data-st data-f="rel" data-a="pick" data-k="rel"><small>Relationship</small><span class="val ${f.rel ? '' : 'phv'}" id="fRel">${f.rel || 'Select one'}</span></button>
+        <label class="field" data-st data-f="dob"><small>Date of birth</small><input id="fDob" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="DD/MM/YYYY" maxlength="10" value="${f.dob || ''}"></label>
+        <div class="ferr" id="ferr"></div>`;
+    }
     case 'acct':
       return `<div class="st" style="margin-bottom:8px">Choose your bank account</div><div data-st style="margin:0 12px 22px;font-size:15px;line-height:21px;color:var(--sub)">This account will pay and receive money from your fixed deposit</div>` +
-        ['3456', '8821', '1047'].map((n, i) => `<button class="opt acct ${S.acc === i ? 'on' : ''}" data-st data-a="acc" data-i="${i}"><span class="lg"><img src="img/hdfc.png" alt="" style="width:26px"></span><span><b>HDFC bank savings</b><small>•••• ${n}</small></span><span class="radio"></span></button>`).join('') +
+        S.accts.map((a, i) => `<button class="opt acct ${S.acc === i ? 'on' : ''}" data-st data-a="acc" data-i="${i}" ${a.isNew ? 'data-new' : ''}><span class="lg">${a.lg ? `<img src="img/${a.lg}.png" alt="" style="width:26px">` : `<b class="ini">${a.s.slice(0, 2)}</b>`}</span><span><b>${esc(a.b)}</b><small>•••• ${a.n}</small></span><span class="radio"></span></button>`).join('') +
         `<button class="addnew press" data-st data-a="goto" data-s="addacct">Add new +</button>`;
-    case 'addacct':
+    case 'addacct': {
+      const f = S.form;
       return `<div class="st">Add bank details</div>
-        <div class="field" data-st><small>Account number</small><div>1234 1134 5677<i class="caret"></i></div></div>
-        <div class="field" data-st><small>Bank name</small><div class="ph">Select one ${I.chevd}</div></div>
-        <div class="field" data-st><small>Name on account</small><div class="ph">Enter name</div></div>`;
+        <label class="field" data-st data-f="accno"><small>Account number</small><input id="fAcc" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" placeholder="Enter account number" value="${f.accno || ''}"></label>
+        <button class="field" data-st data-f="bank" data-a="pick" data-k="bank"><small>Bank name</small><span class="val ${f.bank ? '' : 'phv'}" id="fBank">${f.bank || 'Select one'}</span></button>
+        <label class="field" data-st data-f="holder"><small>Name on account</small><input id="fHolder" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="done" placeholder="Enter name" value="${esc(f.holder || '')}"></label>
+        <div class="ferr" id="ferr"></div>`;
+    }
     case 'review':
       return `<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 12px 20px"><div style="font-size:23px;font-weight:500">Review your FD</div><button data-a="edit" style="color:#a872b3;text-decoration:underline;font-size:15px">Edit</button></div>
         <div class="box fill" data-st><div style="display:flex;justify-content:space-between;align-items:center;padding:22px 22px 20px"><span style="font-size:16px;color:var(--mute)">Amount</span><b class="num" style="font-size:27px;font-weight:500">${inr(S.amt)}</b></div>
           <div style="border-top:1px solid #e6e6df;display:flex;justify-content:space-between;padding:16px 22px 18px"><div><small style="font-size:13px;color:#857c8e">Maturity amount</small><div class="num" style="font-size:18px;margin-top:4px">${inr(m)}</div></div><div style="text-align:right"><small style="font-size:13px;color:#857c8e">Interest gain</small><div class="num green" style="font-size:18px;margin-top:4px">+${inr(m - S.amt)}</div></div></div></div>
         <div class="box" data-st style="margin-top:56px">
-          ${[['Tenure', titleTen(s.ten)], ['Interest rate', s.rate.toFixed(2) + '%'], ['Interest payout', 'At maturity'], ['Nominee', ['Jojo Maria George', 'Roshni Singh'][S.nom]]].map(([l, v]) => `<div class="kv" style="height:64px"><span>${l}</span><b>${v}</b></div>`).join('')}
+          ${[['Tenure', titleTen(s.ten)], ['Interest rate', s.rate.toFixed(2) + '%'], ['Interest payout', 'At maturity'], ['Nominee', esc(S.noms[S.nom].n)]].map(([l, v]) => `<div class="kv" style="height:64px"><span>${l}</span><b>${v}</b></div>`).join('')}
           <div class="kv" style="height:64px"><b style="font-size:16px">Reinvest on maturity</b><button class="toggle ${S.reinv ? 'on' : ''}" data-a="reinv" aria-label="Reinvest on maturity"><i></i></button></div></div>`;
   }
   return '';
@@ -756,6 +904,8 @@ function renderStep(dir, o = {}) {
     const ic = o.icon; if (ic) { const ti = $('svg', tgt); ti.style.opacity = 0; morphEl(ic, R(ic), R(ti), SOFT).then((g) => { ti.style.opacity = ''; g.remove(); }); }
     return;
   }
+  const nw = $('[data-new]', el);
+  if (nw) { nw.removeAttribute('data-new'); A(nw, [{ transform: 'scale(.92)', opacity: 0 }, { transform: 'none', opacity: 1 }], BOUNCE, { delay: 260 }); [S.noms, S.accts].forEach((l) => l.forEach((x) => { x.isNew = false; })); }
   if (!dir) { old.forEach((x) => x.remove()); stagger(el, 60); return; }
   old.forEach((x) => A(x, [{ transform: 'none', opacity: 1 }, { transform: `translateX(${-dir * 90}px)`, opacity: 0 }], SNAP).then(() => x.remove()));
   A(el, [{ transform: `translateX(${dir * 120}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], SNAP);
@@ -764,7 +914,7 @@ function renderStep(dir, o = {}) {
 function updateCta() {
   const p = bookEl(); if (!p) return;
   const st = S.steps[S.steps.length - 1];
-  $('.cta', p).classList.toggle('off', st === 'pan' && !S.pan.every(Boolean));
+  $('.cta', p).classList.toggle('off', (st === 'pan' && !S.pan.every(Boolean)) || ((st === 'addnom' || st === 'addacct') && formErrors(st).length > 0));
 }
 function goStep(st, o = {}) {
   if (busy && !o.force) return; lock(320);
@@ -789,6 +939,7 @@ function openBooking(steps, src, o = {}) {
   if (busy) return; lock(700);
   S.steps = steps.slice(); S.fresh = true; S.ptab = 0;
   if (S.planAmt && steps[0] === 'amount') S.amt = S.planAmt;
+  if (recM) closeRecModal(true);
   const p = bookPage();
   const prev = top();
   pagesEl.appendChild(p); stack.push(p);
@@ -867,7 +1018,7 @@ function payFlow() {
       <div id="paymsg" style="margin-top:30px;font-size:14px;color:var(--mute)"></div></div>`);
   setTimeout(() => { const u = $('#upi', p); u.classList.add('on'); u.style.background = 'var(--sel)'; u.style.transition = 'background .3s'; $('#paymsg', p).textContent = 'Opening your UPI app…'; }, 900);
   setTimeout(() => {
-    const q = present(`<div class="ph" style="background:linear-gradient(180deg,#f4f1fb,#fff)"><div style="font-size:14px;color:var(--mute)">UPI · HDFC •••• 3456</div><div class="num" style="font-size:34px;font-weight:500;margin:10px 0 34px">${inr(S.amt)}</div>
+    const q = present(`<div class="ph" style="background:linear-gradient(180deg,#f4f1fb,#fff)"><div style="font-size:14px;color:var(--mute)">UPI · ${S.accts[S.acc].s} •••• ${S.accts[S.acc].n}</div><div class="num" style="font-size:34px;font-weight:500;margin:10px 0 34px">${inr(S.amt)}</div>
       <div style="font-size:16px;font-weight:500">Enter UPI PIN</div><div id="pin" style="display:flex;gap:14px;margin-top:22px">${'<i style="width:14px;height:14px;border-radius:50%;border:1.5px solid #8d6197;display:block"></i>'.repeat(6)}</div></div>`);
     const dots = $$('#pin i', q);
     dots.forEach((d, i) => setTimeout(() => { d.style.background = '#8d6197'; A(d, [{ transform: 'scale(1.5)' }, { transform: 'none' }], BOUNCE); }, 500 + i * 160));
@@ -957,6 +1108,9 @@ const ACT = {
   back() { if (!busy) pop(); },
   ask(el) { const b = $('.askbar input', el.closest('.page')); if (b) { b.value = $('b', el).textContent; b.dispatchEvent(new Event('input')); b.focus(); } },
   askfocus(el) { const i = $('.askbar input', el.closest('.page')); if (i) i.focus(); else { const p = el.closest('.page'); if (p.classList.contains('bank')) discOpen(p); } },
+  askchat() { if (recM) closeRecModal(true); chatSheet(); },
+  chatq(el) { chatSend(el.textContent); const i = $('.chat input', sheet && sheet.el); if (i) i.focus({ preventScroll: true }); },
+  recclose() { closeRecModal(); },
   send(el) { const b = el.closest('.askbar'); if (b) sendAsk(b); else discClose(el.closest('.page')); },
   tab(el) {
     const i = +el.dataset.i; if (i === S.tab) return; const p = el.closest('.page');
@@ -981,18 +1135,17 @@ const ACT = {
     const k = el.dataset.b, amt = el.dataset.amt ? S.calcAmt : 0, t = CALC_T[S.calcT] || CALC_T[0];
     planSheet(el, amt ? { bank: k, ten: t[2], yrs: t[1], rate: 8.5, amt } : { bank: k, ten: el.dataset.t || '5 years', yrs: +el.dataset.y || 5, rate: 8.5 });
   },
-  recopen(el, e) {
-    if (e.target.closest('[data-a="recstart"],[data-a="askfocus"]')) return;
-    const card = el.querySelector('.dcard[style*="z-index: 3"]') || el.querySelector('.dcard');
-    deckTimer.hold = true; setTimeout(() => { deckTimer.hold = false; }, 4000);
-    planSheet(card, { bank: 'sur', ten: '5Y 3M 16D', yrs: 5.29, rate: 8.31, amt: 500000 });
+  recopen(el) { openRecModal(el); },
+  recplan(el) { // a card inside the open modal; on the banner itself a tap anywhere opens the modal
+    if (!el.closest('.rmodal')) return openRecModal(el.closest('.rec'));
+    const r = REC[+el.dataset.i]; planSheet(el, { bank: r.bank, ten: r.ten, yrs: r.yrs, rate: r.rate, amt: r.amt });
   },
-  recstart(el) {
-    S.sel = { bank: 'sur', ten: '5Y 3M 16D', yrs: 5.29, rate: 8.31 }; S.planAmt = 500000;
-    const card = el.closest('.dcard'); openBooking(['amount'], card, { logo: null, r0: 18 });
+  recstart(el) { // Start FD → the FD bottom sheet, the card flies up into it
+    const r = REC[+el.dataset.i]; deckTimer.hold = true;
+    planSheet(el.closest('.dcard'), { bank: r.bank, ten: r.ten, yrs: r.yrs, rate: r.rate, amt: r.amt });
   },
-  closesheet() { if (sheet) closeSheet(); },
-  sheetbank() { const k = S.sel.bank; closeSheet().then(() => push(bankPage(k))); },
+  closesheet() { if (sheet) closeSheet().then(() => { if (!recM) deckTimer.hold = false; }); },
+  sheetbank() { const k = S.sel.bank; closeRecModal(true); closeSheet().then(() => push(bankPage(k))); },
   startfd() { if (!sheet) return; openBooking(['amount'], $('.pmain', sheet.el), { logo: $('.ptop .logo', sheet.el), r0: 26 }); },
   viewplans() { if (!sheet) return; S.planAmt = 0; openBooking(['select'], $('.pmain', sheet.el), { logo: $('.ptop .logo', sheet.el), r0: 26 }); },
   viewplans2(el) { const p = el.closest('.page'); S.sel = { bank: p.dataset.bank, ten: '5 years', yrs: 5, rate: 8.25 }; S.planAmt = 0; openBooking(['select'], el, { dark: el.classList.contains('vp'), r0: el.classList.contains('vp') ? 28 : 24, logo: $('.bhero .logo', p) }); },
@@ -1032,18 +1185,53 @@ const ACT = {
     if (st === 'amount' && S.amt < 1000) { A($('#amtv', bookEl()), [{ transform: 'none' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(7px)' }, { transform: 'none' }], { e: 'ease-out', d: 380 }); $('#amtm', bookEl()).textContent = 'Minimum deposit is ₹1,000'; return; }
     if (next) return goStep(next);
     if (st === 'aadhaar') return bankKyc();
-    if (st === 'addnom') return goStep('nominee');
-    if (st === 'addacct') return goStep('acct');
+    if (st === 'addnom' || st === 'addacct') {
+      const errs = formErrors(st), step = $('.step:last-child', bookEl());
+      if (errs.length) {
+        errs.forEach(([k]) => { const fe = $(`[data-f="${k}"]`, step); if (fe) fe.classList.add('err'); });
+        const er = $('#ferr', step); er.textContent = errs[0][1];
+        A(er, [{ opacity: 0, transform: 'translateY(-4px)' }, { opacity: 1, transform: 'none' }], SOFT);
+        const first = $(`[data-f="${errs[0][0]}"]`, step);
+        A(first, [{ transform: 'none' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }], { e: 'ease-out', d: 400 });
+        const inp = first && $('input', first); if (inp) inp.focus();
+        return;
+      }
+      const f = S.form;
+      if (st === 'addnom') { S.noms.forEach((m) => { m.isNew = false; }); S.noms.push({ n: f.name.trim(), r: f.rel, d: f.dob, isNew: true }); S.nom = S.noms.length - 1; goStep('nominee'); }
+      else { S.accts.forEach((a) => { a.isNew = false; }); const n = f.accno.replace(/\D/g, ''); S.accts.push({ b: f.bank, s: f.bank.split(' ')[0], n: n.slice(-4), lg: f.bank === 'HDFC Bank' ? 'hdfc' : '', isNew: true }); S.acc = S.accts.length - 1; goStep('acct'); }
+      return;
+    }
     if (st === 'review') return payFlow();
   },
   consent(el) { const i = +el.dataset.i; S.pan[i] = !S.pan[i]; el.classList.toggle('on', S.pan[i]); updateCta(); A($('.chk', el), [{ transform: 'scale(.8)' }, { transform: 'none' }], BOUNCE); },
   nom(el) { S.nom = +el.dataset.i; $$('.opt', el.parentElement).forEach((o) => o.classList.toggle('on', o === el)); },
   acc(el) { S.acc = +el.dataset.i; $$('.opt', el.parentElement).forEach((o) => o.classList.toggle('on', o === el)); },
-  goto(el) { goStep(el.dataset.s); },
+  goto(el) {
+    const st = el.dataset.s; S.form = {};
+    goStep(st);
+    const inp = $('.step:last-child input', bookEl()); if (inp) inp.focus({ preventScroll: true }); // keyboard up on the same tap
+  },
+  pick(el) {
+    const k = el.dataset.k, [title, opts] = PICK[k], cur = S.form[k];
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    openSheet(`<div class="esheet"><h3>${title}</h3><div class="box">${opts.map((o) => `<button class="kv pk ${o === cur ? 'on' : ''}" data-a="pickset" data-k="${k}" data-v="${o}"><b style="font-weight:400;font-size:17px">${o}</b><span class="radio"></span></button>`).join('')}</div></div>`);
+  },
+  pickset(el) {
+    const k = el.dataset.k, v = el.dataset.v; S.form[k] = v;
+    $$('.pk', el.parentElement).forEach((x) => x.classList.toggle('on', x === el));
+    setTimeout(() => closeSheet().then(() => {
+      const step = $('.step:last-child', bookEl()), val = $(k === 'rel' ? '#fRel' : '#fBank', step), fe = val && val.closest('.field');
+      if (!val) return;
+      val.textContent = v; val.classList.remove('phv'); fe.classList.remove('err'); const er = $('#ferr', step); if (er) er.textContent = '';
+      A(val, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], SOFT);
+      updateCta();
+      const nx = $(k === 'rel' ? '#fDob' : '#fHolder', step); if (nx && !nx.value) nx.focus({ preventScroll: true });
+    }), 160);
+  },
   reinv(el) { S.reinv = !S.reinv; el.classList.toggle('on', S.reinv); },
   edit() {
     const r = (l, v, s) => `<div class="kv"><span>${l}</span><b>${v}<button class="pen press-s press" data-a="editgo" data-s="${s}" aria-label="Edit ${l}">${I.pen}</button></b></div>`;
-    openSheet(`<div class="esheet"><h3>Edit details</h3><div class="box fill">${r('Amount', inr(S.amt), 'amount')}${r('Tenure', titleTen(S.sel.ten), 'select')}${r('Nominee', ['Jojo Maria George', 'Roshni Singh'][S.nom], 'nominee')}</div></div>`);
+    openSheet(`<div class="esheet"><h3>Edit details</h3><div class="box fill">${r('Amount', inr(S.amt), 'amount')}${r('Tenure', titleTen(S.sel.ten), 'select')}${r('Nominee', esc(S.noms[S.nom].n), 'nominee')}</div></div>`);
   },
   editgo(el) { const s = el.dataset.s; closeSheet().then(() => goStep(s, { force: true })); },
   details() {
@@ -1079,6 +1267,18 @@ stage.addEventListener('pointerdown', (e) => {
 })();
 addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (sheet) closeSheet(); else if (top() && top().dataset.book) bookBack(false); else pop(); } });
 addEventListener('message', (e) => { if (e.data && e.data.decade === 'back') { if (sheet) closeSheet(); else if (stack.length > 1) { if (top().dataset.book) bookBack(false); else pop(); } } });
+
+/* focusing a field must never scroll the fixed frame (stage, pages, the booking card) — only real scrollers move */
+document.addEventListener('scroll', (e) => {
+  const t = e.target;
+  if (t === document || !t.classList) { if (scrollY || scrollX) scrollTo(0, 0); return; }
+  if (t === stage || t === pagesEl || t === layer || t.classList.contains('page') || t.classList.contains('bcardx') || t.classList.contains('steps') || t.classList.contains('sheet') || t.classList.contains('rmodal')) { t.scrollTop = 0; t.scrollLeft = 0; }
+}, true);
+// keep a focused field in view inside its own step, smoothly
+stage.addEventListener('focusin', (e) => {
+  const f = e.target.closest && e.target.closest('.field'), st = f && f.closest('.step');
+  if (st) setTimeout(() => { const r = f.offsetTop - 30; if (r < st.scrollTop || r > st.scrollTop + st.clientHeight - 120) st.scrollTo({ top: Math.max(0, r - 40), behavior: 'smooth' }); }, 60);
+});
 
 /* ---------------- start ---------------- */
 ['hero.jpg', 'vkyc.jpg', 'relax.jpg', 'pan.png', 'aadhaar.png', 'hdfc.png', 'suryoday.png', 'jana.png', 'shriram.png', 'shivalik.png', 'unity.png']
