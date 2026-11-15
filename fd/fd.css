@@ -73,10 +73,11 @@ img { display: block; -webkit-user-drag: none; }
 .chev { flex: none; opacity: .35; }
 
 /* FD categories card: 368×228, rows of 76 */
-.cats { margin: 0 11px; overflow: hidden; box-shadow: 0 4px 97px rgba(0,0,0,.07); }
-.cat { display: flex; align-items: center; width: 100%; height: 76px; padding: 0 22px 0 26px; text-align: left; }
-.cat > svg:first-child { flex: none; width: 24px; height: 24px; margin-right: 15px; }
-.cat + .cat { border-top: 1px solid var(--line); }
+.cats { margin: 0 11px; padding: 15px; height: 279px; box-shadow: 0 4px 97px rgba(0,0,0,.07); }
+.cat { display: flex; align-items: center; width: 338px; height: 75px; padding: 0 17px 0 17px; text-align: left; border: 1px solid #dfdcda; border-radius: 21px; background: #fff; }
+.cat > svg:first-child { flex: none; width: 29px; height: 29px; margin-right: 13px; }
+.cat + .cat { margin-top: 11px; }
+.cat:active { border-color: #cfcbc8; background: #fcfcfa; }
 .cat b { display: block; font-weight: 500; font-size: 17px; line-height: 23px; color: var(--ink); }
 .cat small { display: block; font-size: 13px; line-height: 16px; color: var(--mute); margin-top: 3px; }
 .cat span { flex: 1; }
@@ -498,3 +499,24 @@ img { display: block; -webkit-user-drag: none; }
 .dtable u { text-underline-offset: 3px; cursor: pointer; }
 .dtable u.n { letter-spacing: .09em; }
 .toast { position: absolute; left: 50%; bottom: 104px; transform: translateX(-50%); background: rgba(31,21,19,.94); color: #fff; font-size: 14px; line-height: 20px; padding: 10px 16px; border-radius: 20px; white-space: nowrap; z-index: 30; pointer-events: none; }
+
+/* FD details: the band's oval pattern */
+.dband { position: relative; overflow: hidden; }
+.dband > * { position: relative; }
+.dband .ovals { position: absolute; left: -19px; top: 40px; width: 429px; height: 512px; pointer-events: none; }
+
+/* ---------- motion polish ---------- */
+/* pages carry a soft edge shadow while they slide over each other */
+.page:not(:first-child) { box-shadow: none; }
+/* scroll-linked effects run on the browser's scroll timeline (compositor), not in JS */
+@supports (animation-timeline: view()) {
+  .rv { animation: rv linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+  @keyframes rv { from { opacity: 0; translate: 0 26px; scale: .975; } to { opacity: 1; translate: 0 0; scale: 1; } }
+  .bhero .img { animation: heroPar linear both; animation-timeline: scroll(); animation-range: 0 320px; transform-origin: 50% 100%; }
+  @keyframes heroPar { to { scale: 1.12; translate: 0 22px; } }
+  .dband .ovals { animation: ovDrift linear both; animation-timeline: scroll(); animation-range: 0 560px; }
+  @keyframes ovDrift { to { translate: 0 90px; opacity: .35; } }
+  .dband .dslot, .dband .again { animation: bandLift linear both; animation-timeline: scroll(); animation-range: 0 520px; }
+  @keyframes bandLift { to { translate: 0 -40px; scale: .96; opacity: .5; } }
+}
+@media (prefers-reduced-motion: reduce) { .rv, .bhero .img, .dband .ovals, .dband .dslot, .dband .again { animation: none !important; } }

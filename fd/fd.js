@@ -251,7 +251,7 @@ const askbar = () => `<div class="askbar"><label class="f press" style="transiti
 const qcards = (n = 5) => {
   const cs = ['#ffe9ee', '#fff1cc', '#f8f7cc', '#e4e8ee', '#ffe9ee'];
   return `<div class="askh">${I.mark('#6c4126', 22)}Ask Decade</div><div class="qgrid">` +
-    cs.slice(0, n).map((c, i) => `<button class="q press" data-st style="background:${c}" data-a="ask"><small>Mutual fund market ›</small><b>${['How mutual funds performed in the last 6 months?', 'Is it safe to invest in an FD?', 'FD or savings — which is better for me?', 'How is FD interest taxed?', 'What is DICGC insurance?'][i]}</b></button>`).join('') + '</div>';
+    cs.slice(0, n).map((c, i) => `<button class="q press rv" data-st style="background:${c}" data-a="ask"><small>Mutual fund market ›</small><b>${['How mutual funds performed in the last 6 months?', 'Is it safe to invest in an FD?', 'FD or savings — which is better for me?', 'How is FD interest taxed?', 'What is DICGC insurance?'][i]}</b></button>`).join('') + '</div>';
 };
 function bindAsk(root) {
   $$('.askbar', root).forEach((b) => {
@@ -299,7 +299,7 @@ function recCard(i) {
 const REC_TEXT = (bank = 'Suryoday SF Bank') => `Hi Arunima, Decade suggests moving part of your savings to a fixed deposit, and we found a great option at ${bank}.`;
 const askd = () => `<button class="askd press" data-a="askchat">${I.mark('rgba(255,255,255,.85)', 17)}Ask Decade ${I.chevs('rgba(255,255,255,.75)')}</button>`;
 function depCard(d, i) {
-  return `<div class="dep card press ${d.isNew ? 'new' : ''}" data-st data-a="depopen" data-k="${d.key}" data-i="${i}">
+  return `<div class="dep card press rv ${d.isNew ? 'new' : ''}" data-st data-a="depopen" data-k="${d.key}" data-i="${i}">
     <div class="t">${logo('sur', 'sm')}<span>Suryoday SF bank FD</span>${I.chevs('rgba(0,0,0,.6)')}<span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
     <div class="r1"><div><small>Invested amount</small><b>${inr(d.a)}</b></div><div class="rt"><small>Interest rate</small><b class="green">${d.r.toFixed(2)}%</b></div></div>
     <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog"><i style="transform:scaleX(${Math.max(d.p, .03)})"></i></div><div class="row">${d.s === 'matured' ? 'Matured on' : 'Tenure'}<b class="t2">${d.left}</b></div></div>
@@ -330,17 +330,18 @@ function detailsPage(d) {
   const p = mkPage('details', `
     <div class="scroll">
       <div class="dband">
+        <svg class="ovals" viewBox="0 0 429 512" fill="none" stroke="#d2cecc" stroke-width=".45" aria-hidden="true"><ellipse cx="86" cy="128" rx="85.8" ry="127.8"/><ellipse cx="86" cy="256" rx="85.8" ry="127.8"/><ellipse cx="86" cy="384" rx="85.8" ry="127.8"/><ellipse cx="172" cy="128" rx="85.8" ry="127.8"/><ellipse cx="172" cy="256" rx="85.8" ry="127.8"/><ellipse cx="172" cy="384" rx="85.8" ry="127.8"/><ellipse cx="258" cy="128" rx="85.8" ry="127.8"/><ellipse cx="258" cy="256" rx="85.8" ry="127.8"/><ellipse cx="258" cy="384" rx="85.8" ry="127.8"/><ellipse cx="343" cy="128" rx="85.8" ry="127.8"/><ellipse cx="343" cy="256" rx="85.8" ry="127.8"/><ellipse cx="343" cy="384" rx="85.8" ry="127.8"/></svg>
         <div class="dslot">${depCard(d, 0).replace('data-a="depopen"', '')}</div>
         <button class="again press" data-a="again">Invest again${I.chevs('#fff')}</button>
       </div>
-      <div class="dtable" data-st>
+      <div class="dtable rv" data-st>
         ${row('Investment date', date, '', 'n')}${row('Investment amount', inr(d.a), '', 'n')}${row('Tenure', isNew ? titleTen(S.sel.ten) : '4Y 5M 14D', '', 'n')}
         ${row('Maturity instruction', `<span id="mi">${S.reinv ? 'Reinvest' : 'Reinvest'}</span>`, chip(I.pen, 'mi'))}
         ${row('Transaction ID', '23456781098354721083')}${row('Payment method', 'UPI')}${row('Nominee', esc(nom.n))}${row('Nominee relation', esc(nom.r))}
         ${row('Receipt', '<u data-a="dl">Download</u>', chip(dl, 'dl'))}${row('Form 121', '<u data-a="f121">Apply</u>', chip(cr, 'f121'))}
       </div>
       <h2 class="h2" style="margin:35px 31px 21px">Withdrawal details</h2>
-      <div class="dtable" data-st style="height:130px;margin-top:0">
+      <div class="dtable rv" data-st style="height:130px;margin-top:0">
         ${row('Account', `<u class="n">xxxx${acc.n}</u>`, chip(cr, 'noop'))}${row('Bank', acc.s === 'HDFC' ? 'HDFC Bank' : esc(acc.s + ' Bank'))}
       </div>
       <div style="height:187px"></div>
@@ -358,8 +359,8 @@ function toast(text) {
 }
 
 function homePage() {
-  const cats = Object.entries(CATS).map(([k, [t, s]]) => `<button class="cat press" data-a="cat" data-c="${k}">${I.cat[k]}<span><b data-lbl>${t}</b><small>${s}</small></span>${I.chev('#b5b5b5')}</button>`).join('');
-  const banks = ['shiv', 'shri', 'sur', 'shiv'].map((k) => `<button class="bcard card press" data-st data-a="bank" data-b="${k}">
+  const cats = Object.entries(CATS).map(([k, [t, s]]) => `<button class="cat press" data-a="cat" data-c="${k}">${I.cat[k]}<span><b data-lbl>${t}</b><small>${s}</small></span>${I.chev('#8a8a8a')}</button>`).join('');
+  const banks = ['shiv', 'shri', 'sur', 'shiv'].map((k) => `<button class="bcard card press rv" data-st data-a="bank" data-b="${k}">
       <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>${I.chev('#b5b5b5')}</div>
       <div class="d"><b>RBI Licensed Small finance bank</b><small>AAA means the highest degree of safety for timely repayment of interest and principal.</small></div></button>`).join('');
   const tiles = [['#ffd77c', 'Withdraw<br>anytime'], ['#dcf3a5', 'Insured by<br>DICGC'], ['#f0d2f7', 'RBI regulated<br>banks'], ['#d9dee6', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background:${c}">${t}</div>`).join('');
@@ -377,8 +378,8 @@ function homePage() {
     ${banks}
     <button class="obtn press" data-a="allbanks" style="margin-top:2px">View all banks ${I.chevd}</button>
     <h2 class="h2" style="margin-bottom:21px">Fixed deposit protection</h2>
-    <div class="tiles card" data-st>${tiles}</div>
-    <div class="calcband"><div class="calc card" data-st>
+    <div class="tiles card rv" data-st>${tiles}</div>
+    <div class="calcband"><div class="calc card rv" data-st>
       <h3>Calculate Fixed Deposit<br>Returns</h3>
       <div class="in"><div class="amtbox"><div class="a"><span id="calcAmt">${inr(S.calcAmt)}</span><input type="tel" inputmode="numeric" aria-label="Investment amount" data-calcin></div><div class="l">Investment amount</div></div>
         <div class="chips" id="chips"><i class="pill"></i>${chips}</div>
@@ -594,14 +595,14 @@ function listHdr(badgeCalc) {
     <button class="cbtn r press press-s" data-a="filter" aria-label="Filter">${I.filter}</button></div>`;
 }
 function listPage(title) {
-  const rows = LIST.map((k, i) => `<button class="lrow card press" data-st data-a="plan" data-b="${k}" data-t="${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}" data-y="${i % 3 === 1 ? 5 : 4.53}">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>
+  const rows = LIST.map((k, i) => `<button class="lrow card press rv" data-st data-a="plan" data-b="${k}" data-t="${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}" data-y="${i % 3 === 1 ? 5 : 4.53}">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>
       <div class="r"><b>8.5%</b><small>${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}</small></div></button>`).join('');
   const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle">${title}</h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
 }
 function amtListPage() {
   const t = CALC_T[S.calcT] || CALC_T[0];
-  const rows = ['shiv', 'shri', 'jana', 'sur'].map((k, i) => `<button class="arow card press" data-st data-a="plan" data-b="${k}" data-amt="1">
+  const rows = ['shiv', 'shri', 'jana', 'sur'].map((k, i) => `<button class="arow card press rv" data-st data-a="plan" data-b="${k}" data-amt="1">
       <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span><div class="r"><b>8.5%</b><small>${t[2]}</small></div></div>
       <div class="m"><div><b>${inr(S.calcAmt)}</b><small>Investing amount</small></div><div><b class="green">${inr(mat(S.calcAmt, 8.5, t[1]) + i * 37)}</b><small>At maturity</small></div></div></button>`).join('');
   const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle" data-a="calcsheet">Invest ${inr(S.calcAmt)} for ${t[2]}</h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(true)}${askbar()}`);
@@ -727,7 +728,7 @@ function bankPage(k) {
       <div class="bhero" data-st><div class="img"></div><div class="in"><h1>${b.l}</h1>${logo(k, 'w')}<p>${b.since}</p>
         <div class="feats"><div>${I.bolt}Instant withdrawal available</div><div>${I.sun}No penalty for 1Y withdrawal</div><div>${I.shield()}DICGC insures up to ₹5 lakh</div></div></div></div>
       <h2 class="h2">About the bank</h2>
-      <div class="tiles card" data-st>${tiles}</div>
+      <div class="tiles card rv" data-st>${tiles}</div>
       <h2 class="h2">Deposit plans</h2>
       <div class="card dcards">${plans}</div>
       <button class="obtn press" data-a="viewplans2" style="margin-top:17px">View all plans ${I.chevs()}</button>
