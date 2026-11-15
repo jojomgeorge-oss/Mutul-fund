@@ -520,3 +520,5 @@ img { display: block; -webkit-user-drag: none; }
   @keyframes bandLift { to { translate: 0 -40px; scale: .96; opacity: .5; } }
 }
 @media (prefers-reduced-motion: reduce) { .rv, .bhero .img, .dband .ovals, .dband .dslot, .dband .again { animation: none !important; } }
+
+.tile { background-color: #eee; background-size: cover; background-position: center; }

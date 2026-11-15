@@ -363,7 +363,7 @@ function homePage() {
   const banks = ['shiv', 'shri', 'sur', 'shiv'].map((k) => `<button class="bcard card press rv" data-st data-a="bank" data-b="${k}">
       <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>${I.chev('#b5b5b5')}</div>
       <div class="d"><b>RBI Licensed Small finance bank</b><small>AAA means the highest degree of safety for timely repayment of interest and principal.</small></div></button>`).join('');
-  const tiles = [['#ffd77c', 'Withdraw<br>anytime'], ['#dcf3a5', 'Insured by<br>DICGC'], ['#f0d2f7', 'RBI regulated<br>banks'], ['#d9dee6', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background:${c}">${t}</div>`).join('');
+  const tiles = [['tile1', 'Withdraw<br>anytime'], ['tile2', 'Insured by<br>DICGC'], ['tile3', 'RBI regulated<br>banks'], ['tile4', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
   const chips = CALC_T.map(([l], i) => `<button data-a="chip" data-i="${i}">${l}</button>`).join('') + '<button data-a="chip" data-i="5">+</button>';
   const all = `
     <h2 class="h2">FD Categories</h2>
@@ -721,7 +721,7 @@ function bankPage(k) {
   const b = B[k];
   const plans = [['5 years', 5, 8.25], ['4y 6m 11d', 4.53, 8.25], ['3y 4m', 3.33, 8.25], ['1 years', 1, 8.25]].map(([t, y, r]) => `<button class="dplan press" data-a="dplan" data-t="${t}" data-y="${y}" data-r="${r}">${I.bars('#c43960', 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#9a9a9a')}</button>`).join('');
   const bars = [['6.30%', 78, '#d9dee6', 60], ['7.56%', 121, '#d9dee6', 160], ['8.32%', 176, '#7ce469', 265]].map(([v, h, c, x]) => `<div class="bar" style="left:${x}px"><span>${v}</span><i style="height:${h}px;background:${c}"></i></div>`).join('');
-  const tiles = [['#ffd77c', 'Withdraw<br>anytime'], ['#dcf3a5', 'Insured by<br>DICGC'], ['#f0d2f7', 'RBI regulated<br>banks'], ['#d9dee6', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background:${c}">${t}</div>`).join('');
+  const tiles = [['tile1', 'Withdraw<br>anytime'], ['tile2', 'Insured by<br>DICGC'], ['tile3', 'RBI regulated<br>banks'], ['tile4', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
   const p = mkPage('bank', `
     <div class="scroll">
       <div style="height:137px"></div>
@@ -1346,7 +1346,7 @@ stage.addEventListener('focusin', (e) => {
 });
 
 /* ---------------- start ---------------- */
-['hero.jpg', 'vkyc.jpg', 'relax.jpg', 'pan.png', 'aadhaar.png', 'hdfc.png', 'suryoday.png', 'jana.png', 'shriram.png', 'shivalik.png', 'unity.png']
+['hero.jpg', 'vkyc.jpg', 'relax.jpg', 'tile1.jpg', 'tile2.jpg', 'tile3.jpg', 'tile4.jpg', 'pan.png', 'aadhaar.png', 'hdfc.png', 'suryoday.png', 'jana.png', 'shriram.png', 'shivalik.png', 'unity.png']
   .forEach((n) => { const im = new Image(); im.src = 'img/' + n; if (im.decode) im.decode().catch(() => {}); });
 const home = homePage();
 pagesEl.appendChild(home); stack.push(home); home._init();
