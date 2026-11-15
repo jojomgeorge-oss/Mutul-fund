@@ -67,8 +67,8 @@ const CATS = {
   instant: ['Instant withdrawals', 'Break it anytime', '#9a55b5'],
 };
 const PLANS = {
-  fd: [['More than 1 year', '#c43960', [['5 years', 5, 8.25], ['3 years', 3, 7.6], ['1 year', 1, 7.1]]],
-    ['Up to 1 year', '#8f5aa0', [['6 months', .5, 6.5], ['9 months', .75, 6.75], ['1 year', 1, 7.1]]],
+  fd: [['More than 1 year', '#c43960', [['5 years', 5, 8.25], ['3 years', 3, 4], ['1 year', 1, 4]]],
+    ['Up to 1 year', '#8f5aa0', [['6 months', .5, 4], ['9 months', .75, 4], ['1 year', 1, 4]]],
     ['Up to 3 months', '#cf8a2e', [['14 days', .04, 4], ['45 days', .12, 4.25], ['90 days', .25, 4.5]]]],
   rd: [['More than 1 year', '#2f7d9a', [['5 years', 5, 7.75], ['3 years', 3, 7.4], ['2 years', 2, 7.2]]],
     ['Up to 1 year', '#5b6fb5', [['12 months', 1, 6.9], ['9 months', .75, 6.6], ['6 months', .5, 6.2]]]],
@@ -76,7 +76,7 @@ const PLANS = {
 const S = {
   tab: 0, dtab: 1, calcT: 3, calcAmt: 1292, recI: 0, ptab: 0,
   sel: { bank: 'sur', ten: '5 Years', yrs: 5, rate: 8.25 }, amt: 50000, fresh: true,
-  steps: [], pan: [1, 0, 0], nom: 1, acc: 0, reinv: false, newDep: null, form: {},
+  steps: [], pan: [1, 0, 0], nom: 0, acc: 0, reinv: false, newDep: null, form: {},
   noms: [{ n: 'Jojo Maria George', r: 'Husband', d: '14/10/1991' }, { n: 'Roshni Singh', r: 'Sister', d: '22/06/1995' }],
   accts: [{ b: 'HDFC bank savings', s: 'HDFC', n: '3456', lg: 'hdfc' }, { b: 'HDFC bank savings', s: 'HDFC', n: '8821', lg: 'hdfc' }, { b: 'HDFC bank savings', s: 'HDFC', n: '1047', lg: 'hdfc' }],
 };
@@ -113,12 +113,12 @@ const I = {
   lock: '<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="1" y="6" width="10" height="7" rx="2" fill="#1a8d1a"/><path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1a8d1a" stroke-width="1.6"/></svg>',
   bars: (c, s = 39, r = 12) => `<svg width="${s}" height="${s}" viewBox="0 0 39 39" style="flex:none"><rect width="39" height="39" rx="${r * 39 / s}" fill="${c}"/><rect x="10.5" y="21.5" width="3" height="4" rx="1.5" fill="#fff" opacity=".75"/><rect x="15.5" y="19.5" width="3" height="6" rx="1.5" fill="#fff" opacity=".85"/><rect x="20.5" y="16.5" width="3" height="9" rx="1.5" fill="#fff"/><rect x="25.5" y="13.5" width="3" height="12" rx="1.5" fill="#fff"/></svg>`,
   cat: {
-    high: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M3 19l6.5-6.5 4 4L22 8M16.5 8H22v5.5" stroke="#21a32a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 23h2M9 23h2M14 23h2M19 23h2" stroke="#21a32a" stroke-width="2" stroke-linecap="round"/></svg>',
+    high: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 23v-4M9.5 23v-7M15 23v-5M20.5 23v-9" stroke="#21a32a" stroke-width="2" stroke-linecap="round"/><path d="M3.5 13.5l6-6 4.5 3.5 7.5-7.5M16.5 3.5h5v5" stroke="#21a32a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     monthly: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="3.5" y="5" width="19" height="17" rx="4" stroke="#e8517a" stroke-width="1.9"/><path d="M3.5 10.5h19M8.5 3v4M17.5 3v4" stroke="#e8517a" stroke-width="1.9" stroke-linecap="round"/><circle cx="13" cy="16" r="2.4" stroke="#e8517a" stroke-width="1.7"/></svg>',
     instant: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="3.5" y="6" width="19" height="16" rx="4" stroke="#9a55b5" stroke-width="1.9"/><path d="M6 6l9-2.5a2 2 0 0 1 2.5 1.5L18 6" stroke="#9a55b5" stroke-width="1.9" stroke-linejoin="round"/><path d="M14 10l-3 4.5h4L12 19" stroke="#9a55b5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   },
 };
-const logo = (k, cls = '') => `<div class="logo ${B[k].full ? 'full' : ''} ${cls}" data-logo><img src="img/${B[k].img}.png" alt=""></div>`;
+const logo = (k, cls = '') => `<div class="logo ${B[k].full ? 'full' : ''} ${cls}" data-logo><i><img src="img/${B[k].img}.png" alt=""></i></div>`;
 
 /* ---------------- pages & navigation ---------------- */
 const stack = [];
@@ -247,10 +247,10 @@ function morphEl(el, from, to, sp = SOFT, extra = {}) { // flies a copy of el fr
 }
 
 /* ---------------- shared bits ---------------- */
-const askbar = () => `<div class="askbar"><label class="f press" style="transition:none">${I.mark('#9a9a9a', 19)}<i class="caret" style="position:absolute;left:142px"></i><input type="text" placeholder="Ask Decade" enterkeyhint="send" aria-label="Ask Decade"><button type="button" class="send press-s press" data-a="send" aria-label="Send">${I.send}</button></label></div>`;
+const askbar = () => `<div class="askbar"><label class="f press" style="transition:none">${I.mark('#9a9a9a', 19)}<i class="caret"></i><input type="text" placeholder="Ask Decade" enterkeyhint="send" aria-label="Ask Decade"><button type="button" class="send press-s press" data-a="send" aria-label="Send">${I.send}</button></label></div>`;
 const qcards = (n = 5) => {
-  const cs = ['#ffe3ea', '#fff0c9', '#f6f6c9', '#e3e6ee', '#ffe3ea'];
-  return `<div class="askh">${I.mark('#6c4126', 21)}Ask Decade</div><div class="qgrid">` +
+  const cs = ['#ffe9ee', '#fff1cc', '#f8f7cc', '#e4e8ee', '#ffe9ee'];
+  return `<div class="askh">${I.mark('#6c4126', 22)}Ask Decade</div><div class="qgrid">` +
     cs.slice(0, n).map((c, i) => `<button class="q press" data-st style="background:${c}" data-a="ask"><small>Mutual fund market ›</small><b>${['How mutual funds performed in the last 6 months?', 'Is it safe to invest in an FD?', 'FD or savings — which is better for me?', 'How is FD interest taxed?', 'What is DICGC insurance?'][i]}</b></button>`).join('') + '</div>';
 };
 function bindAsk(root) {
@@ -288,7 +288,7 @@ function segPill(seg, i, anim = true) {
 function recCard(i) {
   const r = REC[i], b = B[r.bank];
   return `<div class="dcard" data-i="${i}" data-a="recplan">
-    <div class="top"><span class="rlogo"><img src="img/${b.img}.png" alt=""></span>${bankName(r.bank)}</div>
+    <div class="top"><span class="rlogo"><img src="img/${b.img}.png" alt=""></span><span>${bankName(r.bank)}</span></div>
     <div class="grid"><div><label>Invest</label><div class="v">${inr(r.amt)}</div></div><div><label>Interest rate</label><div class="v green">${r.rate.toFixed(2)}%</div></div>
       <div><label>Tenure</label><div class="v">${r.ten}</div></div></div>
     <button class="go press" data-a="recstart" data-i="${i}">Start FD</button></div>`;
@@ -297,9 +297,9 @@ const REC_TEXT = (bank = 'Suryoday SF Bank') => `Hi Arunima, Decade suggests mov
 const askd = () => `<button class="askd press" data-a="askchat">${I.mark('rgba(255,255,255,.85)', 17)}Ask Decade ${I.chevs('rgba(255,255,255,.75)')}</button>`;
 function depCard(d, i) {
   return `<div class="dep card ${d.isNew ? 'new' : ''}" data-st>
-    <div class="t">${logo('sur', 'round').replace('class="logo', 'style="width:26px;height:26px" class="logo')}<span>Suryoday SF bank FD ›</span><span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
+    <div class="t">${logo('sur', 'sm')}<span>Suryoday SF bank FD</span>${I.chevs('rgba(0,0,0,.6)')}<span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
     <div class="r1"><div><small>Invested amount</small><b>${inr(d.a)}</b></div><div class="rt"><small>Interest rate</small><b class="green">${d.r.toFixed(2)}%</b></div></div>
-    <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog"><i style="transform:scaleX(${d.p})"></i></div><div class="row">${d.s === 'matured' ? 'Matured on' : 'Tenure'}<b style="font-size:14px">${d.left}</b></div></div>
+    <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog"><i style="transform:scaleX(${Math.max(d.p, .03)})"></i></div><div class="row">${d.s === 'matured' ? 'Matured on' : 'Tenure'}<b class="t2">${d.left}</b></div></div>
   </div>`;
 }
 function deposits() {
@@ -320,18 +320,18 @@ function homePage() {
   const tiles = [['#ffd77c', 'Withdraw<br>anytime'], ['#dcf3a5', 'Insured by<br>DICGC'], ['#f0d2f7', 'RBI regulated<br>banks'], ['#d9dee6', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background:${c}">${t}</div>`).join('');
   const chips = CALC_T.map(([l], i) => `<button data-a="chip" data-i="${i}">${l}</button>`).join('') + '<button data-a="chip" data-i="5">+</button>';
   const all = `
-    <h2 class="h2" style="margin:48px 26px 20px">FD Categories</h2>
+    <h2 class="h2">FD Categories</h2>
     <div class="cats card" data-st>${cats}</div>
-    <h2 class="h2" style="margin:48px 26px 20px">Recommendation</h2>
+    <h2 class="h2">Recommendation</h2>
     <div class="rec" data-st data-a="recopen">
       <div class="deck">${REC.map((_, i) => recCard(i)).join('')}</div>
       <p>${REC_TEXT()}</p>
       ${askd()}
     </div>
-    <h2 class="h2" style="margin:46px 26px 20px">Browse all banks</h2>
+    <h2 class="h2" style="margin-bottom:17px">Browse all banks</h2>
     ${banks}
-    <button class="obtn press" data-a="allbanks">View all banks ${I.chevd}</button>
-    <h2 class="h2" style="margin:48px 26px 20px">Fixed deposit protection</h2>
+    <button class="obtn press" data-a="allbanks" style="margin-top:2px">View all banks ${I.chevd}</button>
+    <h2 class="h2" style="margin-bottom:21px">Fixed deposit protection</h2>
     <div class="tiles card" data-st>${tiles}</div>
     <div class="calcband"><div class="calc card" data-st>
       <h3>Calculate Fixed Deposit<br>Returns</h3>
@@ -340,11 +340,10 @@ function homePage() {
         <button class="dbtn press" data-a="calc">Calculate</button></div>
     </div></div>
     ${qcards()}
-    <div style="height:130px"></div>`;
+    <div style="height:139px"></div>`;
   const dep = `
-    <div style="height:34px"></div>
-    <div class="sum card" data-st><small>Total investment</small><div class="big num" id="sumv">₹5,00,000</div><div class="g">Interest gain <b>+₹3,265</b></div>
-      <button class="obtn press" data-a="noop"><span>View transactions</span>${I.chevs()}</button></div>
+    <div class="sum card" data-st><small>Total investment</small><div class="big" id="sumv">₹5,00,000</div><div class="g">Interest gain <b>+₹3,265</b></div>
+      <button class="obtn press" data-a="noop">View transactions${I.chevs()}</button></div>
     <div class="seg dtabs" id="dseg"><i class="pill"></i><button data-a="dtab" data-i="0">Pending</button><button data-a="dtab" data-i="1">Ongoing</button><button data-a="dtab" data-i="2">Matured</button></div>
     <div id="deplist"></div>
     <div style="height:130px"></div>`;
@@ -416,7 +415,7 @@ function renderDeps(p, anim = true, dir = 1) {
 
 /* recommendation deck: front card lifts up, tucks behind; the next one slides forward */
 // front card, and the one behind it peeking out narrower and translucent (as in the design)
-const POS = ['translateY(0) scale(1)', 'translateY(43px) scale(.893)'], OP = [1, .32];
+const POS = ['translateY(0) scale(1)', 'translateY(23px) scale(.8944, .9905)'], OP = [1, .3]; // back sheet: 288×208 at (+17,+23), white/.30
 function deckLayout(p) {
   $$('.deck', p).forEach((dk) => $$('.dcard', dk).forEach((c, i) => {
     const pos = (i - S.recI + 2) % 2;
@@ -472,7 +471,7 @@ function openRecModal(banner) {
     el.style.transformOrigin = '0 0';
     A(el, [{ transform: t0, opacity: o0 }, { transform: 'none', opacity: 1 }], SOFT, { delay: k === 1 ? 30 : 0 });
   });
-  A(bd, [{ opacity: 0 }, { opacity: .45 }], EASE);
+  A(bd, [{ opacity: 0 }, { opacity: .6 }], EASE);
   A(x, [{ transform: 'translateY(16px) scale(.6)', opacity: 0 }, { transform: 'none', opacity: 1 }], BOUNCE, { delay: 140 });
 }
 function closeRecModal(fast) {
@@ -494,7 +493,7 @@ function closeRecModal(fast) {
     el.style.transformOrigin = '0 0';
     A(el, [{ transform: 'none', opacity: 1 }, { transform: `translate(${t.x - l.x}px, ${t.y - l.y}px) scale(${t.w / l.w})`, opacity: targets[k][1] }], SNAP);
   });
-  A($('.backdrop', wrap), [{ opacity: .45 }, { opacity: 0 }], EASE);
+  A($('.backdrop', wrap), [{ opacity: .6 }, { opacity: 0 }], EASE);
   A($('.rmx', wrap), [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.6)' }], QUICK);
   return wait(SNAP.d).then(() => { banner.style.visibility = ''; wrap.remove(); deckTimer.hold = false; });
 }
@@ -515,7 +514,7 @@ function chatSheet(q) {
   if (sheet) return;
   const s = openSheet(`<div class="chat">
       <div class="chd"><span class="serif">${I.mark('#6c4126', 20)}Ask Decade</span><button class="chx press press-s" data-a="closesheet" aria-label="Close">${I.x}</button></div>
-      <div class="msgs"><div class="m d">Hi Arunima, ask me anything about this fixed deposit at Suryoday SF Bank.</div></div>
+      <div class="msgs"><div class="msg d">Hi Arunima, ask me anything about this fixed deposit at Suryoday SF Bank.</div></div>
       <div class="qchips">${CHIPS.map((c) => `<button class="press" data-a="chatq">${c}</button>`).join('')}</div>
       <div class="askbar inl"><label class="f">${I.mark('#9a9a9a', 19)}<input type="text" placeholder="Ask Decade" enterkeyhint="send" aria-label="Message Decade"><button type="button" class="send press press-s" data-a="send" aria-label="Send">${I.send}</button></label></div>
     </div>`, { noScale: true });
@@ -528,7 +527,7 @@ function chatSend(q) {
   if (!sheet) return;
   const el = sheet.el, box = $('.msgs', el), chips = $('.qchips', el);
   if (chips && chips.offsetHeight) { A(chips, [{ opacity: 1 }, { opacity: 0, transform: 'translateY(8px)' }], QUICK).then(() => { chips.style.display = 'none'; }); }
-  const add = (cls, html) => { const m = document.createElement('div'); m.className = 'm ' + cls; m.innerHTML = html; box.appendChild(m); box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' }); return m; };
+  const add = (cls, html) => { const m = document.createElement('div'); m.className = 'msg ' + cls; m.innerHTML = html; box.appendChild(m); box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' }); return m; };
   const u = add('u', esc(q));
   A(u, [{ opacity: 0, transform: 'translateY(14px) scale(.96)' }, { opacity: 1, transform: 'none' }], SOFT);
   const ty = add('d typing', '<i></i><i></i><i></i>');
@@ -546,21 +545,21 @@ function chatSend(q) {
 const LIST = ['shiv', 'shri', 'sur', 'jana', 'shiv', 'shri', 'sur', 'jana'];
 function listHdr(badgeCalc) {
   return `<div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle left">Fixed deposits</div>
-    <button class="cbtn r2 press press-s" data-a="calcsheet" aria-label="Calculator">${I.calc}${badgeCalc ? '<span class="badge">1</span>' : ''}</button>
-    <button class="cbtn r press press-s" data-a="filter" aria-label="Filter">${I.filter}<span class="badge">1</span></button></div>`;
+    <button class="cbtn r2 press press-s" data-a="calcsheet" aria-label="Calculator">${I.calc}</button>
+    <button class="cbtn r press press-s" data-a="filter" aria-label="Filter">${I.filter}</button></div>`;
 }
 function listPage(title) {
   const rows = LIST.map((k, i) => `<button class="lrow card press" data-st data-a="plan" data-b="${k}" data-t="${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}" data-y="${i % 3 === 1 ? 5 : 4.53}">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>
-      <div class="r"><b>8.5%</b><small style="display:block;margin-top:4px">${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}</small></div></button>`).join('');
-  const p = mkPage('list', `<div class="scroll"><div style="height:142px"></div><h1 class="ltitle">${title}</h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
+      <div class="r"><b>8.5%</b><small>${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}</small></div></button>`).join('');
+  const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle">${title}</h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
 }
 function amtListPage() {
   const t = CALC_T[S.calcT] || CALC_T[0];
   const rows = ['shiv', 'shri', 'jana', 'sur'].map((k, i) => `<button class="arow card press" data-st data-a="plan" data-b="${k}" data-amt="1">
-      <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span><div style="text-align:right"><b style="color:var(--green);font-size:17px">8.5%</b><small style="display:block;margin-top:4px;font-size:15px;font-weight:500;letter-spacing:.06em">${t[2]}</small></div></div>
-      <div class="m"><div><b>${inr(S.calcAmt)}</b><small>Investing amount</small></div><div style="text-align:right"><b class="green">${inr(mat(S.calcAmt, 8.5, t[1]) + i * 37)}</b><small>At maturity</small></div></div></button>`).join('');
-  const p = mkPage('list', `<div class="scroll"><div style="height:142px"></div><h1 class="ltitle" style="display:flex;align-items:center;gap:10px">Invest ${inr(S.calcAmt)} for ${t[2]}<button class="pen press-s press" data-a="calcsheet" aria-label="Edit">${I.pen}</button></h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(true)}${askbar()}`);
+      <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span><div class="r"><b>8.5%</b><small>${t[2]}</small></div></div>
+      <div class="m"><div><b>${inr(S.calcAmt)}</b><small>Investing amount</small></div><div><b class="green">${inr(mat(S.calcAmt, 8.5, t[1]) + i * 37)}</b><small>At maturity</small></div></div></button>`).join('');
+  const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle" data-a="calcsheet">Invest ${inr(S.calcAmt)} for ${t[2]}</h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(true)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
 }
 
@@ -571,8 +570,7 @@ let sheet = null; // { wrap, el, close }
 function scaleBehind(on) {
   const p = top(); if (!p) return;
   stack.forEach((x) => { if (x !== p) x.style.visibility = on ? 'hidden' : ''; });
-  if (on) { p.style.borderRadius = '26px'; A(p, [{ transform: 'none' }, { transform: 'scale(.935) translateY(6px)' }], SOFT); }
-  else A(p, [{ transform: p.style.transform || 'scale(.935) translateY(6px)' }, { transform: 'none' }], SOFT).then(() => { if (!sheet) p.style.borderRadius = ''; });
+  // Figma dims the screen behind a sheet (black/.6) without shrinking it
 }
 function openSheet(html, o = {}) {
   if (sheet) return null;
@@ -584,7 +582,7 @@ function openSheet(html, o = {}) {
   sheet = { wrap, el, src: o.src, onClose: o.onClose };
   bindAsk(wrap);
   if (!o.custom) {
-    A(bd, [{ opacity: 0 }, { opacity: .42 }], EASE);
+    A(bd, [{ opacity: 0 }, { opacity: .6 }], EASE);
     A(el, [{ transform: 'translateY(105%)' }, { transform: 'none' }], SOFT);
   }
   if (!o.noScale) scaleBehind(true);
@@ -613,7 +611,7 @@ function dragSheet(el) {
     const raw = (e.clientY - d.y0) / K; d.dy = raw > 0 ? raw : -Math.sqrt(-raw) * 3;
     if (Math.abs(raw) > 6) { try { el.setPointerCapture(e.pointerId); } catch (_) {} d.moved = true; }
     el.style.transform = `translateY(${d.dy}px)`;
-    const bd = el.previousElementSibling; if (bd) bd.style.opacity = .42 * Math.max(0, 1 - d.dy / 500);
+    const bd = el.previousElementSibling; if (bd) bd.style.opacity = .6 * Math.max(0, 1 - d.dy / 500);
   });
   const up = (e) => {
     if (!d || e.pointerId !== d.id) return;
@@ -621,7 +619,7 @@ function dragSheet(el) {
     if (!moved) return;
     blockClick();
     if (dy > 130 || v > .6) closeSheet();
-    else { A(el, [{ transform: `translateY(${dy}px)` }, { transform: 'none' }], BOUNCE); const bd = el.previousElementSibling; if (bd) A(bd, [{ opacity: bd.style.opacity }, { opacity: .42 }], EASE); }
+    else { A(el, [{ transform: `translateY(${dy}px)` }, { transform: 'none' }], BOUNCE); const bd = el.previousElementSibling; if (bd) A(bd, [{ opacity: bd.style.opacity }, { opacity: .6 }], EASE); }
   };
   el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
 }
@@ -631,7 +629,7 @@ function planSheet(src, plan) {
   const k = plan.bank, b = B[k];
   const amtRow = plan.amt ? `<div class="pkv"><div><b>${inr(plan.amt)}</b><small>Investing amount</small></div><div class="rt"><b class="green">${inr(mat(plan.amt, plan.rate, plan.yrs))}</b><small>At maturity</small></div></div>` : '';
   const html = `<div class="psheet">
-    <div class="ptop" data-a="sheetbank"><h3>${b.l} ${I.chevs('#292929')}</h3><p>${b.since}</p>${logo(k)}</div>
+    <div class="ptop" data-a="sheetbank"><h3>${b.l}${I.chevs('#282424')}</h3><p>${b.since}</p>${logo(k, 'w')}</div>
     <div class="pmain"><div class="pkv"><div><b>${plan.ten}</b><small>Tenure</small></div><div class="rt"><b class="green">${plan.rate.toFixed(2)}%</b><small>Interest rate</small></div></div>${amtRow}
       <div class="feats"><div>${I.bolt}Instant withdrawal available</div><div>${I.sun}No penalty for 1Y withdrawal</div><div>${I.shield()}DICGC insures up to ₹5 lakh</div></div>
       <button class="bigbtn press" data-a="startfd" style="margin-top:22px">Start FD</button></div>
@@ -642,7 +640,7 @@ function planSheet(src, plan) {
   if (!s) return;
   const el = s.el, ptop = $('.ptop', el), pmain = $('.pmain', el), ap = $('.allplans', el), lg = $('.logo', ptop), hd = $('.handle', el);
   const from = R(src), to = R(ptop), lf = src.querySelector('[data-logo]');
-  A($('.backdrop', s.wrap), [{ opacity: 0 }, { opacity: .42 }], EASE);
+  A($('.backdrop', s.wrap), [{ opacity: 0 }, { opacity: .6 }], EASE);
   // the card itself
   ptop.style.opacity = 0; src.style.visibility = 'hidden';
   morphBox(from, to, { r0: 22, r1: 26, sp: SOFT }).then((g) => { ptop.style.opacity = ''; g.remove(); });
@@ -658,11 +656,11 @@ function planSheet(src, plan) {
 
 function calcSheet() {
   const chips = CALC_T.map(([l], i) => `<button data-a="chip" data-i="${i}">${l}</button>`).join('') + '<button data-a="chip" data-i="5">+</button>';
-  const s = openSheet(`<div class="calc" style="margin:0 27px 26px;background:#fff;border-radius:30px;padding:30px 30px 18px">
+  const s = openSheet(`<div class="calc card" style="margin:0 0 11px 26px">
     <h3>Calculate Fixed Deposit<br>Returns</h3>
-    <div class="amtbox" style="margin:0 15px"><div class="a"><span id="calcAmt2">${inr(S.calcAmt)}</span><input type="tel" inputmode="numeric" data-calcin2 aria-label="Investment amount"></div><div class="l">Investment amount</div></div>
-    <div class="in" style="margin-top:34px;background:#fff"><div class="chips" id="chips2" style="margin:8px 0 24px"><i class="pill"></i>${chips}</div>
-    <button class="obtn press" data-a="calc" style="width:158px;margin:0 auto">Calculate</button></div></div>`);
+    <div class="in"><div class="amtbox"><div class="a"><span id="calcAmt2">${inr(S.calcAmt)}</span><input type="tel" inputmode="numeric" data-calcin2 aria-label="Investment amount"></div><div class="l">Investment amount</div></div>
+      <div class="chips" id="chips2"><i class="pill"></i>${chips}</div>
+      <button class="dbtn press" data-a="calc">Calculate</button></div></div>`);
   if (!s) return;
   segPill($('#chips2', s.el), S.calcT, false);
   const ci = $('[data-calcin2]', s.el);
@@ -675,41 +673,41 @@ function calcSheet() {
    ===================================================================== */
 function bankPage(k) {
   const b = B[k];
-  const hero = k === 'sur' ? '<div class="img"></div>' : `<div class="img" style="background:linear-gradient(160deg,#efe7dd,#d9cfc3);display:grid;place-items:center">${logo(k).replace('class="logo', 'style="width:96px;height:96px;border-radius:26px" class="logo')}</div>`;
-  const plans = [['5 years', 5, 8.25], ['4y 6m 11d', 4.53, 8.25], ['3y 4m', 3.33, 8.25], ['1 years', 1, 8.25]].map(([t, y, r]) => `<button class="dplan press" data-a="dplan" data-t="${t}" data-y="${y}" data-r="${r}">${I.bars('#c43960', 39)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#c8c8c8')}</button>`).join('');
-  const bars = [['6.30%', 78, '#d9dee6'], ['7.56%', 121, '#d9dee6'], ['8.32%', 176, '#7ce469']].map(([v, h, c]) => `<div>${v}<i style="height:${h}px;background:${c}"></i></div>`).join('');
+  const plans = [['5 years', 5, 8.25], ['4y 6m 11d', 4.53, 8.25], ['3y 4m', 3.33, 8.25], ['1 years', 1, 8.25]].map(([t, y, r]) => `<button class="dplan press" data-a="dplan" data-t="${t}" data-y="${y}" data-r="${r}">${I.bars('#c43960', 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#9a9a9a')}</button>`).join('');
+  const bars = [['6.30%', 78, '#d9dee6', 60], ['7.56%', 121, '#d9dee6', 160], ['8.32%', 176, '#7ce469', 265]].map(([v, h, c, x]) => `<div class="bar" style="left:${x}px"><span>${v}</span><i style="height:${h}px;background:${c}"></i></div>`).join('');
   const tiles = [['#ffd77c', 'Withdraw<br>anytime'], ['#dcf3a5', 'Insured by<br>DICGC'], ['#f0d2f7', 'RBI regulated<br>banks'], ['#d9dee6', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background:${c}">${t}</div>`).join('');
   const p = mkPage('bank', `
     <div class="scroll">
-      <div style="height:136px"></div>
-      <div class="bhero card" data-st>${hero}<div class="in"><h1>${b.l}</h1>${logo(k)}<p>${b.since}</p>
+      <div style="height:137px"></div>
+      <div class="bhero" data-st><div class="img"></div><div class="in"><h1>${b.l}</h1>${logo(k, 'w')}<p>${b.since}</p>
         <div class="feats"><div>${I.bolt}Instant withdrawal available</div><div>${I.sun}No penalty for 1Y withdrawal</div><div>${I.shield()}DICGC insures up to ₹5 lakh</div></div></div></div>
-      <div class="tiles card" data-st style="margin-top:56px">${tiles}</div>
-      <div class="bsec">Deposit plans</div>
-      <div class="card" style="margin:0 11px;padding:13px 13px 5px">${plans}</div>
-      <button class="obtn press" data-a="viewplans2" style="margin-top:18px">View all plans ${I.chevs()}</button>
-      <div class="bsec">Compare interest rates</div>
-      <div class="card" style="margin:0 11px;padding:27px">
-        <div style="display:flex;align-items:center;height:67px;border:1px solid #e6e6e6;border-radius:11px;padding:0 18px 0 10px;gap:11px"><div class="logo" style="width:45px;height:45px;border-radius:6px;background:#fff;border:1px solid #e6e6e6"><img src="img/hdfc.png" alt=""></div><div style="flex:1"><div style="font-size:12px;color:#8d8888;letter-spacing:.06em">HDFC BANK SAVINGS</div><div style="font-size:15px">7.86%</div></div>${I.chevd}</div>
-        <div class="bars" id="bars">${bars}</div>
-        <div class="blabels"><span>HDFC<br>SAVINGS</span><span>HDFC<br>FD</span><span>${b.n.split(' ')[0].toUpperCase()}<br>FD</span></div>
+      <h2 class="h2">About the bank</h2>
+      <div class="tiles card" data-st>${tiles}</div>
+      <h2 class="h2">Deposit plans</h2>
+      <div class="card dcards">${plans}</div>
+      <button class="obtn press" data-a="viewplans2" style="margin-top:17px">View all plans ${I.chevs()}</button>
+      <h2 class="h2">Compare interest rates</h2>
+      <div class="card cmp">
+        <div class="dd"><div class="logo"><i><img src="img/hdfc.png" alt=""></i></div><div style="flex:1"><small>HDFC BANK SAVINGS</small><b>7.86%</b></div><span class="ddv">${I.chevd.replace('#4a1d17', '#a2a2a2')}</span></div>
+        <div class="bars" id="bars" style="height:237px"><i class="guide" style="bottom:176px"></i><i class="guide" style="bottom:88px"></i>${bars}</div>
+        <div class="blabels"><span style="left:60px">HDFC<br>SVINGS</span><span style="left:160px">HDFC<br>FD</span><span style="left:265px">${b.n.split(' ')[0].toUpperCase()}<br>FD</span></div>
       </div>
-      <div class="bsec">Recommendation</div>
+      <h2 class="h2">Recommendation</h2>
       <div class="rec" data-a="recopen"><div class="deck">${REC.map((_, i) => recCard(i)).join('')}</div>
         <p>${REC_TEXT()}</p>
         ${askd()}</div>
-      <div class="bsec" style="text-align:center">Get instant receipt</div>
-      <div class="receipt"><div style="width:64px;height:64px;border-radius:50%;margin:0 auto;border:1px dashed rgba(255,255,255,.4);display:grid;place-items:center">${I.mark('#fff', 22)}</div>
-        <h4>Fixed deposit receipt</h4><div class="s">Arunima Chandra, your deposit of ₹1,00,000<br>on Decade was successful on 25 June 2026</div>
-        <div class="kv"><div><span>Start date</span><b>25 June 2026</b></div><div class="r"><span>Tenure</span><b>5 Years</b></div><div><span>Interest</span><b>8.75%</b></div><div class="r"><span>Principle</span><b>₹1,00,000</b></div></div></div>
-      <div style="text-align:center;font-size:12px;color:rgba(0,0,0,.4);margin:16px 0 0">For illustration only, actual receipt may vary</div>
+      <div class="rband"><h2>Get instant receipt</h2>
+        <div class="receipt"><svg class="seal" width="66" height="66" viewBox="0 0 66 66" aria-hidden="true"><defs><path id="sealp" d="M33 33m-26 0a26 26 0 1 1 52 0a26 26 0 1 1 -52 0"/></defs><text font-size="8.6" fill="rgba(255,255,255,.55)" letter-spacing="1.1"><textPath href="#sealp">Fixed deposit started 19 July 2026 •</textPath></text><g transform="translate(22 22) scale(1.3)"><path d="${MARK_D}" fill="rgba(255,255,255,.7)"/></g></svg>
+          <h4>Fixed deposit receipt</h4><div class="s">Arunima Chandra, your deposit of ₹1,00,000 on Decade was successful on 25 June 2026</div>
+          <div class="kv"><div><span>Start date</span><b>25 June 2026</b></div><div><span>Tenure</span><b>5 Years</b></div><div><span>Interest</span><b>8.75%</b></div><div><span>Principle</span><b>₹1,00,000</b></div></div></div>
+        <div class="note">For illustration only, actual receipt may vary</div></div>
       ${qcards()}
-      <div style="height:140px"></div>
+      <div style="height:139px"></div>
     </div>
     <div class="bpill"></div>
-    <div class="hdr" style="height:112px"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle">${b.n.replace('Suryoday', 'Suryodaya')}</div><button class="cbtn r press press-s" data-a="noop" aria-label="More">${I.dots}</button></div>
+    <div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle">${b.n.replace('Suryoday', 'Suryodaya')}</div><button class="cbtn r press press-s" data-a="noop" aria-label="More">${I.dots}</button></div>
     <div class="vbar"><label class="disc press" data-a="disc">${I.mark('#5a2a1f', 21)}<input type="text" placeholder="Ask Decade" aria-label="Ask Decade" tabindex="-1"><button type="button" class="send" data-a="send" aria-label="Send">${I.send}</button></label>
-      <button class="vp press" data-a="viewplans2">View plans ${I.chevs('#fff')}</button></div>`);
+      <button class="vp press" data-a="viewplans2">View plans</button></div>`);
   p.dataset.bank = k;
   deckLayout(p);
   const sc = $('.scroll', p), img = $('.bhero .img', p), h = $('.hdr', p);
@@ -724,10 +722,10 @@ function bankPage(k) {
   const io = new IntersectionObserver((es) => {
     if (barsDone || !es.some((e) => e.isIntersecting)) return;
     barsDone = true; io.disconnect();
-    $$('#bars i', p).forEach((x, i) => A(x, [{ transform: 'scaleY(0)' }, { transform: 'none' }], BOUNCE, { delay: i * 110 }));
+    $$('#bars .bar i', p).forEach((x, i) => A(x, [{ transform: 'scaleY(0)' }, { transform: 'none' }], BOUNCE, { delay: i * 110 }));
   }, { root: sc, rootMargin: '0px 0px -80px 0px' });
   io.observe($('#bars', p));
-  $$('#bars i', p).forEach((x) => { x.style.transform = 'scaleY(0)'; });
+  $$('#bars .bar i', p).forEach((x) => { x.style.transform = 'scaleY(0)'; });
   const di = $('.disc input', p);
   di.addEventListener('keydown', (e) => { if (e.key === 'Enter') discClose(p); });
   return p;
@@ -736,7 +734,7 @@ function discOpen(p) {
   if (p._discOpen) { $('.disc input', p).focus(); return; }
   p._discOpen = true; p._discY = $('.scroll', p).scrollTop;
   const d = $('.disc', p), vp = $('.vp', p), inp = $('input', d), sd = $('.send', d);
-  A(d, [{ clipPath: 'inset(0 297px 0 0 round 28px)' }, { clipPath: 'inset(0 0px 0 0 round 28px)' }], SOFT);
+  A(d, [{ clipPath: 'inset(0 296px 0 0 round 28px)' }, { clipPath: 'inset(0 0px 0 0 round 28px)' }], SOFT);
   A(vp, [{ transform: 'none', opacity: 1 }, { transform: 'translateX(40px) scale(.7)', opacity: 0 }], SNAP);
   vp.style.pointerEvents = 'none';
   A(inp, [{ opacity: 0 }, { opacity: 1 }], FADE, { delay: 120 });
@@ -748,7 +746,7 @@ function discClose(p) {
   if (!p._discOpen) return; p._discOpen = false;
   const d = $('.disc', p), vp = $('.vp', p), inp = $('input', d), sd = $('.send', d);
   inp.blur(); inp.tabIndex = -1; d.parentElement.classList.remove('open');
-  A(d, [{ clipPath: 'inset(0 0px 0 0 round 28px)' }, { clipPath: 'inset(0 297px 0 0 round 28px)' }], SNAP);
+  A(d, [{ clipPath: 'inset(0 0px 0 0 round 28px)' }, { clipPath: 'inset(0 296px 0 0 round 28px)' }], SNAP);
   A(inp, [{ opacity: 1 }, { opacity: 0 }], { e: 'ease', d: 120 });
   A(sd, [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(0)', opacity: 0 }], QUICK);
   A(vp, [{ transform: 'translateX(40px) scale(.7)', opacity: 0 }, { transform: 'none', opacity: 1 }], SOFT, { delay: 60 });
@@ -808,7 +806,7 @@ function bookPage() {
   const b = B[S.sel.bank];
   const p = mkPage('bk', `
     <div class="bcardx">
-      <div class="bkh"><button class="back press press-s" data-a="stepback" aria-label="Back">${I.back}</button>${logo(S.sel.bank)}<div class="nm">${b.n}</div></div>
+      <div class="bkh"><button class="back press press-s" data-a="stepback" aria-label="Back">${I.back}</button>${logo(S.sel.bank, 'sm')}<div class="nm">${b.n}</div></div>
       <div class="steps"></div>
     </div>
     <button class="cta press" data-a="cta"><span>Continue</span></button>
@@ -822,26 +820,26 @@ function stepHTML(st) {
   const s = S.sel, m = mat(S.amt, s.rate, s.yrs);
   switch (st) {
     case 'select': {
-      const groups = PLANS[S.ptab ? 'rd' : 'fd'].map(([g, c, rows]) => `<div class="pgroup" data-st>${g}</div>` + rows.map(([t, y, r]) => `<button class="prow press" data-st data-a="pickplan" data-t="${t}" data-y="${y}" data-r="${r}" data-c="${c}">${I.bars(c, 39)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev()}</button>`).join('')).join('<div style="height:26px"></div>');
-      return `<div class="st" style="margin-top:12px">Select your plan</div>
-        <div class="seg ptabs" id="ptabs"><i class="pill"></i><button data-a="ptab" data-i="0">Fixed deposit</button><button data-a="ptab" data-i="1">Recurring deposit</button></div>
-        <div id="plist">${groups}</div><div style="height:130px"></div>`;
+      const groups = PLANS[S.ptab ? 'rd' : 'fd'].map(([g, c, rows]) => `<div class="pgroup" data-st>${g}</div>` + rows.map(([t, y, r]) => `<button class="prow press" data-st data-a="pickplan" data-t="${t}" data-y="${y}" data-r="${r}" data-c="${c}">${I.bars(c, 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#1c1c1c')}</button>`).join('')).join('<div style="height:61px"></div>');
+      return `<div class="st" style="margin:20px 15px 25px">Select your plan</div>
+        <div class="seg eq ptabs" id="ptabs"><i class="pill"></i><button data-a="ptab" data-i="0">Fixed deposit</button><button data-a="ptab" data-i="1">Recurring deposit</button></div>
+        <div id="plist">${groups}</div><div style="height:40px"></div>`;
     }
     case 'amount':
-      return `<div class="box fill" data-morph="plan" style="margin-top:2px"><div class="ptop2">${I.bars(s.color || '#c43960', 51, 15)}<div><b>${titleTen(s.ten)}</b><small>${B[s.bank].n.replace('bank', 'Bank')}</small></div><span class="rt">${s.rate.toFixed(2)}%</span></div>
-          <div class="pay-row"><span>Interest payout</span><span style="font-weight:500;font-size:17px">On maturity<span class="pen">${I.pen}</span></span></div></div>
-        <div class="box bigamt" style="margin-top:24px"><div class="v num" id="amtv">${amtSpans(S.amt)}</div><div class="m" id="amtm">Your FD at maturity will be ${inr(m)}</div></div>
+      return `<div class="ptop2b" data-morph="plan"><div class="ptop2">${I.bars(s.color || '#c43960', 47, 15)}<div><b>${titleTen(s.ten)}</b><small>${B[s.bank].n.replace('bank', 'Bank')}</small></div><span class="rt">${s.rate.toFixed(2)}%</span></div>
+          <div class="pay-row"><span>Interest payout</span><span class="r">On maturity<span class="pen">${I.pen}</span></span></div></div>
+        <div class="bigamt"><div class="v" id="amtv">${amtSpans(S.amt)}</div><div class="m" id="amtm">Your FD at maturity will be ${inr(m)}</div></div>
         <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'd'].map((k) => k === '' ? '<span></span>' : `<button data-a="key" data-k="${k}" aria-label="${k === 'd' ? 'Delete' : k}">${k === 'd' ? I.del : k}</button>`).join('')}</div>`;
     case 'pan':
       return `<div class="st c">Confirm your PAN details</div>
-        <div class="pancard" data-st><img src="img/pan.png" alt="Income Tax Department"><div class="box" style="background:#fff;border:0;border-radius:14px">
-          <div class="kv"><span>Name</span><b>Vangipurappu Venkata</b></div><div class="kv"><span>PAN number</span><b>ABCDE234K</b></div><div class="kv"><span>Date of birth</span><b>15/08/1999</b></div></div></div>
-        <div class="box" data-st style="margin-top:70px" id="consents">${['I authorize Decade and its partner to verify my PAN details.', 'I consent to processing my KYC information for verification.', 'I confirm the PAN details are accurate and mine.'].map((c, i) => `<button class="consent ${S.pan[i] ? 'on' : ''}" data-a="consent" data-i="${i}"><span class="chk">${I.tick}</span>${c}</button>`).join('')}</div>`;
+        <div class="pancard" data-st><img src="img/pan.png" alt="Income Tax Department, Govt. of India"><div class="pbox">
+          <div class="kv"><span>Name</span><b>Vangipurappu Venkata</b></div><div class="kv"><span>PAN number</span><b>ABCDE234k</b></div><div class="kv"><span>Date of birth</span><b>15/08/1999</b></div></div></div>
+        <div data-st id="consents">${['I authorize Decade and its partner to verify my PAN details.', 'I consent to processing my KYC information for verification.', 'I confirm the PAN details are accurate and mine.'].map((c, i) => `<button class="consent ${S.pan[i] ? 'on' : ''}" data-a="consent" data-i="${i}"><span class="chk">${I.tick}</span>${c}</button>`).join('')}</div>`;
     case 'aadhaar':
       return `<div class="st c">Confirm your Aadhaar</div>
-        <div data-st style="text-align:center;color:var(--mute);font-size:15px;line-height:22px;margin:-6px 18px 0">You will be redirected to the bank page, enter your Aadhaar number and confirm with OTP</div>
-        <div class="box" data-st style="margin:30px 4px 0;text-align:center"><img src="img/aadhaar.png" alt="Aadhaar card" style="width:276px;margin:30px auto 0;border-radius:6px"><div style="border-top:1px solid var(--line);margin-top:26px;padding:22px 0;color:#7b9a12;font-weight:500">Keep your Aadhaar number handy</div></div>
-        <div data-st style="position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:center;gap:6px;color:var(--green-d);font-size:15px">${I.shield('#1a8d1a', 16)}Shared directly with the bank KYC</div>`;
+        <div class="adesc" data-st>You will be redirected to the bank page, enter your Aadhaar number and confirm with OTP</div>
+        <div class="abox" data-st><img src="img/aadhaar.png" alt="Aadhaar card"><div>Keep your Aadhaar number handy</div></div>
+        <div class="ashare" data-st>${I.shield('#037600', 16)}Shared directly with the bank KYC</div>`;
     case 'nominee':
       return `<div class="st">Choose your nominee</div>` +
         S.noms.map((m, i) => `<button class="opt person ${S.nom === i ? 'on' : ''}" data-st data-a="nom" data-i="${i}" ${m.isNew ? 'data-new' : ''}><b>${esc(m.n)}</b><small>${esc(m.r)}</small><small>DOB : ${m.d}</small><span class="radio"></span></button>`).join('') +
@@ -855,8 +853,8 @@ function stepHTML(st) {
         <div class="ferr" id="ferr"></div>`;
     }
     case 'acct':
-      return `<div class="st" style="margin-bottom:8px">Choose your bank account</div><div data-st style="margin:0 12px 22px;font-size:15px;line-height:21px;color:var(--sub)">This account will pay and receive money from your fixed deposit</div>` +
-        S.accts.map((a, i) => `<button class="opt acct ${S.acc === i ? 'on' : ''}" data-st data-a="acc" data-i="${i}" ${a.isNew ? 'data-new' : ''}><span class="lg">${a.lg ? `<img src="img/${a.lg}.png" alt="" style="width:26px">` : `<b class="ini">${a.s.slice(0, 2)}</b>`}</span><span><b>${esc(a.b)}</b><small>•••• ${a.n}</small></span><span class="radio"></span></button>`).join('') +
+      return `<div class="st">Choose your bank account</div><div class="asub" data-st>This account will pay and receive money from your fixed deposit</div>` +
+        S.accts.map((a, i) => `<button class="opt acct ${S.acc === i ? 'on' : ''}" data-st data-a="acc" data-i="${i}" ${a.isNew ? 'data-new' : ''}><span class="lg">${a.lg ? `<img src="img/${a.lg}.png" alt="" style="width:26px">` : `<b class="ini">${a.s.slice(0, 2)}</b>`}</span><span><b>${esc(a.b)}</b><small><span class="dots4">····</span>${a.n}</small></span><span class="radio"></span></button>`).join('') +
         `<button class="addnew press" data-st data-a="goto" data-s="addacct">Add new +</button>`;
     case 'addacct': {
       const f = S.form;
@@ -867,12 +865,12 @@ function stepHTML(st) {
         <div class="ferr" id="ferr"></div>`;
     }
     case 'review':
-      return `<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 12px 20px"><div style="font-size:23px;font-weight:500">Review your FD</div><button data-a="edit" style="color:#a872b3;text-decoration:underline;font-size:15px">Edit</button></div>
-        <div class="box fill" data-st><div style="display:flex;justify-content:space-between;align-items:center;padding:22px 22px 20px"><span style="font-size:16px;color:var(--mute)">Amount</span><b class="num" style="font-size:27px;font-weight:500">${inr(S.amt)}</b></div>
-          <div style="border-top:1px solid #e6e6df;display:flex;justify-content:space-between;padding:16px 22px 18px"><div><small style="font-size:13px;color:#857c8e">Maturity amount</small><div class="num" style="font-size:18px;margin-top:4px">${inr(m)}</div></div><div style="text-align:right"><small style="font-size:13px;color:#857c8e">Interest gain</small><div class="num green" style="font-size:18px;margin-top:4px">+${inr(m - S.amt)}</div></div></div></div>
-        <div class="box" data-st style="margin-top:56px">
-          ${[['Tenure', titleTen(s.ten)], ['Interest rate', s.rate.toFixed(2) + '%'], ['Interest payout', 'At maturity'], ['Nominee', esc(S.noms[S.nom].n)]].map(([l, v]) => `<div class="kv" style="height:64px"><span>${l}</span><b>${v}</b></div>`).join('')}
-          <div class="kv" style="height:64px"><b style="font-size:16px">Reinvest on maturity</b><button class="toggle ${S.reinv ? 'on' : ''}" data-a="reinv" aria-label="Reinvest on maturity"><i></i></button></div></div>`;
+      return `<div class="rvh"><div>Review your FD</div><button data-a="edit">Edit</button></div>
+        <div class="rv1" data-st><div class="a">Amount<b>${inr(S.amt)}</b></div>
+          <div class="m"><div><small>Maturity amount</small><b>${inr(m)}</b></div><div><small>Interest gain</small><b class="g">+${inr(m - S.amt)}</b></div></div></div>
+        <div class="rv2" data-st>
+          ${[['Tenure', titleTen(s.ten), 'n'], ['Interest rate', s.rate.toFixed(2) + '%', 'n'], ['Interest payout', 'At maturity', ''], ['Nominee', esc(S.noms[S.nom].n), '']].map(([l, v, c]) => `<div class="kv"><span>${l}</span><b class="${c}">${v}</b></div>`).join('')}
+          <div class="kv"><b>Reinvest on maturity</b><button class="toggle ${S.reinv ? 'on' : ''}" data-a="reinv" aria-label="Reinvest on maturity"><i></i></button></div></div>`;
   }
   return '';
 }
@@ -965,7 +963,7 @@ function openBooking(steps, src, o = {}) {
   else { const ab = $('.askbar', p); A(ab, [{ transform: 'translateY(120px)' }, { transform: 'none' }], SOFT, { delay: 160 }); }
   if (sheet) { // the sheet dissolves into the new card
     const s = sheet; sheet = null;
-    A($('.backdrop', s.wrap), [{ opacity: .42 }, { opacity: 0 }], EASE);
+    A($('.backdrop', s.wrap), [{ opacity: .6 }, { opacity: 0 }], EASE);
     const ptop = $('.ptop', s.el), ap = $('.allplans', s.el), hd = $('.handle', s.el);
     if (ptop) A(ptop, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-60px) scale(.96)', opacity: 0 }], SOFT);
     if (ap) A(ap, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(80px)', opacity: 0 }], SOFT);
@@ -1032,13 +1030,13 @@ function payFlow() {
 function success() {
   S.newDep = { a: S.amt, r: S.sel.rate, m: mat(S.amt, S.sel.rate, S.sel.yrs), s: 'pending', p: 0, left: 'Starts after VKYC', isNew: true };
   const p = mkPage('succ', `
-    <button class="cbtn l press press-s" data-a="done" aria-label="Close" style="top:49px;left:21px;opacity:0">${I.x}</button>
-    <div class="card" id="scard" style="position:absolute;left:27px;right:24px;top:112px;height:248px;border-radius:27px;opacity:0"></div>
-    ${[90, 150, 220, 340].map((s) => `<i class="ring" style="width:${s}px;height:${s}px"></i>`).join('')}
-    <div class="sgroup" id="sg" style="position:absolute;left:27px;right:24px;top:150px">
-      <div class="tickc"><svg width="26" height="20" viewBox="0 0 26 20" fill="none"><path d="M3 10.5l7 7L23 3" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <button class="cbtn l press press-s" data-a="done" aria-label="Close" style="left:21px;opacity:0">${I.x}</button>
+    <div class="card" id="scard" style="position:absolute;left:27px;width:340px;top:112px;height:249px;opacity:0"></div>
+    ${[95, 145, 219, 343].map((s, i) => `<i class="ring ${i ? '' : 'r1'}" style="width:${s}px;height:${s}px"></i>`).join('')}
+    <div class="sgroup" id="sg" style="position:absolute;left:27px;width:340px;top:152px">
+      <div class="tickc"><svg width="24" height="18" viewBox="0 0 26 20" fill="none"><path d="M3 10.5l7 7L23 3" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="amt num" id="samt">₹0</div><div class="ok">Payment successful</div><button class="vd" data-a="details" style="opacity:0">View details</button></div>
-    <div class="vk card" id="vk" style="border-radius:27px;opacity:0"><div class="img"></div><h4>Complete VKYC <small>takes ~3min</small></h4>
+    <div class="vk card" id="vk" style="opacity:0"><div class="img"></div><h4>Complete VKYC <small>takes ~3min</small></h4>
       <p>You need to do video KYC with the bank by <b>17 November 2026, 11:45 PM</b> to complete your FD booking</p>
       <div class="av"><i></i>Bank agent available</div><button class="bigbtn press" data-a="vkyc">Start VKYC</button></div>`);
   p.dataset.noswipe = 1;
@@ -1052,9 +1050,9 @@ function success() {
   });
   const sg = $('#sg', p), tick = $('.tickc', p), path = $('.tickc path', p), rings = $$('.ring', p);
   // FLIP: start centred on the screen, end in the card
-  const last = R(sg), cy = 424, dy = cy - (last.y + 38);
+  const last = R(sg), cy = 362.5, dy = cy - (last.y + 27.5); // check centred where the Figma frame has it
   sg.style.transform = `translateY(${dy}px)`;
-  rings.forEach((r) => { r.style.top = (last.y + 28 + dy) + 'px'; });
+  rings.forEach((r) => { r.style.top = cy + 'px'; });
   A(tick, [{ transform: 'scale(0)' }, { transform: 'none' }], BOUNCE, { delay: 120 });
   A(path, [{ strokeDashoffset: 30 }, { strokeDashoffset: 0 }], { e: 'cubic-bezier(.4,0,.2,1)', d: 420 }, { delay: 380 });
   rings.forEach((r, i) => A(r, [{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 }], GENTLE, { delay: 260 + i * 120 }));
@@ -1091,7 +1089,7 @@ function finishKyc(callP) {
   const rs = $('.rsheet', s.el), to = R(rs);
   rs.style.opacity = 0; $('.handle', s.el).style.opacity = 0;
   callP.remove();
-  A($('.backdrop', s.wrap), [{ opacity: 0 }, { opacity: .42 }], EASE);
+  A($('.backdrop', s.wrap), [{ opacity: 0 }, { opacity: .6 }], EASE);
   morphBox({ x: 0, y: 0, w: 390, h: 849 }, to, { r1: 32, bg0: '#141212', bg1: '#fff', sh: 'none' }).then((g) => {
     rs.style.opacity = ''; g.remove(); A($('.handle', s.el), [{ opacity: 0 }, { opacity: 1 }], FADE);
     $$(':scope > *', rs).forEach((c, i) => A(c, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: i * 60 }));
@@ -1158,7 +1156,7 @@ const ACT = {
   },
   calc() { if (busy) return; if (sheet) closeSheet().then(() => push(amtListPage())); else push(amtListPage()); },
   calcsheet() { calcSheet(); },
-  filter(el) { const b = $('.badge', el); if (b) A(b, [{ transform: 'scale(1)' }, { transform: 'scale(1.4)' }, { transform: 'scale(1)' }], BOUNCE); A(el, [{ transform: 'rotate(0)' }, { transform: 'rotate(-8deg)' }, { transform: 'rotate(6deg)' }, { transform: 'none' }], { e: 'ease-out', d: 420 }); },
+  filter(el) { A(el, [{ transform: 'rotate(0)' }, { transform: 'rotate(-8deg)' }, { transform: 'rotate(6deg)' }, { transform: 'none' }], { e: 'ease-out', d: 420 }); },
   stepback() { if (!busy) bookBack(false); },
   ptab(el) {
     const i = +el.dataset.i; if (i === S.ptab) return; const dir = i > S.ptab ? 1 : -1; S.ptab = i;
@@ -1230,8 +1228,8 @@ const ACT = {
   },
   reinv(el) { S.reinv = !S.reinv; el.classList.toggle('on', S.reinv); },
   edit() {
-    const r = (l, v, s) => `<div class="kv"><span>${l}</span><b>${v}<button class="pen press-s press" data-a="editgo" data-s="${s}" aria-label="Edit ${l}">${I.pen}</button></b></div>`;
-    openSheet(`<div class="esheet"><h3>Edit details</h3><div class="box fill">${r('Amount', inr(S.amt), 'amount')}${r('Tenure', titleTen(S.sel.ten), 'select')}${r('Nominee', esc(S.noms[S.nom].n), 'nominee')}</div></div>`);
+    const r = (l, v, s, c = '') => `<div class="kv"><span>${l}</span><b class="${c}">${v}<button class="pen press-s press" data-a="editgo" data-s="${s}" aria-label="Edit ${l}">${I.pen}</button></b></div>`;
+    openSheet(`<div class="esheet"><h3>Edit details</h3><div class="box fill">${r('Amount', inr(S.amt), 'amount')}${r('Tenure', titleTen(S.sel.ten), 'select')}${r('Nominee', esc(S.noms[S.nom].n), 'nominee', 'n')}</div></div>`);
   },
   editgo(el) { const s = el.dataset.s; closeSheet().then(() => goStep(s, { force: true })); },
   details() {
