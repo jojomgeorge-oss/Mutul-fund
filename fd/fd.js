@@ -128,11 +128,18 @@ function setUnder(p, on) {
 function stagger(p, delay = 60) {
   $$('[data-st]', p).slice(0, 9).forEach((el, i) => A(el, [{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: delay + i * 38 }));
 }
+const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 function push(p, how = 'slide', o = {}) {
   const prev = top();
+  p.style.transform = how === 'slide' ? 'translateX(100%)' : how === 'up' ? 'translateY(100%)' : '';
+  if (how === 'fade') p.style.opacity = 0;
   pagesEl.appendChild(p); stack.push(p);
   if (p._init) p._init();
-  lock(SNAP.d * .6);
+  lock(SNAP.d * .6 + 40);
+  frame().then(() => { p.style.opacity = ''; pushGo(p, prev, how, o); });
+  return p;
+}
+function pushGo(p, prev, how, o) {
   if (how === 'slide') {
     A(p, [{ transform: 'translateX(100%)' }, { transform: 'none' }], SNAP);
     if (prev) { prev.classList.add('under'); A(prev, [{ transform: 'none' }, { transform: `translateX(${UNDER}px)` }], SNAP); A($('.dim', prev), [{ opacity: 0 }, { opacity: .08 }], SNAP); }
@@ -203,16 +210,23 @@ function blockClick() { endSwipe.block = true; clearTimeout(blockClick.t); block
 
 /* ---------------- shared-element morph ---------------- */
 function ghost(r, style) {
-  const g = document.createElement('div'); g.className = 'ghost';
+  const g = document.createElement('div'); g.className = 'ghost'; g.style.transformOrigin = '0 0';
   Object.assign(g.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' }, style);
   stage.appendChild(g); return g;
 }
+// The box is drawn once at its final size, then scaled from the source rect: compositor-only, no relayout or repaint per frame.
 function morphBox(from, to, o = {}) {
-  const g = ghost(from, { background: o.bg0 || '#fff', borderRadius: (o.r0 ?? 20) + 'px', boxShadow: o.sh || '0 10px 30px rgba(0,0,0,.08)' });
-  return A(g, [
-    { left: from.x + 'px', top: from.y + 'px', width: from.w + 'px', height: from.h + 'px', borderRadius: (o.r0 ?? 20) + 'px', background: o.bg0 || '#fff' },
-    { left: to.x + 'px', top: to.y + 'px', width: to.w + 'px', height: to.h + 'px', borderRadius: (o.r1 ?? 20) + 'px', background: o.bg1 || o.bg0 || '#fff' },
-  ], o.sp || SOFT).then(() => g);
+  const bg1 = o.bg1 || o.bg0 || '#fff';
+  const g = ghost(to, { background: bg1, borderRadius: (o.r1 ?? 20) + 'px', boxShadow: o.sh || '0 10px 30px rgba(0,0,0,.08)', willChange: 'transform' });
+  if (o.bg0 && o.bg0 !== bg1) { // colour change = a second layer fading out, not an animated background
+    const dk = document.createElement('div');
+    dk.style.cssText = `position:absolute;inset:0;border-radius:inherit;background:${o.bg0};will-change:opacity`;
+    g.appendChild(dk);
+    A(dk, [{ opacity: 1 }, { opacity: 0 }], { e: 'cubic-bezier(.4,0,.2,1)', d: (o.sp || SOFT).d * .55 });
+  }
+  const t0 = `translate(${from.x - to.x}px, ${from.y - to.y}px) scale(${from.w / to.w}, ${from.h / to.h})`;
+  g.style.transform = t0;
+  return A(g, [{ transform: t0 }, { transform: 'none' }], o.sp || SOFT).then(() => g);
 }
 function morphEl(el, from, to, sp = SOFT, extra = {}) { // flies a copy of el from one rect to another (transform only)
   const c = el.cloneNode(true); c.removeAttribute('data-a');
@@ -245,16 +259,16 @@ function sendAsk(b) {
 }
 function hdrFade(p) {
   const sc = $('.scroll', p), h = $('.hdr', p);
-  if (sc && h) sc.addEventListener('scroll', () => h.style.setProperty('--hb', Math.min(1, sc.scrollTop / 40)), { passive: true });
+  let on = false;
+  if (sc && h) sc.addEventListener('scroll', () => { const n = sc.scrollTop > 8; if (n !== on) { on = n; h.classList.toggle('on', n); } }, { passive: true });
 }
 function segPill(seg, i, anim = true) {
   const bs = $$('button', seg), pill = $('.pill', seg), b = bs[i];
   bs.forEach((x, j) => x.classList.toggle('on', j === i));
   const to = { transform: `translateX(${b.offsetLeft - 2}px)`, width: b.offsetWidth + 'px' };
   if (!anim) { Object.assign(pill.style, to); return; }
-  const from = { transform: pill.style.transform || 'none', width: pill.style.width || b.offsetWidth + 'px' };
-  // stretch a little mid-flight, like a droplet
-  A(pill, [from, to], SNAP);
+  pill.style.width = to.width;
+  A(pill, [{ transform: pill.style.transform || 'none' }, { transform: to.transform }], SNAP);
 }
 
 /* =====================================================================
@@ -269,7 +283,7 @@ function recCard(i) {
     g('Interest rate', '8.31%', 'green') + g('Tenure', '5Y 3M 16D'),
     g('Invest', '₹5,00,000') + g('Interest rate', '8.31%', 'green') + g('Tenure', '5Y 3M 16D') + g('At maturity', m, 'green'),
   ];
-  return `<div class="dcard" data-i="${i}">${top}<div class="grid">${grids[i]}</div>${i < 2 ? '<button class="go press" data-a="recstart">Start FD</button>' : ''}</div>`;
+  return `<div class="dcard" data-i="${i}"><i class="shade"></i>${top}<div class="grid">${grids[i]}</div>${i < 2 ? '<button class="go press" data-a="recstart">Start FD</button>' : ''}</div>`;
 }
 function depCard(d, i) {
   return `<div class="dep card ${d.isNew ? 'new' : ''}" data-st>
@@ -392,6 +406,7 @@ function renderDeps(p, anim = true, dir = 1) {
 }
 
 /* recommendation deck: front card lifts up, tucks behind; the next one slides forward */
+const SHADE = [0, .07, .14];
 const POS = ['translateY(0) scale(1)', 'translateY(25px) scale(.94)', 'translateY(48px) scale(.88)'];
 function deckLayout(p, anim) {
   const cards = $$('.dcard', p);
@@ -399,8 +414,7 @@ function deckLayout(p, anim) {
     const pos = (i - S.recI + 3) % 3;
     c.style.zIndex = 3 - pos;
     c.style.pointerEvents = pos === 0 ? '' : 'none';
-    const tf = POS[pos], br = pos === 0 ? 1 : pos === 1 ? .93 : .86;
-    if (!anim) { c.style.transform = tf; c.style.filter = `brightness(${br})`; }
+    if (!anim) { c.style.transform = POS[pos]; $('.shade', c).style.opacity = SHADE[pos]; }
   });
   $$('.dots i', p).forEach((d, i) => d.classList.toggle('on', i === S.recI));
 }
@@ -408,16 +422,18 @@ function deckNext(p) {
   const cards = $$('.dcard', p), front = cards[S.recI];
   S.recI = (S.recI + 1) % 3;
   const a = front.animate([
-    { transform: POS[0], filter: 'brightness(1)' },
-    { transform: 'translateY(-64px) scale(1.02) rotate(-1.2deg)', filter: 'brightness(1)', offset: .42 },
-    { transform: POS[2], filter: 'brightness(.86)' }], { duration: 880, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
+    { transform: POS[0] },
+    { transform: 'translateY(-64px) scale(1.02) rotate(-1.2deg)', offset: .42 },
+    { transform: POS[2] }], { duration: 880, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
+  A($('.shade', front), [{ opacity: 0 }, { opacity: SHADE[2] }], { e: 'ease', d: 500 }, { delay: 380 });
   setTimeout(() => { front.style.zIndex = 0; }, 380);
-  a.finished.then(() => { front.style.transform = POS[2]; front.style.filter = 'brightness(.86)'; a.cancel(); deckLayout(p, false); }).catch(() => {});
+  a.finished.then(() => { front.style.transform = POS[2]; a.cancel(); deckLayout(p, false); }).catch(() => {});
   cards.forEach((c) => {
     if (c === front) return;
     const pos = (+c.dataset.i - S.recI + 3) % 3;
     c.style.zIndex = 3 - pos;
-    A(c, [{ transform: c.style.transform, filter: c.style.filter }, { transform: POS[pos], filter: `brightness(${pos ? .93 : 1})` }], SOFT, { delay: 260 });
+    A(c, [{ transform: c.style.transform }, { transform: POS[pos] }], SOFT, { delay: 260 });
+    const sh = $('.shade', c); A(sh, [{ opacity: sh.style.opacity || 0 }, { opacity: SHADE[pos] }], SOFT, { delay: 260 });
   });
   $$('.dots i', p).forEach((d, i) => d.classList.toggle('on', i === S.recI));
 }
@@ -460,8 +476,8 @@ let sheet = null; // { wrap, el, close }
 function scaleBehind(on) {
   const p = top(); if (!p) return;
   stack.forEach((x) => { if (x !== p) x.style.visibility = on ? 'hidden' : ''; });
-  A(p, on ? [{ transform: 'none', borderRadius: '0px' }, { transform: 'scale(.935) translateY(6px)', borderRadius: '26px' }]
-    : [{ transform: p.style.transform || 'scale(.935) translateY(6px)', borderRadius: '26px' }, { transform: 'none', borderRadius: '0px' }], SOFT);
+  if (on) { p.style.borderRadius = '26px'; A(p, [{ transform: 'none' }, { transform: 'scale(.935) translateY(6px)' }], SOFT); }
+  else A(p, [{ transform: p.style.transform || 'scale(.935) translateY(6px)' }, { transform: 'none' }], SOFT).then(() => { if (!sheet) p.style.borderRadius = ''; });
 }
 function openSheet(html, o = {}) {
   if (sheet) return null;
@@ -602,16 +618,18 @@ function bankPage(k) {
   const sc = $('.scroll', p), img = $('.bhero .img', p), h = $('.hdr', p);
   h.style.setProperty('--hb', 0);
   let barsDone = false;
+  let scd = false;
   sc.addEventListener('scroll', () => {
-    const y = sc.scrollTop;
-    p.classList.toggle('scrolled', y > 70);
-    if (img) img.style.transform = `scale(${1 + Math.min(y, 300) / 1500})`;
-    if (!barsDone) {
-      const bb = $('#bars', p).getBoundingClientRect(), sr = sc.getBoundingClientRect();
-      if (bb.top < sr.bottom - 80) { barsDone = true; $$('#bars i', p).forEach((x, i) => A(x, [{ transform: 'scaleY(0)' }, { transform: 'none' }], BOUNCE, { delay: i * 110 })); }
-    }
+    const y = sc.scrollTop, on = y > 70;
+    if (on !== scd) { scd = on; p.classList.toggle('scrolled', on); }
     if (p._discOpen && Math.abs(y - p._discY) > 30) discClose(p);
   }, { passive: true });
+  const io = new IntersectionObserver((es) => {
+    if (barsDone || !es.some((e) => e.isIntersecting)) return;
+    barsDone = true; io.disconnect();
+    $$('#bars i', p).forEach((x, i) => A(x, [{ transform: 'scaleY(0)' }, { transform: 'none' }], BOUNCE, { delay: i * 110 }));
+  }, { root: sc, rootMargin: '0px 0px -80px 0px' });
+  io.observe($('#bars', p));
   $$('#bars i', p).forEach((x) => { x.style.transform = 'scaleY(0)'; });
   const di = $('.disc input', p);
   di.addEventListener('keydown', (e) => { if (e.key === 'Enter') discClose(p); });
@@ -621,7 +639,7 @@ function discOpen(p) {
   if (p._discOpen) { $('.disc input', p).focus(); return; }
   p._discOpen = true; p._discY = $('.scroll', p).scrollTop;
   const d = $('.disc', p), vp = $('.vp', p), inp = $('input', d), sd = $('.send', d);
-  A(d, [{ width: '55px' }, { width: '352px' }], SOFT);
+  A(d, [{ clipPath: 'inset(0 297px 0 0 round 28px)' }, { clipPath: 'inset(0 0px 0 0 round 28px)' }], SOFT);
   A(vp, [{ transform: 'none', opacity: 1 }, { transform: 'translateX(40px) scale(.7)', opacity: 0 }], SNAP);
   vp.style.pointerEvents = 'none';
   A(inp, [{ opacity: 0 }, { opacity: 1 }], FADE, { delay: 120 });
@@ -633,7 +651,7 @@ function discClose(p) {
   if (!p._discOpen) return; p._discOpen = false;
   const d = $('.disc', p), vp = $('.vp', p), inp = $('input', d), sd = $('.send', d);
   inp.blur(); inp.tabIndex = -1; d.parentElement.classList.remove('open');
-  A(d, [{ width: '352px' }, { width: '55px' }], SNAP);
+  A(d, [{ clipPath: 'inset(0 0px 0 0 round 28px)' }, { clipPath: 'inset(0 297px 0 0 round 28px)' }], SNAP);
   A(inp, [{ opacity: 1 }, { opacity: 0 }], { e: 'ease', d: 120 });
   A(sd, [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(0)', opacity: 0 }], QUICK);
   A(vp, [{ transform: 'translateX(40px) scale(.7)', opacity: 0 }, { transform: 'none', opacity: 1 }], SOFT, { delay: 60 });
@@ -776,13 +794,16 @@ function openBooking(steps, src, o = {}) {
   pagesEl.appendChild(p); stack.push(p);
   renderStep(0);
   const card = $('.bcardx', p), to = R(card), cta = $('.cta', p);
+  if (!p.classList.contains('sel')) to.h -= 127;
   if (!src) { p.style.transform = 'translateX(100%)'; A(p, [{ transform: 'translateX(100%)' }, { transform: 'none' }], SNAP); if (prev) { A(prev, [{ transform: 'none' }, { transform: `translateX(${UNDER}px)` }], SNAP); prev.classList.add('under'); } return; }
   const from = R(src);
   card.style.opacity = 0; p.style.background = 'transparent';
-  A(p, [{ backgroundColor: 'rgba(242,242,240,0)' }, { backgroundColor: 'rgba(242,242,240,1)' }], { e: 'ease', d: 380 });
+  const fbg = document.createElement('div'); fbg.style.cssText = 'position:absolute;inset:0;background:#f2f2f0;will-change:opacity';
+  p.insertBefore(fbg, p.firstChild);
+  A(fbg, [{ opacity: 0 }, { opacity: 1 }], { e: 'ease', d: 380 });
   const dark = o.dark;
   morphBox(from, to, { r0: o.r0 ?? 22, r1: 27, bg0: dark ? '#211715' : '#fff', bg1: '#fff', sp: SOFT }).then((g) => {
-    card.style.opacity = ''; g.remove(); p.style.background = '';
+    card.style.opacity = ''; g.remove(); p.style.background = ''; fbg.remove();
     if (prev) setUnder(prev, true), prev.style.borderRadius = '';
   });
   const inner = [$('.bkh', p), $('.steps', p)];
@@ -891,7 +912,7 @@ function success() {
   setTimeout(() => countUp($('#samt', p), S.amt), 320);
   setTimeout(() => {
     A(sg, [{ transform: `translateY(${dy}px)` }, { transform: 'none' }], SOFT);
-    rings.forEach((r) => { A(r, [{ transform: 'translate(-50%,-50%) scale(1)', opacity: 1, top: r.style.top }, { transform: 'translate(-50%,-50%) scale(.4)', opacity: 0, top: (last.y + 28) + 'px' }], SOFT); });
+    rings.forEach((r) => { A(r, [{ transform: 'translate(-50%,-50%) scale(1)', opacity: 1 }, { transform: `translate(-50%, calc(-50% - ${dy}px)) scale(.4)`, opacity: 0 }], SOFT); });
     A($('#scard', p), [{ opacity: 0, transform: 'scale(.86)' }, { opacity: 1, transform: 'none' }], SOFT);
     A($('.vd', p), [{ opacity: 0 }, { opacity: 1 }], FADE, { delay: 250 });
     A($('#vk', p), [{ opacity: 1, transform: 'translateY(520px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: 90 });
@@ -918,11 +939,9 @@ function finishKyc(callP) {
   } });
   const rs = $('.rsheet', s.el), to = R(rs);
   rs.style.opacity = 0; $('.handle', s.el).style.opacity = 0;
-  const g = ghost({ x: 0, y: 0, w: 390, h: 849 }, { background: '#141212', borderRadius: '0px' });
   callP.remove();
   A($('.backdrop', s.wrap), [{ opacity: 0 }, { opacity: .42 }], EASE);
-  A(g, [{ left: '0px', top: '0px', width: '390px', height: '849px', borderRadius: '0px', background: '#141212' },
-    { left: to.x + 'px', top: to.y + 'px', width: to.w + 'px', height: to.h + 'px', borderRadius: '32px', background: '#ffffff' }], SOFT).then(() => {
+  morphBox({ x: 0, y: 0, w: 390, h: 849 }, to, { r1: 32, bg0: '#141212', bg1: '#fff', sh: 'none' }).then((g) => {
     rs.style.opacity = ''; g.remove(); A($('.handle', s.el), [{ opacity: 0 }, { opacity: 1 }], FADE);
     $$(':scope > *', rs).forEach((c, i) => A(c, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: i * 60 }));
   });
@@ -1062,6 +1081,8 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (sheet) closeS
 addEventListener('message', (e) => { if (e.data && e.data.decade === 'back') { if (sheet) closeSheet(); else if (stack.length > 1) { if (top().dataset.book) bookBack(false); else pop(); } } });
 
 /* ---------------- start ---------------- */
+['hero.jpg', 'vkyc.jpg', 'relax.jpg', 'pan.png', 'aadhaar.png', 'hdfc.png', 'suryoday.png', 'jana.png', 'shriram.png', 'shivalik.png', 'unity.png']
+  .forEach((n) => { const im = new Image(); im.src = 'img/' + n; if (im.decode) im.decode().catch(() => {}); });
 const home = homePage();
 pagesEl.appendChild(home); stack.push(home); home._init();
 stagger(home, 120);
