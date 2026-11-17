@@ -80,10 +80,18 @@ const S = {
   noms: [{ n: 'Jojo Maria George', r: 'Husband', d: '14/10/1991' }, { n: 'Roshni Singh', r: 'Sister', d: '22/06/1995' }],
   accts: [{ b: 'HDFC bank savings', s: 'HDFC', n: '3456', lg: 'hdfc' }, { b: 'HDFC bank savings', s: 'HDFC', n: '8821', lg: 'hdfc' }, { b: 'HDFC bank savings', s: 'HDFC', n: '1047', lg: 'hdfc' }],
 };
+// the three recommendation card layouts from the design (same FD, shown three ways)
 const REC = [
-  { bank: 'sur', amt: 500000, rate: 8.31, ten: '5Y 3M 16D', yrs: 5.29 },
-  { bank: 'shiv', amt: 300000, rate: 8.2, ten: '3Y 6M', yrs: 3.5 },
+  { v: 1, bank: 'sur', amt: 500000, rate: 8.31, ten: '5Y 3M 16D', yrs: 5.29 },
+  { v: 2, bank: 'sur', amt: 0, rate: 8.31, ten: '5Y 3M 16D', yrs: 5.29 },
+  { v: 3, bank: 'sur', amt: 500000, rate: 8.31, ten: '5Y 3M 16D', yrs: 5.29 },
 ];
+// an FD that was started but not finished; shows as "Complete your FD"
+S.pend = { bank: 'sur', amt: 500000, ten: '5Y 3M 16D', yrs: 5.29, rate: 8.31, stage: 'kyc', step: 'pan' };
+const STAGE = { kyc: ['Complete KYC', 'Start KYC'], pan: ['Verify PAN', 'Start'], details: ['Enter details', 'Start'] };
+const ORDER = ['select', 'amount', 'pan', 'aadhaar', 'personal', 'nominee', 'addnom', 'acct', 'addacct', 'review'];
+const ASKQ = [['Mutual fund market', 'How mutual funds performed in the last 6 months?', '#ffe9ee'], ['FD investments', 'Is safe to invest in an FD?', '#fff1cc'], ['FD vs Savings', 'FD or savings - which is better for me?', '#f8f7cc'], ['FD taxes', 'How FD interest taxed?', '#e4e8ee'], ['DICGS insurance', 'What is DICGC insurance?', '#ffe9ee']];
+const TENURES = [['Upto<br>1 Year', 'Upto 1 Year'], ['Upto<br>5 Years', 'Upto 5 Years'], ['Beyond<br>5 Years', 'Beyond 5 Years']];
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const bankName = (k) => B[k].n.replace(' bank', ' Bank');
 const CALC_T = [['5Y', 5, '5 Years'], ['3Y', 3, '3 Years'], ['1Y', 1, '1 Year'], ['6M', .5, '6 Months'], ['3M', .25, '3 Months']];
@@ -249,9 +257,8 @@ function morphEl(el, from, to, sp = SOFT, extra = {}) { // flies a copy of el fr
 /* ---------------- shared bits ---------------- */
 const askbar = () => `<div class="askbar"><label class="f press" style="transition:none">${I.mark('#9a9a9a', 19)}<i class="caret"></i><input type="text" placeholder="Ask Decade" enterkeyhint="send" aria-label="Ask Decade"><button type="button" class="send press-s press" data-a="send" aria-label="Send">${I.send}</button></label></div>`;
 const qcards = (n = 5) => {
-  const cs = ['#ffe9ee', '#fff1cc', '#f8f7cc', '#e4e8ee', '#ffe9ee'];
   return `<div class="askh">${I.mark('#6c4126', 22)}Ask Decade</div><div class="qgrid">` +
-    cs.slice(0, n).map((c, i) => `<button class="q press rv" data-st style="background:${c}" data-a="ask"><small>Mutual fund market ›</small><b>${['How mutual funds performed in the last 6 months?', 'Is it safe to invest in an FD?', 'FD or savings — which is better for me?', 'How is FD interest taxed?', 'What is DICGC insurance?'][i]}</b></button>`).join('') + '</div>';
+    ASKQ.slice(0, n).map(([t, q, c]) => `<button class="q press rv" data-st style="background:${c}" data-a="ask"><small>${t} ›</small><b>${q}</b></button>`).join('') + '</div>';
 };
 function bindAsk(root) {
   $$('.askbar', root).forEach((b) => {
@@ -290,11 +297,33 @@ function segPill(seg, i, anim = true) {
    ===================================================================== */
 function recCard(i) {
   const r = REC[i], b = B[r.bank];
-  return `<div class="dcard" data-i="${i}" data-a="recplan">
-    <div class="top"><span class="rlogo"><img src="img/${b.img}.png" alt=""></span><span>${bankName(r.bank)}</span></div>
-    <div class="grid"><div><label>Invest</label><div class="v">${inr(r.amt)}</div></div><div><label>Interest rate</label><div class="v green">${r.rate.toFixed(2)}%</div></div>
-      <div><label>Tenure</label><div class="v">${r.ten}</div></div></div>
-    <button class="go press" data-a="recstart" data-i="${i}">Start FD</button></div>`;
+  const head = `<div class="top"><span class="rlogo"><img src="img/${b.img}.png" alt=""></span><span>${bankName(r.bank)}</span></div>`;
+  const kv = (l, v, cls = '') => `<div class="${cls}"><label>${l}</label><div class="v ${cls.includes('g') ? 'green' : ''}">${v}</div></div>`;
+  let body;
+  if (r.v === 2) body = `<div class="grid2">${kv('Tenure', r.ten)}${kv('Interest rate', r.rate.toFixed(2) + '%', 'r g')}</div>
+    <button class="go wide press" data-a="recstart" data-i="${i}">Start FD</button>`;
+  else if (r.v === 3) body = `<div class="grid2">${kv('Invest', inr(r.amt))}${kv('At maturity', inr(mat(r.amt, r.rate, r.yrs)), 'r g')}</div>
+    <div class="grid2" style="padding-top:25px"><div><label>Plan</label><div class="v sm">${r.ten} @ ${r.rate.toFixed(2)}%</div></div></div>
+    <button class="go press" data-a="recstart" data-i="${i}" style="bottom:25px">Start FD</button>`;
+  else body = `<div class="grid">${kv('Invest', inr(r.amt))}${kv('Interest rate', r.rate.toFixed(2) + '%', 'g')}${kv('Tenure', r.ten)}</div>
+    <button class="go press" data-a="recstart" data-i="${i}">Start FD</button>`;
+  return `<div class="dcard" data-i="${i}" data-a="recplan">${head}${body}</div>`;
+}
+/* "Complete your FD": an FD that was started but not finished */
+function actionCard() {
+  const d = S.pend; if (!d) return '';
+  const [msg, btn] = STAGE[d.stage];
+  return `<div class="acard card" data-st>
+    <div class="top"><span class="rlogo"><img src="img/${B[d.bank].img}.png" alt=""></span><span>${bankName(d.bank)}</span></div>
+    <div class="apbox"><div class="r"><div><label>Invest</label><b>${inr(d.amt)}</b></div><div class="rt"><label>Tenure</label><b>${d.ten}</b></div></div>
+      <div class="f"><span>${msg}</span><button class="go press" data-a="pendgo">${btn}</button></div></div></div>`;
+}
+function refreshPend(p) {
+  const a = $('#pendA', p), b = $('#pendB', p); if (!a) return;
+  const has = !!S.pend;
+  a.innerHTML = has ? `<h2 class="h2">Complete your FD</h2>${actionCard()}` : '';
+  b.innerHTML = has ? actionCard() : '';
+  p.classList.toggle('haspend', has);
 }
 const REC_TEXT = (bank = 'Suryoday SF Bank') => `Hi Arunima, Decade suggests moving part of your savings to a fixed deposit, and we found a great option at ${bank}.`;
 const askd = () => `<button class="askd press" data-a="askchat">${I.mark('rgba(255,255,255,.85)', 17)}Ask Decade ${I.chevs('rgba(255,255,255,.75)')}</button>`;
@@ -346,7 +375,7 @@ function detailsPage(d) {
       </div>
       <div style="height:187px"></div>
     </div>
-    <div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle">FD details</div><button class="cbtn r press press-s" data-a="noop" aria-label="Search">${I.search}</button></div>
+    <div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle">FD details</div></div>
     ${askbar()}`);
   p._dep = d;
   hdrFade(p); bindAsk(p);
@@ -361,11 +390,13 @@ function toast(text) {
 function homePage() {
   const cats = Object.entries(CATS).map(([k, [t, s]]) => `<button class="cat press" data-a="cat" data-c="${k}">${I.cat[k]}<span><b data-lbl>${t}</b><small>${s}</small></span>${I.chev('#8a8a8a')}</button>`).join('');
   const banks = ['shiv', 'shri', 'sur', 'shiv'].map((k) => `<button class="bcard card press rv" data-st data-a="bank" data-b="${k}">
-      <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>${I.chev('#b5b5b5')}</div>
+      <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span><div class="upto"><small>upto</small><b>8.35%</b></div></div>
       <div class="d"><b>RBI Licensed Small finance bank</b><small>AAA means the highest degree of safety for timely repayment of interest and principal.</small></div></button>`).join('');
-  const tiles = [['tile1', 'Withdraw<br>anytime'], ['tile2', 'Insured by<br>DICGC'], ['tile3', 'RBI regulated<br>banks'], ['tile4', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
+  const tiles = [['tile1', 'DICGC insured<br>up to ₹5 lakh'], ['tile2', 'RBI-regulated<br>banks'], ['tile3', 'Trusted banks.<br>Secure deposits.'], ['tile4', 'Flexible interest<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
+  const ten = TENURES.map(([l, t]) => `<button class="tten card press" data-a="tenure" data-t="${t}"><svg viewBox="0 0 115 139" fill="none" stroke="#f5dff9" aria-hidden="true"><ellipse cx="28.5" cy="4" rx="29.5" ry="62"/><ellipse cx="62.5" cy="4" rx="29.5" ry="62"/><ellipse cx="92.5" cy="4" rx="29.5" ry="62"/></svg><span data-lbl>${l}</span></button>`).join('');
   const chips = CALC_T.map(([l], i) => `<button data-a="chip" data-i="${i}">${l}</button>`).join('') + '<button data-a="chip" data-i="5">+</button>';
   const all = `
+    <div id="pendA"></div>
     <h2 class="h2">FD Categories</h2>
     <div class="cats card" data-st>${cats}</div>
     <h2 class="h2">Recommendation</h2>
@@ -374,22 +405,24 @@ function homePage() {
       <p>${REC_TEXT()}</p>
       ${askd()}
     </div>
-    <h2 class="h2" style="margin-bottom:17px">Browse all banks</h2>
+    <h2 class="h2">Search by tenure</h2>
+    <div class="tens" data-st>${ten}</div>
+    <h2 class="h2" style="margin-left:17px">Available deposits</h2>
     ${banks}
     <button class="obtn press" data-a="allbanks" style="margin-top:2px">View all banks ${I.chevd}</button>
-    <h2 class="h2" style="margin-bottom:21px">Fixed deposit protection</h2>
-    <div class="tiles card rv" data-st>${tiles}</div>
-    <div class="calcband"><div class="calc card rv" data-st>
-      <h3>Calculate Fixed Deposit<br>Returns</h3>
+    <div class="calcband"><svg class="ovals" viewBox="0 0 429 256" fill="none" stroke="#d2cecc" stroke-width=".4" aria-hidden="true"><ellipse cx="86" cy="128" rx="85.8" ry="127.8"/><ellipse cx="172" cy="128" rx="85.8" ry="127.8"/><ellipse cx="258" cy="128" rx="85.8" ry="127.8"/><ellipse cx="343" cy="128" rx="85.8" ry="127.8"/></svg><div class="calc card rv" data-st>
+      <h3>Calculate<br>Fixed Deposit Returns</h3>
       <div class="in"><div class="amtbox"><div class="a"><span id="calcAmt">${inr(S.calcAmt)}</span><input type="tel" inputmode="numeric" aria-label="Investment amount" data-calcin></div><div class="l">Investment amount</div></div>
         <div class="chips" id="chips"><i class="pill"></i>${chips}</div>
         <button class="dbtn press" data-a="calc">Calculate</button></div>
     </div></div>
-    ${qcards()}
+    <h2 class="h2" style="margin-bottom:21px">Fixed deposit protection</h2>
+    <div class="tiles card rv" data-st>${tiles}</div>
+    ${qcards().replace('class="askh"', 'class="askh" style="margin-top:55px"')}
     <div style="height:139px"></div>`;
   const dep = `
-    <div class="sum card" data-st><small>Total investment</small><div class="big" id="sumv">₹5,00,000</div><div class="g">Interest gain <b>+₹3,265</b></div>
-      <button class="obtn press" data-a="noop">View transactions${I.chevs()}</button></div>
+    <div id="pendB"></div>
+    <div class="sum card" data-st><small>Total investment</small><div class="big" id="sumv">₹5,03,265</div><div class="gbox"><span>Interest gain</span><b>+₹3,265</b></div></div>
     <div class="seg dtabs" id="dseg"><i class="pill"></i><button data-a="dtab" data-i="0">Pending</button><button data-a="dtab" data-i="1">Ongoing</button><button data-a="dtab" data-i="2">Matured</button></div>
     <div id="deplist"></div>
     <div style="height:130px"></div>`;
@@ -405,11 +438,12 @@ function homePage() {
   p._init = () => {
     segPill($('#topseg', p), S.tab, false); setPanes(p, S.tab, 0);
     segPill($('#chips', p), S.calcT, false);
-    renderDeps(p, false);
-    $('#sumv', p).textContent = inr(500000 + (S.newDep ? S.newDep.a : 0));
+    renderDeps(p, false); refreshPend(p);
+    $('#sumv', p).textContent = inr(503265 + (S.newDep ? S.newDep.a : 0));
     deckLayout(p); deckTimer(p);
   };
-  p._top = () => deckTimer(p);
+  p._top = () => { deckTimer(p); if (p._pendKey !== JSON.stringify(S.pend)) { refreshPend(p); p._pendKey = JSON.stringify(S.pend); if (S.pend) { $$('.acard', p).forEach((c) => A(c, [{ opacity: 0, transform: 'translateY(16px) scale(.97)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: 200 })); } } };
+  p._pendKey = JSON.stringify(S.pend);
   hdrFade(p); bindAsk(p);
   const ci = $('[data-calcin]', p);
   ci.addEventListener('input', () => {
@@ -430,7 +464,7 @@ function setPanes(p, i, dir) {
   A(inc, [{ transform: `translateX(${dir * 70}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], SNAP);
   if (sc.scrollTop > 0) sc.scrollTo({ top: 0, behavior: 'smooth' });
   stagger(inc, 40);
-  if (i === 1) countUp($('#sumv', p), 500000 + (S.newDep ? S.newDep.a : 0));
+  if (i === 1) countUp($('#sumv', p), 503265 + (S.newDep ? S.newDep.a : 0));
 }
 function fixPills(p) {
   const d = $('#dseg', p), c = $('#chips', p);
@@ -462,23 +496,26 @@ function renderDeps(p, anim = true, dir = 1) {
 /* recommendation deck: front card lifts up, tucks behind; the next one slides forward */
 // front card, and the one behind it peeking out narrower and translucent (as in the design)
 const POS = ['translateY(0) scale(1)', 'translateY(23px) scale(.8944, .9905)'], OP = [1, .3]; // back sheet: 288×208 at (+17,+23), white/.30
+const NREC = REC.length;
 function deckLayout(p) {
   $$('.deck', p).forEach((dk) => $$('.dcard', dk).forEach((c, i) => {
-    const pos = (i - S.recI + 2) % 2;
-    c.style.zIndex = 2 - pos; c.style.pointerEvents = pos === 0 ? '' : 'none';
-    c.style.transform = POS[pos]; c.style.opacity = OP[pos];
+    const pos = (i - S.recI + NREC) % NREC;
+    c.style.zIndex = NREC - pos; c.style.pointerEvents = pos === 0 ? '' : 'none';
+    c.style.transform = POS[Math.min(pos, 1)]; c.style.opacity = pos > 1 ? 0 : OP[pos];
   }));
 }
 function deckNext(p) {
   const dk = $('.deck', p); if (!dk) return;
-  const cards = $$('.dcard', dk), front = cards[S.recI], back = cards[(S.recI + 1) % 2];
-  S.recI = (S.recI + 1) % 2;
+  const cards = $$('.dcard', dk), front = cards[S.recI], back = cards[(S.recI + 1) % NREC], next = cards[(S.recI + 2) % NREC];
+  S.recI = (S.recI + 1) % NREC;
   // front lifts up, slips behind; the one behind slides up to the front
   const a = front.animate([
     { transform: POS[0], opacity: 1 },
     { transform: 'translateY(-58px) scale(.99)', opacity: 1, offset: .42 },
     { transform: POS[1], opacity: OP[1] }], { duration: 900, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
-  setTimeout(() => { front.style.zIndex = 1; back.style.zIndex = 2; }, 380);
+  setTimeout(() => { front.style.zIndex = 0; back.style.zIndex = NREC; if (next !== front) next.style.zIndex = NREC - 1; }, 380);
+  if (next !== front) A(next, [{ opacity: 0 }, { opacity: OP[1] }], SOFT, { delay: 420 });
+  if (next !== front) A(front, [{ opacity: 1 }, { opacity: 0 }], { e: 'ease', d: 300 }, { delay: 560 });
   a.finished.then(() => { a.cancel(); deckLayout(p); }).catch(() => {});
   A(back, [{ transform: POS[1], opacity: OP[1] }, { transform: POS[0], opacity: 1 }], SOFT, { delay: 300 });
 }
@@ -495,7 +532,7 @@ let recM = null;
 function openRecModal(banner) {
   if (busy || recM || sheet) return; lock(650);
   deckTimer.hold = true;
-  const order = [S.recI, (S.recI + 1) % 2];
+  const order = REC.map((_, k) => (S.recI + k) % NREC);
   const wrap = document.createElement('div'); wrap.style.cssText = 'position:absolute;inset:0;isolation:isolate';
   wrap.innerHTML = `<div class="backdrop" data-a="recclose"></div>
     <div class="rmodal"><div class="rmscroll">${order.map((i) => recCard(i)).join('')}<p>${REC_TEXT()}</p>${askd()}</div></div>
@@ -508,6 +545,7 @@ function openRecModal(banner) {
   const pieces = $$('.dcard', sc).map((c, k) => [c, $(`.dcard[data-i="${order[k]}"]`, banner)]);
   pieces.push([$('p', sc), $('p', banner)], [$('.askd', sc), $('.askd', banner)]);
   const firsts = pieces.map(([, s]) => [R(s), +getComputedStyle(s).opacity]);
+  firsts.forEach((f, k) => { if (k < NREC && f[1] === 0) f[1] = 0; });
   banner.style.visibility = 'hidden';
   mod.classList.add('flying');
   morphBox(from, to, { r0: 23, r1: 24, bg1: 'linear-gradient(180deg,#4f1d15,#7e3125)', sh: 'none', parent: wrap, z: 0 }).then((g) => { mod.classList.remove('flying'); g.remove(); });
@@ -591,20 +629,20 @@ function chatSend(q) {
 const LIST = ['shiv', 'shri', 'sur', 'jana', 'shiv', 'shri', 'sur', 'jana'];
 function listHdr(badgeCalc) {
   return `<div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle left">Fixed deposits</div>
-    <button class="cbtn r2 press press-s" data-a="calcsheet" aria-label="Calculator">${I.calc}</button>
+    <button class="cbtn r2 press press-s" data-a="calcsheet" aria-label="Calculator">${I.calc}${badgeCalc ? '<span class="badge">1</span>' : ''}</button>
     <button class="cbtn r press press-s" data-a="filter" aria-label="Filter">${I.filter}</button></div>`;
 }
 function listPage(title) {
   const rows = LIST.map((k, i) => `<button class="lrow card press rv" data-st data-a="plan" data-b="${k}" data-t="${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}" data-y="${i % 3 === 1 ? 5 : 4.53}">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>
       <div class="r"><b>8.5%</b><small>${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}</small></div></button>`).join('');
-  const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle">${title}</h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
+  const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle">${title}</h1>${rows}${qcards(3)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
 }
 function amtListPage() {
   const t = CALC_T[S.calcT] || CALC_T[0];
   const rows = ['shiv', 'shri', 'jana', 'sur'].map((k, i) => `<button class="arow card press rv" data-st data-a="plan" data-b="${k}" data-amt="1">
       <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span><div class="r"><b>8.5%</b><small>${t[2]}</small></div></div>
-      <div class="m"><div><b>${inr(S.calcAmt)}</b><small>Investing amount</small></div><div><b class="green">${inr(mat(S.calcAmt, 8.5, t[1]) + i * 37)}</b><small>At maturity</small></div></div></button>`).join('');
+      <div class="m"><div><b>${inr(S.calcAmt)}</b><small>Investing amount</small></div><div><b class="green">${inr(mat(S.calcAmt, 8.5, t[1]))}</b><small>At maturity</small></div></div></button>`).join('');
   const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle" data-a="calcsheet">Invest ${inr(S.calcAmt)} for ${t[2]}</h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(true)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
 }
@@ -703,7 +741,7 @@ function planSheet(src, plan) {
 function calcSheet() {
   const chips = CALC_T.map(([l], i) => `<button data-a="chip" data-i="${i}">${l}</button>`).join('') + '<button data-a="chip" data-i="5">+</button>';
   const s = openSheet(`<div class="calc card" style="margin:0 0 11px 26px">
-    <h3>Calculate Fixed Deposit<br>Returns</h3>
+    <h3>Calculate<br>Fixed Deposit Returns</h3>
     <div class="in"><div class="amtbox"><div class="a"><span id="calcAmt2">${inr(S.calcAmt)}</span><input type="tel" inputmode="numeric" data-calcin2 aria-label="Investment amount"></div><div class="l">Investment amount</div></div>
       <div class="chips" id="chips2"><i class="pill"></i>${chips}</div>
       <button class="dbtn press" data-a="calc">Calculate</button></div></div>`);
@@ -721,21 +759,21 @@ function bankPage(k) {
   const b = B[k];
   const plans = [['5 years', 5, 8.25], ['4y 6m 11d', 4.53, 8.25], ['3y 4m', 3.33, 8.25], ['1 years', 1, 8.25]].map(([t, y, r]) => `<button class="dplan press" data-a="dplan" data-t="${t}" data-y="${y}" data-r="${r}">${I.bars('#c43960', 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#9a9a9a')}</button>`).join('');
   const bars = [['6.30%', 78, '#d9dee6', 60], ['7.56%', 121, '#d9dee6', 160], ['8.32%', 176, '#7ce469', 265]].map(([v, h, c, x]) => `<div class="bar" style="left:${x}px"><span>${v}</span><i style="height:${h}px;background:${c}"></i></div>`).join('');
-  const tiles = [['tile1', 'Withdraw<br>anytime'], ['tile2', 'Insured by<br>DICGC'], ['tile3', 'RBI regulated<br>banks'], ['tile4', 'Get monthly<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
+  const tiles = [['btile1', 'Partial<br>withdrawals<br>available'], ['btile2', 'No withdrawal<br>penalty for 1Y<br>tenure'], ['btile3', 'Withdraw<br>instantly in 7<br>days'], ['btile4', 'Flexible<br>interest<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
   const p = mkPage('bank', `
     <div class="scroll">
       <div style="height:137px"></div>
       <div class="bhero" data-st><div class="img"></div><div class="in"><h1>${b.l}</h1>${logo(k, 'w')}<p>${b.since}</p>
-        <div class="feats"><div>${I.bolt}Instant withdrawal available</div><div>${I.sun}No penalty for 1Y withdrawal</div><div>${I.shield()}DICGC insures up to ₹5 lakh</div></div></div></div>
-      <h2 class="h2">About the bank</h2>
-      <div class="tiles card rv" data-st>${tiles}</div>
+        <div class="feats"><div>${I.bolt}DICGC insured up to ₹5 lakh</div><div>${I.sun}RBI-licensed Small Finance Bank</div><div>${I.shield()}Listed on NSE &amp; BSE</div></div></div></div>
       <h2 class="h2">Deposit plans</h2>
       <div class="card dcards">${plans}</div>
-      <button class="obtn press" data-a="viewplans2" style="margin-top:17px">View all plans ${I.chevs()}</button>
+      <button class="obtn press" data-a="viewplans2" style="margin-top:23px">View all plans ${I.chevs()}</button>
+      <h2 class="h2">About the bank</h2>
+      <div class="tiles card rv" data-st>${tiles}</div>
       <h2 class="h2">Compare interest rates</h2>
       <div class="card cmp">
         <div class="dd"><div class="logo"><i><img src="img/hdfc.png" alt=""></i></div><div style="flex:1"><small>HDFC BANK SAVINGS</small><b>7.86%</b></div><span class="ddv">${I.chevd.replace('#4a1d17', '#a2a2a2')}</span></div>
-        <div class="bars" id="bars" style="height:237px"><i class="guide" style="bottom:176px"></i><i class="guide" style="bottom:88px"></i>${bars}</div>
+        <div class="bars" id="bars" style="height:230px"><i class="guide" style="bottom:176px"></i><i class="guide" style="bottom:88px"></i>${bars}</div>
         <div class="blabels"><span style="left:60px">HDFC<br>SVINGS</span><span style="left:160px">HDFC<br>FD</span><span style="left:265px">${b.n.split(' ')[0].toUpperCase()}<br>FD</span></div>
       </div>
       <h2 class="h2">Recommendation</h2>
@@ -798,8 +836,12 @@ function discClose(p) {
 /* =====================================================================
    BOOKING — one card; the steps slide inside it and the button stays put
    ===================================================================== */
-const CTA = { amount: 'Continue', pan: 'Confirm', aadhaar: 'Proceed', nominee: 'Confirm', addnom: 'Confirm', acct: 'Confirm', addacct: 'Confirm', review: 'Confirm' };
+const CTA = { personal: 'Confirm', amount: 'Continue', pan: 'Confirm', aadhaar: 'Proceed', nominee: 'Confirm', addnom: 'Confirm', acct: 'Confirm', addacct: 'Confirm', review: 'Confirm' };
+const PID = { rel: '#fRel', bank: '#fBank', occ: '#fOcc', edu: '#fEdu', inc: '#fInc' };
 const PICK = {
+  occ: ['Occupation', ['Salaried', 'Self-employed', 'Business owner', 'Student', 'Retired', 'Homemaker']],
+  edu: ['Education', ['Higher secondary', 'Graduate', 'Post graduate', 'Professional degree', 'Other']],
+  inc: ['Annual income', ['Below ₹5 lakh', '₹5 – 10 lakh', '₹10 – 25 lakh', '₹25 lakh – 1 crore', 'Above ₹1 crore']],
   rel: ['Relationship', ['Spouse', 'Father', 'Mother', 'Son', 'Daughter', 'Brother', 'Sister']],
   bank: ['Bank name', ['HDFC Bank', 'ICICI Bank', 'State Bank of India', 'Axis Bank', 'Kotak Mahindra Bank', 'Federal Bank']],
 };
@@ -814,6 +856,10 @@ function formErrors(st) {
     if (!f.name || f.name.trim().length < 2) e.push(['name', 'Enter the nominee’s full name']);
     if (!f.rel) e.push(['rel', 'Choose how they’re related to you']);
     if (!dobOk(f.dob)) e.push(['dob', f.dob && f.dob.length === 10 ? 'That date of birth isn’t valid' : 'Enter date of birth as DD/MM/YYYY']);
+  } else if (st === 'personal') {
+    if (!f.occ) e.push(['occ', 'Choose your occupation']);
+    if (!f.edu) e.push(['edu', 'Choose your education']);
+    if (!f.inc) e.push(['inc', 'Choose your annual income']);
   } else if (st === 'addacct') {
     const n = (f.accno || '').replace(/\D/g, '');
     if (n.length < 9) e.push(['accno', 'Account numbers have 9 to 18 digits']);
@@ -873,15 +919,19 @@ function stepHTML(st) {
         <div class="bigamt"><div class="v" id="amtv">${amtSpans(S.amt)}</div><div class="m" id="amtm">Your FD at maturity will be ${inr(m)}</div></div>
         <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'd'].map((k) => k === '' ? '<span></span>' : `<button data-a="key" data-k="${k}" aria-label="${k === 'd' ? 'Delete' : k}">${k === 'd' ? I.del : k}</button>`).join('')}</div>`;
     case 'pan':
-      return `<div class="st c">Confirm your PAN details</div>
-        <div class="pancard" data-st><img src="img/pan.png" alt="Income Tax Department, Govt. of India"><div class="pbox">
-          <div class="kv"><span>Name</span><b>Vangipurappu Venkata</b></div><div class="kv"><span>PAN number</span><b>ABCDE234k</b></div><div class="kv"><span>Date of birth</span><b>15/08/1999</b></div></div></div>
+      return `<div class="st c" style="margin-bottom:35px">Confirm your PAN details</div>
+        <div class="pancard" data-st><img class="phd" src="img/panhead.png" alt="Income Tax Department, Govt. of India"><i class="ln"></i>
+          <dl><dt>Name</dt><dd>Vangipurappu Venkata</dd><dt>Pan Account Number</dt><dd>abcde1234k</dd><dt>Date of Birth</dt><dd>15/08/1999</dd></dl><img class="holo" src="img/holo.jpg" alt=""></div>
         <div data-st id="consents">${['I authorize Decade and its partner to verify my PAN details.', 'I consent to processing my KYC information for verification.', 'I confirm the PAN details are accurate and mine.'].map((c, i) => `<button class="consent ${S.pan[i] ? 'on' : ''}" data-a="consent" data-i="${i}"><span class="chk">${I.tick}</span>${c}</button>`).join('')}</div>`;
     case 'aadhaar':
       return `<div class="st c">Confirm your Aadhaar</div>
         <div class="adesc" data-st>You will be redirected to the bank page, enter your Aadhaar number and confirm with OTP</div>
         <div class="abox" data-st><img src="img/aadhaar.png" alt="Aadhaar card"><div>Keep your Aadhaar number handy</div></div>
         <div class="ashare" data-st>${I.shield('#037600', 16)}Shared directly with the bank KYC</div>`;
+    case 'personal': {
+      const f = S.form, pf = (k, l) => `<button class="field" data-st data-f="${k}" data-a="pick" data-k="${k}"><small>${l}</small><span class="val ${f[k] ? '' : 'phv'}" id="${PID[k].slice(1)}">${f[k] || 'Select one'}${I.chevd.replace('#4a1d17', '#aba6a6')}</span></button>`;
+      return `<div class="st">Add your details</div>${pf('occ', 'Occupations')}${pf('edu', 'Education')}${pf('inc', 'Annual income')}<div class="ferr" id="ferr"></div>`;
+    }
     case 'nominee':
       return `<div class="st">Choose your nominee</div>` +
         S.noms.map((m, i) => `<button class="opt person ${S.nom === i ? 'on' : ''}" data-st data-a="nom" data-i="${i}" ${m.isNew ? 'data-new' : ''}><b>${esc(m.n)}</b><small>${esc(m.r)}</small><small>DOB : ${m.d}</small><span class="radio"></span></button>`).join('') +
@@ -890,7 +940,7 @@ function stepHTML(st) {
       const f = S.form;
       return `<div class="st">Add nominee details</div>
         <label class="field" data-st data-f="name"><small>Name</small><input id="fName" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next" placeholder="Enter full name" value="${esc(f.name || '')}"></label>
-        <button class="field" data-st data-f="rel" data-a="pick" data-k="rel"><small>Relationship</small><span class="val ${f.rel ? '' : 'phv'}" id="fRel">${f.rel || 'Select one'}</span></button>
+        <button class="field" data-st data-f="rel" data-a="pick" data-k="rel"><small>Relationship</small><span class="val ${f.rel ? '' : 'phv'}" id="fRel">${f.rel || 'Select one'}${I.chevd.replace('#4a1d17', '#aba6a6')}</span></button>
         <label class="field" data-st data-f="dob"><small>Date of birth</small><input id="fDob" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="DD/MM/YYYY" maxlength="10" value="${f.dob || ''}"></label>
         <div class="ferr" id="ferr"></div>`;
     }
@@ -902,7 +952,7 @@ function stepHTML(st) {
       const f = S.form;
       return `<div class="st">Add bank details</div>
         <label class="field" data-st data-f="accno"><small>Account number</small><input id="fAcc" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" placeholder="Enter account number" value="${f.accno || ''}"></label>
-        <button class="field" data-st data-f="bank" data-a="pick" data-k="bank"><small>Bank name</small><span class="val ${f.bank ? '' : 'phv'}" id="fBank">${f.bank || 'Select one'}</span></button>
+        <button class="field" data-st data-f="bank" data-a="pick" data-k="bank"><small>Bank name</small><span class="val ${f.bank ? '' : 'phv'}" id="fBank">${f.bank || 'Select one'}${I.chevd.replace('#4a1d17', '#aba6a6')}</span></button>
         <label class="field" data-st data-f="holder"><small>Name on account</small><input id="fHolder" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="done" placeholder="Enter name" value="${esc(f.holder || '')}"></label>
         <div class="ferr" id="ferr"></div>`;
     }
@@ -954,9 +1004,11 @@ function renderStep(dir, o = {}) {
 function updateCta() {
   const p = bookEl(); if (!p) return;
   const st = S.steps[S.steps.length - 1];
-  $('.cta', p).classList.toggle('off', (st === 'pan' && !S.pan.every(Boolean)) || ((st === 'addnom' || st === 'addacct') && formErrors(st).length > 0));
+  $('.cta', p).classList.toggle('off', (st === 'pan' && !S.pan.every(Boolean)) || ((st === 'addnom' || st === 'addacct' || st === 'personal') && formErrors(st).length > 0));
 }
+function reach(st) { const i = ORDER.indexOf(st); if (i > (S.reached ?? -1)) S.reached = i; }
 function goStep(st, o = {}) {
+  reach(st);
   if (busy && !o.force) return; lock(320);
   const i = S.steps.indexOf(st);
   if (i >= 0) { S.steps = S.steps.slice(0, i + 1); renderStep(-1, o); }
@@ -972,12 +1024,19 @@ function bookBack(fromSwipe, dx = 0) {
     }
     S.steps.pop(); lock(320); renderStep(-1); return;
   }
+  // leaving a booking part-way keeps it on the home screen as "Complete your FD"
+  const r = S.reached ?? -1, sel = S.sel;
+  if (r >= ORDER.indexOf('amount') && !S.paid) {
+    const stage = r >= ORDER.indexOf('personal') ? 'details' : r === ORDER.indexOf('pan') ? 'pan' : 'kyc';
+    const step = stage === 'details' ? 'personal' : r >= ORDER.indexOf('aadhaar') ? 'aadhaar' : 'pan';
+    S.pend = { bank: sel.bank, amt: S.amt, ten: sel.ten, yrs: sel.yrs, rate: sel.rate, color: sel.color, stage, step };
+  }
   pop(dx);
 }
 /* opening the booking card: whatever was tapped grows into it */
 function openBooking(steps, src, o = {}) {
   if (busy) return; lock(700);
-  S.steps = steps.slice(); S.fresh = true; S.ptab = 0;
+  S.steps = steps.slice(); S.fresh = true; S.ptab = 0; S.paid = false; S.reached = -1; steps.forEach(reach);
   if (S.planAmt && steps[0] === 'amount') S.amt = S.planAmt;
   if (recM) closeRecModal(true);
   const p = bookPage();
@@ -1049,7 +1108,7 @@ function bankKyc() {
   const cells = $$('.otp i', p);
   '482913'.split('').forEach((d, i) => setTimeout(() => { cells[i].textContent = d; A(cells[i], [{ transform: 'scale(.6)', borderColor: '#8d6197' }, { transform: 'none', borderColor: '#ddd' }], BOUNCE); }, 700 + i * 170));
   setTimeout(() => { const m = $('#kycmsg', p); m.innerHTML = `<span style="color:var(--green-d)">✓ Aadhaar verified</span>`; A(m, [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], SOFT); }, 1900);
-  setTimeout(() => { dismiss().then(() => goStep('nominee', { force: true })); }, 2700);
+  setTimeout(() => { dismiss().then(() => { S.form = {}; goStep('personal', { force: true }); }); }, 2700);
 }
 function payFlow() {
   const p = present(`<div class="hdr" style="height:100px;background:#fff"><div style="position:absolute;top:58px;left:0;right:0;text-align:center;font-size:13px;color:var(--mute);display:flex;justify-content:center;gap:6px;align-items:center">${I.lock}pay.suryodaybank.com</div></div>
@@ -1070,6 +1129,7 @@ function payFlow() {
    SUCCESS — rings + tick, then the result folds up into a card and VKYC rises
    ===================================================================== */
 function success() {
+  S.paid = true; S.pend = null;
   S.newDep = { a: S.amt, r: S.sel.rate, m: mat(S.amt, S.sel.rate, S.sel.yrs), s: 'pending', p: 0, left: 'Starts after VKYC', isNew: true };
   const p = mkPage('succ', `
     <button class="cbtn l press press-s" data-a="done" aria-label="Close" style="left:21px;opacity:0">${I.x}</button>
@@ -1152,6 +1212,21 @@ const ACT = {
   chatq(el) { chatSend(el.textContent); const i = $('.chat input', sheet && sheet.el); if (i) i.focus({ preventScroll: true }); },
   recclose() { closeRecModal(); },
   send(el) { const b = el.closest('.askbar'); if (b) sendAsk(b); else discClose(el.closest('.page')); },
+  pendgo(el) { // resume the unfinished FD at the step it stopped
+    const d = S.pend; if (!d || busy) return;
+    S.sel = { bank: d.bank, ten: d.ten, yrs: d.yrs, rate: d.rate, color: d.color }; S.amt = d.amt; S.planAmt = 0;
+    if (d.step === 'personal') S.form = {};
+    const card = el.closest('.acard');
+    openBooking([d.step], card, { r0: 23, logo: $('.rlogo', card) });
+  },
+  tenure(el) {
+    if (busy) return;
+    const t = el.dataset.t, p = listPage(t), h = $('.ltitle', p), lbl = $('[data-lbl]', el);
+    pagesEl.appendChild(p); const to = R(h); p.remove();
+    const from = R(lbl); h.style.opacity = 0; push(p);
+    const g = ghost(from, { font: '500 15px/21px var(--font-sans)', color: '#282424', whiteSpace: 'nowrap', transformOrigin: '0 0' }); g.textContent = t;
+    A(g, [{ transform: 'none' }, { transform: `translate(${to.x - from.x}px, ${to.y + 4 - from.y}px) scale(${23 / 15})` }], SNAP).then(() => { h.style.opacity = ''; g.remove(); });
+  },
   tab(el) {
     const i = +el.dataset.i; if (i === S.tab) return; const p = el.closest('.page');
     const dir = i > S.tab ? 1 : -1; S.tab = i; segPill($('#topseg', p), i); setPanes(p, i, dir);
@@ -1182,7 +1257,7 @@ const ACT = {
   },
   recstart(el) { // Start FD → the FD bottom sheet, the card flies up into it
     const r = REC[+el.dataset.i]; deckTimer.hold = true;
-    planSheet(el.closest('.dcard'), { bank: r.bank, ten: r.ten, yrs: r.yrs, rate: r.rate, amt: r.amt });
+    planSheet(el.closest('.dcard'), { bank: r.bank, ten: r.ten, yrs: r.yrs, rate: r.rate, amt: r.amt || 0 });
   },
   closesheet() { if (sheet) closeSheet().then(() => { if (!recM) deckTimer.hold = false; }); },
   sheetbank() { const k = S.sel.bank; closeRecModal(true); closeSheet().then(() => push(bankPage(k))); },
@@ -1225,7 +1300,7 @@ const ACT = {
     if (st === 'amount' && S.amt < 1000) { A($('#amtv', bookEl()), [{ transform: 'none' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(7px)' }, { transform: 'none' }], { e: 'ease-out', d: 380 }); $('#amtm', bookEl()).textContent = 'Minimum deposit is ₹1,000'; return; }
     if (next) return goStep(next);
     if (st === 'aadhaar') return bankKyc();
-    if (st === 'addnom' || st === 'addacct') {
+    if (st === 'addnom' || st === 'addacct' || st === 'personal') {
       const errs = formErrors(st), step = $('.step:last-child', bookEl());
       if (errs.length) {
         errs.forEach(([k]) => { const fe = $(`[data-f="${k}"]`, step); if (fe) fe.classList.add('err'); });
@@ -1237,6 +1312,7 @@ const ACT = {
         return;
       }
       const f = S.form;
+      if (st === 'personal') { S.me = { occ: f.occ, edu: f.edu, inc: f.inc }; S.form = {}; goStep('nominee'); return; }
       if (st === 'addnom') { S.noms.forEach((m) => { m.isNew = false; }); S.noms.push({ n: f.name.trim(), r: f.rel, d: f.dob, isNew: true }); S.nom = S.noms.length - 1; goStep('nominee'); }
       else { S.accts.forEach((a) => { a.isNew = false; }); const n = f.accno.replace(/\D/g, ''); S.accts.push({ b: f.bank, s: f.bank.split(' ')[0], n: n.slice(-4), lg: f.bank === 'HDFC Bank' ? 'hdfc' : '', isNew: true }); S.acc = S.accts.length - 1; goStep('acct'); }
       return;
@@ -1260,12 +1336,13 @@ const ACT = {
     const k = el.dataset.k, v = el.dataset.v; S.form[k] = v;
     $$('.pk', el.parentElement).forEach((x) => x.classList.toggle('on', x === el));
     setTimeout(() => closeSheet().then(() => {
-      const step = $('.step:last-child', bookEl()), val = $(k === 'rel' ? '#fRel' : '#fBank', step), fe = val && val.closest('.field');
+      const step = $('.step:last-child', bookEl()), val = $(PID[k], step), fe = val && val.closest('.field');
       if (!val) return;
-      val.textContent = v; val.classList.remove('phv'); fe.classList.remove('err'); const er = $('#ferr', step); if (er) er.textContent = '';
+      val.innerHTML = esc(v) + I.chevd.replace('#4a1d17', '#aba6a6'); val.classList.remove('phv'); fe.classList.remove('err'); const er = $('#ferr', step); if (er) er.textContent = '';
       A(val, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], SOFT);
       updateCta();
-      const nx = $(k === 'rel' ? '#fDob' : '#fHolder', step); if (nx && !nx.value) nx.focus({ preventScroll: true });
+      const nx = k === 'rel' ? $('#fDob', step) : k === 'bank' ? $('#fHolder', step) : null; if (nx && !nx.value) nx.focus({ preventScroll: true });
+      if (['occ', 'edu', 'inc'].includes(k)) { const nk = ['occ', 'edu', 'inc'].find((x) => !S.form[x]); if (nk) setTimeout(() => { const b = $(`[data-k="${nk}"]`, step); if (b && !sheet) ACT.pick(b); }, 280); }
     }), 160);
   },
   reinv(el) { S.reinv = !S.reinv; el.classList.toggle('on', S.reinv); },
@@ -1346,7 +1423,7 @@ stage.addEventListener('focusin', (e) => {
 });
 
 /* ---------------- start ---------------- */
-['hero.jpg', 'vkyc.jpg', 'relax.jpg', 'tile1.jpg', 'tile2.jpg', 'tile3.jpg', 'tile4.jpg', 'pan.png', 'aadhaar.png', 'hdfc.png', 'suryoday.png', 'jana.png', 'shriram.png', 'shivalik.png', 'unity.png']
+['hero.jpg', 'vkyc.jpg', 'relax.jpg', 'btile1.jpg', 'btile2.jpg', 'btile3.jpg', 'btile4.jpg', 'panhead.png', 'holo.jpg', 'tile1.jpg', 'tile2.jpg', 'tile3.jpg', 'tile4.jpg', 'pan.png', 'aadhaar.png', 'hdfc.png', 'suryoday.png', 'jana.png', 'shriram.png', 'shivalik.png', 'unity.png']
   .forEach((n) => { const im = new Image(); im.src = 'img/' + n; if (im.decode) im.decode().catch(() => {}); });
 const home = homePage();
 pagesEl.appendChild(home); stack.push(home); home._init();
