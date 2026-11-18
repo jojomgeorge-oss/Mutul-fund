@@ -668,6 +668,7 @@ const FG = {
   pay: ['Interest payout', [['mat', 'At maturity'], ['mon', 'Monthly'], ['qtr', 'Quarterly']]],
   type: ['Bank type', [['sf', 'Small finance'], ['nbfc', 'NBFC']]],
 };
+const X15 = (c) => `<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M4.5 4.5l6 6M10.5 4.5l-6 6" stroke="${c}" stroke-width="1.3" stroke-linecap="round"/></svg>`;
 const fNew = () => ({ sort: 'rate', cat: [], ten: [], pay: [], type: [], banks: [], ins: false });
 const fCount = (f) => f.cat.length + f.ten.length + f.pay.length + f.type.length + f.banks.length + (f.ins ? 1 : 0);
 const tBucket = (mo) => (mo <= 12 ? 'u1' : mo <= 36 ? 'b13' : mo <= 60 ? 'b35' : 'b5');
@@ -687,7 +688,7 @@ function filterSheet(btn) {
   const banks = Array.from(new Set(fRows(p).map((r) => r.dataset.b)));
   const chips = (g) => `<div class="fchips">${FG[g][1].map(([v, l]) => `<button class="fchip ${f[g].includes(v) ? 'on' : ''}" data-a="fchip" data-g="${g}" data-v="${v}">${l}</button>`).join('')}</div>`;
   const s = openSheet(`<div class="fsheet">
-    <div class="fh"><b>Filter</b><span class="fbadge" id="fbadge"></span><button class="fclr press" data-a="fclear">Clear all${I.x.replace(/width="16" height="16"/, 'width="9" height="9"').replace('stroke-width="2"', 'stroke-width="2.4"')}</button></div>
+    <div class="fh"><b>Filter</b><span class="fbadge" id="fbadge"></span><button class="fclr press" data-a="fclear">Clear all${X15('#1f1513')}</button></div>
     <div class="fbody">
       <h4>Sort by</h4><div class="fseg"><button class="${f.sort === 'rate' ? 'on' : ''}" data-a="fsort" data-v="rate">Highest rate</button><button class="${f.sort === 'ten' ? 'on' : ''}" data-a="fsort" data-v="ten">Short tenure</button></div>
       ${['cat', 'ten', 'pay', 'type'].map((g) => `<h4>${FG[g][0]}</h4>${chips(g)}`).join('')}
@@ -718,7 +719,7 @@ function applyFilter(p, anim = true) {
   const ap = $('.fapplied', p), list = [];
   ['ten', 'pay', 'cat', 'type', 'banks'].forEach((g) => f[g].forEach((v) => list.push([g, v])));
   if (f.ins) list.push(['ins', 1]);
-  ap.innerHTML = list.map(([g, v]) => `<button class="fap press" data-a="funset" data-g="${g}" data-v="${v}">${fLabel(g, v)}${I.x.replace(/width="16" height="16"/, 'width="9" height="9"').replace('#292929', '#fff').replace('stroke-width="2"', 'stroke-width="2.4"')}</button>`).join('');
+  ap.innerHTML = list.map(([g, v]) => `<button class="fap press" data-a="funset" data-g="${g}" data-v="${v}">${fLabel(g, v)}${X15('#f7f2f2')}</button>`).join('');
   p.classList.toggle('filtered', c > 0);
   const fb = $('[data-a="filter"]', p); let bd = $('.badge', fb);
   if (c) { if (!bd) { bd = document.createElement('span'); bd.className = 'badge'; fb.appendChild(bd); if (anim) A(bd, [{ transform: 'scale(0)' }, { transform: 'none' }], BOUNCE, { delay: 200 }); } bd.textContent = c; }
@@ -1467,7 +1468,7 @@ const ACT = {
     const k = el.dataset.k, [title, opts] = PICK[k], cur = S.form[k];
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     openSheet(`<div class="psheet"><h3>${title}</h3><div class="pbody"><div class="plist">${opts.map((o) => `<button class="prow2 ${o === cur ? 'on' : ''}" data-a="picksel" data-v="${esc(o)}"><span>${esc(o)}</span><span class="radio"></span></button>`).join('')}</div>
-      <button class="pconf press" data-a="pickset" data-k="${k}">Confirm</button></div></div>`);
+      <button class="pconf press" data-a="pickset" data-k="${k}">Confirm</button></div></div>`, { cls: 'pks' });
   },
   picksel(el) {
     $$('.prow2', el.parentElement).forEach((x) => x.classList.toggle('on', x === el));
