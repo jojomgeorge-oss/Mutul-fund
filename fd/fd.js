@@ -56,14 +56,24 @@ const lock = (ms = 380) => { busy = true; clearTimeout(lock.t); lock.t = setTime
 const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
 const mat = (a, r, y) => a * Math.pow(1 + r / 100, y);
 const B = {
-  shiv: { n: 'Shivalik SF Bank', l: 'Shivalik Small Finance Bank', img: 'shivalik', since: 'Since 2010 • Private bank', tag: 'DICGC insured' },
+  shiv: { n: 'Shivalik SF Bank', l: 'Shivalik Small Finance Bank', img: 'shivalik', since: 'Since 2010 • Small finance bank', tag: 'DICGC insured' },
   shri: { n: 'Shriram finance', l: 'Shriram Finance', img: 'shriram', full: 1, since: 'Since 1979 • NBFC', tag: 'DICGC insured' },
-  sur: { n: 'Suryoday SF bank', l: 'Suryoday Small Finance Bank', img: 'suryoday', since: 'Since 2008 • Public bank', tag: 'DICGC insured' },
-  jana: { n: 'Jana SF Bank', l: 'Jana Small Finance Bank', img: 'jana', full: 1, since: 'Since 2006 • Private bank', tag: 'DICGC insured' },
-  unity: { n: 'Unity SF Bank', l: 'Unity Small Finance Bank', img: 'unity', full: 1, since: 'Since 2021 • Private bank', tag: 'DICGC insured' },
+  sur: { n: 'Suryoday SF bank', l: 'Suryoday Small Finance Bank', img: 'suryoday', since: 'Since 2008 • Small finance bank', tag: 'DICGC insured' },
+  jana: { n: 'Jana SF Bank', l: 'Jana Small Finance Bank', img: 'jana', full: 1, since: 'Since 2006 • Small finance bank', tag: 'DICGC insured' },
+  unity: { n: 'Unity SF Bank', l: 'Unity Small Finance Bank', img: 'unity', full: 1, since: 'Since 2021 • Small finance bank', tag: 'DICGC insured' },
 };
+// card rates by tenure bucket (≤1Y, 1–3Y, 3–5Y, 5Y+) and what each issuer offers
+const RT = { sur: [7.25, 8.0, 8.6, 8.4], unity: [7.75, 8.15, 8.6, 8.25], shiv: [7.5, 8.1, 8.5, 8.0], shri: [7.1, 7.9, 8.35, 8.3], jana: [7.0, 8.25, 8.25, 7.75] };
+const BF = { sur: { pay: 'mat mon qtr', inst: 1 }, unity: { pay: 'mat mon qtr', inst: 1 }, shiv: { pay: 'mat qtr', inst: 1 }, shri: { pay: 'mat mon qtr', inst: 0 }, jana: { pay: 'mat qtr', inst: 0 } };
+const tIdx = (mo) => (mo <= 12 ? 0 : mo <= 36 ? 1 : mo <= 60 ? 2 : 3);
+const rateFor = (k, mo) => RT[k][tIdx(mo)];
+// short tenures pay less; from 1 year the card rates apply
+const fdRate = (k, yrs) => { const mo = yrs * 12, r0 = RT[k][0]; return mo <= .6 ? r0 - 3.25 : mo <= 1.5 ? r0 - 3 : mo <= 3 ? r0 - 2.75 : mo <= 6 ? r0 - .5 : mo <= 9 ? r0 - .25 : rateFor(k, mo); };
+const maxRate = (k) => Math.max.apply(null, RT[k]);
+const pct = (x) => x.toFixed(2).replace(/0$/, '') + '%';
+const TOP = Math.max.apply(null, Object.keys(RT).map(maxRate));
 const CATS = {
-  high: ['High returns', 'Up to 8.30% a year', '#21a32a'], monthly: ['Monthly payouts', 'Interest paid monthly', '#e8517a'],
+  high: ['High returns', `Up to ${TOP.toFixed(2)}% a year`, '#21a32a'], monthly: ['Monthly payouts', 'Interest paid monthly', '#e8517a'],
   instant: ['Instant withdrawals', 'Break it anytime', '#9a55b5'],
 };
 const PLANS = {
@@ -91,6 +101,12 @@ S.pend = { bank: 'sur', amt: 500000, ten: '5Y 3M 16D', yrs: 5.29, rate: 8.31, st
 const STAGE = { kyc: ['Complete KYC', 'Start KYC'], pan: ['Verify PAN', 'Start'], details: ['Enter details', 'Start'] };
 const ORDER = ['select', 'amount', 'pan', 'aadhaar', 'personal', 'income', 'nominee', 'addnom', 'acct', 'addacct', 'review'];
 const ASKQ = [['Mutual fund market', 'How mutual funds performed in the last 6 months?', '#ffe9ee'], ['FD investments', 'Is safe to invest in an FD?', '#fff1cc'], ['FD vs Savings', 'FD or savings - which is better for me?', '#f8f7cc'], ['FD taxes', 'How FD interest taxed?', '#e4e8ee'], ['DICGS insurance', 'What is DICGC insurance?', '#ffe9ee']];
+// what each listing shows: the page title decides which deposits belong on it
+const SCOPE = {
+  'Monthly payouts': (r) => r.pay.includes('mon'), 'Instant withdrawals': (r) => r.cat.includes('inst'),
+  'Upto 1 Year': (r) => r.mo <= 12, 'Upto 5 Years': (r) => r.mo <= 60, 'Beyond 5 Years': (r) => r.mo > 60,
+  'High returns': (r) => rateFor(r.b, r.mo) >= 8.25,
+};
 const TENURES = [['Upto<br>1 Year', 'Upto 1 Year'], ['Upto<br>5 Years', 'Upto 5 Years'], ['Beyond<br>5 Years', 'Beyond 5 Years']];
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const bankName = (k) => B[k].n.replace(' bank', ' Bank');
@@ -118,6 +134,7 @@ const I = {
   x: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="#292929" stroke-width="2" stroke-linecap="round"/></svg>',
   xw: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>',
   del: '<svg width="30" height="22" viewBox="0 0 24 18" fill="none"><path d="M7.5 1.5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-13L1.5 9z" stroke="#645f5f" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 5.5l7 7m0-7l-7 7" stroke="#645f5f" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  aaa: '<svg width="11" height="12" viewBox="0 0 11 12" fill="none"><path d="M5.5 1l1.3 2.7 3 .4-2.2 2.1.5 3L5.5 7.8 2.9 9.2l.5-3L1.2 4.1l3-.4L5.5 1z" fill="#787373"/></svg>',
   bell: '<svg width="18" height="19" viewBox="0 0 18 19" fill="none"><path d="M9 1.5a5 5 0 0 0-5 5v3.2L2.4 13h13.2L14 9.7V6.5a5 5 0 0 0-5-5z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M6.8 15.5a2.3 2.3 0 0 0 4.4 0" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>',
   lock: '<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="1" y="6" width="10" height="7" rx="2" fill="#1a8d1a"/><path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1a8d1a" stroke-width="1.6"/></svg>',
   bars: (c, s = 39, r = 12) => `<svg width="${s}" height="${s}" viewBox="0 0 39 39" style="flex:none"><rect width="39" height="39" rx="${r * 39 / s}" fill="${c}"/><rect x="10.5" y="21.5" width="3" height="4" rx="1.5" fill="#fff" opacity=".75"/><rect x="15.5" y="19.5" width="3" height="6" rx="1.5" fill="#fff" opacity=".85"/><rect x="20.5" y="16.5" width="3" height="9" rx="1.5" fill="#fff"/><rect x="25.5" y="13.5" width="3" height="12" rx="1.5" fill="#fff"/></svg>`,
@@ -328,19 +345,27 @@ function refreshPend(p) {
 }
 const REC_TEXT = (bank = 'Suryoday SF Bank') => `Hi Arunima, Decade suggests moving part of your savings to a fixed deposit, and we found a great option at ${bank}.`;
 const askd = () => `<button class="askd press" data-a="askchat">${I.mark('rgba(255,255,255,.85)', 17)}Ask Decade ${I.chevs('rgba(255,255,255,.75)')}</button>`;
+// total invested in running deposits, and the interest they have earned so far
+function depTotals() {
+  const on = deposits().ongoing, a = on.reduce((x, d) => x + d.a, 0) + (S.newDep ? S.newDep.a : 0);
+  return { a, g: Math.round(on.reduce((x, d) => x + (d.m - d.a) * d.p, 0)) };
+}
 function depCard(d, i) {
   return `<div class="dep card press rv ${d.isNew ? 'new' : ''}" data-st data-a="depopen" data-k="${d.key}" data-i="${i}">
-    <div class="t">${logo('sur', 'sm')}<span>Suryoday SF bank FD</span>${I.chevs('rgba(0,0,0,.6)')}<span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
+    <div class="t">${logo(d.b || 'sur', 'sm')}<span>${B[d.b || 'sur'].n} FD</span>${I.chevs('rgba(0,0,0,.6)')}<span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
     <div class="r1"><div><small>Invested amount</small><b>${inr(d.a)}</b></div><div class="rt"><small>Interest rate</small><b class="green">${d.r.toFixed(2)}%</b></div></div>
     <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog"><i style="transform:scaleX(${Math.max(d.p, .03)})"></i></div><div class="row">${{ matured: 'Matured on', expired: 'Booking expired', refunded: 'Refunded' }[d.s] || 'Tenure'}<b class="t2">${d.left}</b></div></div>
   </div>`;
 }
+// each deposit carries its own issuer, amount, rate and tenure; maturity and progress follow from them
+const mkDep = (b, a, r, yrs, ten, s, p, left) => ({ b, a, r, yrs, ten, s, p, left, m: mat(a, r, yrs) });
 function deposits() {
-  const base = { a: 50000, r: 8.75, m: 51208, left: '5Y 3M 15D left' };
   const L = {
-    pending: [Object.assign({}, base, { s: 'pending', p: 0, left: 'Starts after VKYC' }), Object.assign({}, base, { s: 'expired', p: 0, left: 'VKYC not done in time' }), Object.assign({}, base, { s: 'refunded', p: 0, left: '₹50,000 back in HDFC ••3456' })],
-    ongoing: [0, 1, 2].map(() => Object.assign({}, base, { s: 'ongoing', p: .06 })),
-    matured: [Object.assign({}, base, { s: 'matured', p: 1, left: '12 Mar 2026', m: 54380 }), Object.assign({}, base, { s: 'matured', p: 1, left: '02 Jan 2026', a: 100000, m: 108250 })],
+    pending: [mkDep('sur', 50000, 8.6, 5, '5 Years', 'pending', 0, 'Starts after VKYC'), mkDep('jana', 100000, 8.25, 3, '3 Years', 'expired', 0, 'VKYC not done in time'),
+      mkDep('shiv', 25000, 8.1, 2, '2 Years', 'refunded', 0, '₹25,000 back in HDFC ••4563')],
+    ongoing: [mkDep('sur', 200000, 8.6, 5, '5 Years', 'ongoing', .32, '3Y 4M 12D left'), mkDep('unity', 75000, 8.15, 2, '2 Years', 'ongoing', .55, '10M 20D left'),
+      mkDep('shiv', 150000, 8.5, 4, '4 Years', 'ongoing', .12, '3Y 6M 3D left')],
+    matured: [mkDep('shri', 50000, 8.3, 1, '1 Year', 'matured', 1, '12 Mar 2026'), mkDep('jana', 100000, 8.25, 1, '1 Year', 'matured', 1, '02 Jan 2026')],
   };
   if (S.newDep) L.pending.unshift(S.newDep);
   for (const k in L) L[k].forEach((d) => { d.key = k; });
@@ -365,7 +390,7 @@ function detailsPage(d) {
         <button class="again press" data-a="again">Invest again${I.chevs('#fff')}</button>
       </div>
       <div class="dtable rv" data-st>
-        ${row('Investment date', date, '', 'n')}${row('Investment amount', inr(d.a), '', 'n')}${row('Tenure', isNew ? titleTen(S.sel.ten) : '4Y 5M 14D', '', 'n')}
+        ${row('Investment date', date, '', 'n')}${row('Investment amount', inr(d.a), '', 'n')}${row('Tenure', isNew ? titleTen(S.sel.ten) : d.ten || '4Y 5M 14D', '', 'n')}
         ${row('Maturity instruction', `<span id="mi">${S.reinv ? 'Reinvest' : 'Reinvest'}</span>`, chip(I.pen, 'mi'))}
         ${row('Transaction ID', '23456781098354721083')}${row('Payment method', 'UPI')}${row('Nominee', esc(nom.n))}${row('Nominee relation', esc(nom.r))}
         ${row('Receipt', '<u data-a="dl">Download</u>', chip(dl, 'dl'))}${row('Form 121', '<u data-a="f121">Apply</u>', chip(cr, 'f121'))}
@@ -390,9 +415,9 @@ function toast(text) {
 
 function homePage() {
   const cats = Object.entries(CATS).map(([k, [t, s]]) => `<button class="cat press" data-a="cat" data-c="${k}">${I.cat[k]}<span><b data-lbl>${t}</b><small>${s}</small></span>${I.chev('#8a8a8a')}</button>`).join('');
-  const banks = ['shiv', 'shri', 'sur', 'shiv'].map((k) => `<button class="bcard card press rv" data-st data-a="bank" data-b="${k}">
-      <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span><div class="upto"><small>upto</small><b>8.35%</b></div></div>
-      <div class="d"><b>RBI Licensed Small finance bank</b><small>AAA means the highest degree of safety for timely repayment of interest and principal.</small></div></button>`).join('');
+  const banks = Object.keys(RT).sort((a, b) => maxRate(b) - maxRate(a)).slice(0, 4).map((k) => `<button class="bcard card press rv" data-st data-a="bank" data-b="${k}">
+      <div class="t">${logo(k)}<span><b>${B[k].n}</b>${safety(k)}</span><div class="upto"><small>upto</small><b>${pct(maxRate(k))}</b></div></div>
+      <div class="d">${isNbfc(k) ? '<b>RBI registered NBFC</b><small>AAA means the highest degree of safety for timely repayment of interest and principal.</small>' : '<b>RBI Licensed Small finance bank</b><small>Deposits up to ₹5 lakh are insured by DICGC, an RBI company.</small>'}</div></button>`).join('');
   const tiles = [['tile1', 'DICGC insured<br>up to ₹5 lakh'], ['tile2', 'RBI-regulated<br>banks'], ['tile3', 'Trusted banks.<br>Secure deposits.'], ['tile4', 'Flexible interest<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
   const ten = TENURES.map(([l, t]) => `<button class="tten card press" data-a="tenure" data-t="${t}"><svg viewBox="0 0 115 139" fill="none" stroke="#f5dff9" aria-hidden="true"><ellipse cx="28.5" cy="4" rx="29.5" ry="62"/><ellipse cx="62.5" cy="4" rx="29.5" ry="62"/><ellipse cx="92.5" cy="4" rx="29.5" ry="62"/></svg><span data-lbl>${l}</span></button>`).join('');
   const chips = CALC_T.map(([l], i) => `<button data-a="chip" data-i="${i}">${l}</button>`).join('') + '<button data-a="chip" data-i="5">+</button>';
@@ -423,7 +448,7 @@ function homePage() {
     <div style="height:139px"></div>`;
   const dep = `
     <div id="pendB"></div>
-    <div class="sum card" data-st><small>Total investment</small><div class="big" id="sumv">₹5,03,265</div><div class="gbox"><span>Interest gain</span><b>+₹3,265</b></div></div>
+    <div class="sum card" data-st><small>Total investment</small><div class="big" id="sumv">${inr(depTotals().a)}</div><div class="gbox"><span>Interest gain</span><b>+${inr(depTotals().g)}</b></div></div>
     <div class="seg dtabs" id="dseg"><i class="pill"></i><button data-a="dtab" data-i="0">Pending</button><button data-a="dtab" data-i="1">Ongoing</button><button data-a="dtab" data-i="2">Matured</button></div>
     <div id="deplist"></div>
     <div style="height:130px"></div>`;
@@ -440,7 +465,7 @@ function homePage() {
     segPill($('#topseg', p), S.tab, false); setPanes(p, S.tab, 0);
     segPill($('#chips', p), S.calcT, false);
     renderDeps(p, false); refreshPend(p);
-    $('#sumv', p).textContent = inr(503265 + (S.newDep ? S.newDep.a : 0));
+    $('#sumv', p).textContent = inr(depTotals().a);
     deckLayout(p); deckTimer(p);
   };
   p._top = () => { deckTimer(p); if (p._pendKey !== JSON.stringify(S.pend)) { refreshPend(p); p._pendKey = JSON.stringify(S.pend); if (S.pend) { $$('.acard', p).forEach((c) => A(c, [{ opacity: 0, transform: 'translateY(16px) scale(.97)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: 200 })); } } };
@@ -465,7 +490,7 @@ function setPanes(p, i, dir) {
   A(inc, [{ transform: `translateX(${dir * 70}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], SNAP);
   if (sc.scrollTop > 0) sc.scrollTo({ top: 0, behavior: 'smooth' });
   stagger(inc, 40);
-  if (i === 1) countUp($('#sumv', p), 503265 + (S.newDep ? S.newDep.a : 0));
+  if (i === 1) countUp($('#sumv', p), depTotals().a);
 }
 function fixPills(p) {
   const d = $('#dseg', p), c = $('#chips', p);
@@ -637,24 +662,34 @@ const LIST = [
   { b: 'shri', t: '3 Years', y: 3, mo: 36, pay: 'mat mon qtr', cat: '' },
   { b: 'sur', t: '5Y 3M 16D', y: 5.29, mo: 63, pay: 'mat mon qtr', cat: 'high' },
   { b: 'jana', t: '4Y 6M 11D', y: 4.53, mo: 54, pay: 'mat qtr', cat: '' },
+  { b: 'unity', t: '1 Year', y: 1, mo: 12, pay: 'mat mon qtr', cat: 'inst' },
+  { b: 'unity', t: '3Y 6M', y: 3.5, mo: 42, pay: 'mat mon qtr', cat: 'high inst' },
+  { b: 'jana', t: '7 Years', y: 7, mo: 84, pay: 'mat qtr', cat: '' },
+  { b: 'shiv', t: '6 Months', y: .5, mo: 6, pay: 'mat', cat: 'inst' },
+  { b: 'unity', t: '10 Years', y: 10, mo: 120, pay: 'mat mon qtr', cat: '' },
+  { b: 'sur', t: '8 Months', y: .67, mo: 8, pay: 'mat mon qtr', cat: 'inst' },
 ];
-const fdat = (k, mo, pay, cat) => `data-b="${k}" data-mo="${mo}" data-pay="${pay}" data-cat="${cat}" data-type="${isNbfc(k) ? 'nbfc' : 'sf'}"`;
+const fdat = (k, mo, pay, cat) => `data-b="${k}" data-mo="${mo}" data-pay="${pay}" data-cat="${cat}" data-r="${rateFor(k, mo)}" data-type="${isNbfc(k) ? 'nbfc' : 'sf'}"`;
+const safety = (k) => (isNbfc(k) ? `<span class="dicgc aaa">${I.aaa}CRISIL AAA rated</span>` : `<span class="dicgc">${I.dicgc}DICGC insured</span>`);
 function listHdr(badgeCalc) {
   return `<div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle left">Fixed deposits</div>
     <button class="cbtn r2 press press-s" data-a="calcsheet" aria-label="Calculator">${I.calc}${badgeCalc ? '<span class="badge">1</span>' : ''}</button>
     <button class="cbtn r press press-s" data-a="filter" aria-label="Filter">${I.filter}</button></div>`;
 }
 function listPage(title) {
-  const rows = LIST.map((r, i) => `<button class="lrow card press rv" data-st data-a="plan" ${fdat(r.b, r.mo, r.pay, r.cat)} data-i="${i}" data-t="${r.t}" data-y="${r.y}">${logo(r.b)}<span><b>${B[r.b].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>
-      <div class="r"><b>8.5%</b><small>${r.t}</small></div></button>`).join('');
+  // only the deposits that fit this page, best rate first
+  const pick = LIST.filter(SCOPE[title] || (() => true)).sort((a, b) => rateFor(b.b, b.mo) - rateFor(a.b, a.mo) || a.mo - b.mo);
+  const rows = pick.map((r, i) => `<button class="lrow card press rv" data-st data-a="plan" ${fdat(r.b, r.mo, r.pay, r.cat)} data-i="${i}" data-t="${r.t}" data-y="${r.y}">${logo(r.b)}<span><b>${B[r.b].n}</b>${safety(r.b)}</span>
+      <div class="r"><b>${pct(rateFor(r.b, r.mo))}</b><small>${r.t}</small></div></button>`).join('');
   const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><div class="fapplied"></div><h1 class="ltitle">${title}</h1><div class="frows">${rows}</div>${qcards(3)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
 }
 function amtListPage() {
   const t = CALC_T[S.calcT] || CALC_T[0];
-  const rows = ['shiv', 'shri', 'jana', 'sur'].map((k, i) => `<button class="arow card press rv" data-st data-a="plan" ${fdat(k, Math.round(t[1] * 12), k === 'shri' || k === 'sur' ? 'mat mon qtr' : 'mat qtr', i % 2 ? 'high' : 'high inst')} data-i="${i}" data-amt="1">
-      <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span><div class="r"><b>8.5%</b><small>${t[2]}</small></div></div>
-      <div class="m"><div><b>${inr(S.calcAmt)}</b><small>Investing amount</small></div><div><b class="green">${inr(mat(S.calcAmt, 8.5, t[1]))}</b><small>At maturity</small></div></div></button>`).join('');
+  const mo = Math.round(t[1] * 12), ks = Object.keys(RT).sort((a, b) => rateFor(b, mo) - rateFor(a, mo));
+  const rows = ks.map((k, i) => `<button class="arow card press rv" data-st data-a="plan" ${fdat(k, mo, BF[k].pay, (rateFor(k, mo) >= 8.25 ? 'high ' : '') + (BF[k].inst ? 'inst' : ''))} data-i="${i}" data-amt="1">
+      <div class="t">${logo(k)}<span><b>${B[k].n}</b>${safety(k)}</span><div class="r"><b>${pct(rateFor(k, mo))}</b><small>${t[2]}</small></div></div>
+      <div class="m"><div><b>${inr(S.calcAmt)}</b><small>Investing amount</small></div><div><b class="green">${inr(mat(S.calcAmt, rateFor(k, mo), t[1]))}</b><small>At maturity</small></div></div></button>`).join('');
   const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><div class="fapplied"></div><h1 class="ltitle" data-a="calcsheet">Invest ${inr(S.calcAmt)} for ${t[2]}</h1><div class="frows">${rows}</div>${qcards(2)}<div style="height:130px"></div></div>${listHdr(true)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
 }
@@ -693,7 +728,7 @@ function filterSheet(btn) {
       <h4>Sort by</h4><div class="fseg"><button class="${f.sort === 'rate' ? 'on' : ''}" data-a="fsort" data-v="rate">Highest rate</button><button class="${f.sort === 'ten' ? 'on' : ''}" data-a="fsort" data-v="ten">Short tenure</button></div>
       ${['cat', 'ten', 'pay', 'type'].map((g) => `<h4>${FG[g][0]}</h4>${chips(g)}`).join('')}
       <h4>Insurance</h4><button class="fins" data-a="fins"><b>DICGC Insured</b><span class="toggle ${f.ins ? 'on' : ''}"><i></i></span><small>Deposits up to ₹5 lakh per bank are covered by DICGC, an RBI company</small></button>
-      <h4>Banks &amp; more</h4><div class="fbanks">${banks.map((k) => `<button class="fbank ${f.banks.includes(k) ? 'on' : ''}" data-a="fchip" data-g="banks" data-v="${k}">${logo(k, 'sm')}<span><b>${B[k].n}</b><small>Up to 8.5% /year</small></span><span class="radio"></span></button>`).join('')}</div>
+      <h4>Banks &amp; more</h4><div class="fbanks">${banks.map((k) => `<button class="fbank ${f.banks.includes(k) ? 'on' : ''}" data-a="fchip" data-g="banks" data-v="${k}">${logo(k, 'sm')}<span><b>${B[k].n}</b><small>Up to ${pct(Math.max.apply(null, fRows(p).filter((r) => r.dataset.b === k).map((r) => +r.dataset.r)))} /year</small></span><span class="radio"></span></button>`).join('')}</div>
     </div>
     <div class="ffoot"><button class="fshow press" data-a="fapply"><span id="fshow"></span></button></div></div>`, { cls: 'fsh' });
   if (!s) return;
@@ -712,7 +747,7 @@ function fLive() {
 function applyFilter(p, anim = true) {
   const f = p._flt || fNew(), rows = fRows(p), box = $('.frows', p), c = fCount(f);
   const on = rows.filter((r) => fMatch(r.dataset, f));
-  const order = on.slice().sort((a, b) => (f.sort === 'ten' ? +a.dataset.mo - +b.dataset.mo : +a.dataset.i - +b.dataset.i));
+  const order = on.slice().sort((a, b) => (f.sort === 'ten' ? +a.dataset.mo - +b.dataset.mo || +b.dataset.r - +a.dataset.r : +b.dataset.r - +a.dataset.r || +a.dataset.i - +b.dataset.i));
   rows.forEach((r) => { r.style.display = on.includes(r) ? '' : 'none'; });
   order.forEach((r) => box.appendChild(r));
   // applied chips replace the title; the filter button carries the count
@@ -792,6 +827,13 @@ function dragSheet(el) {
   el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
 }
 
+/* what this particular deposit offers: withdrawal, payouts and safety */
+function planFeats(plan) {
+  const k = plan.bank, f = BF[k] || {}, pay = plan.pay || f.pay || 'mat', inst = plan.inst !== undefined ? plan.inst : !!f.inst;
+  const pl = pay.includes('mon') ? 'Monthly, quarterly or at maturity' : pay.includes('qtr') ? 'Quarterly or at maturity' : 'Interest paid at maturity';
+  return `<div>${I.bolt}${inst ? 'Instant withdrawal available' : 'Early withdrawal at 1% lower rate'}</div><div>${I.sun}${pl}</div>
+    <div>${I.shield()}${isNbfc(k) ? 'CRISIL AAA · not DICGC insured' : 'DICGC insures up to ₹5 lakh'}</div>`;
+}
 /* plan sheet: the tapped bank card flies up and becomes the sheet's top card */
 function planSheet(src, plan) {
   const k = plan.bank, b = B[k];
@@ -799,7 +841,7 @@ function planSheet(src, plan) {
   const html = `<div class="psheet">
     <div class="ptop" data-a="sheetbank"><h3>${b.l}${I.chevs('#282424')}</h3><p>${b.since}</p>${logo(k, 'w')}</div>
     <div class="pmain"><div class="pkv"><div><b>${plan.ten}</b><small>Tenure</small></div><div class="rt"><b class="green">${plan.rate.toFixed(2)}%</b><small>Interest rate</small></div></div>${amtRow}
-      <div class="feats"><div>${I.bolt}Instant withdrawal available</div><div>${I.sun}No penalty for 1Y withdrawal</div><div>${I.shield()}DICGC insures up to ₹5 lakh</div></div>
+      <div class="feats">${planFeats(plan)}</div>
       <button class="bigbtn press" data-a="startfd" style="margin-top:22px">Start FD</button></div>
     <button class="allplans press" data-a="viewplans">View all plans ${I.chevs()}</button></div>`;
   S.sel = { bank: k, ten: plan.ten, yrs: plan.yrs, rate: plan.rate };
@@ -841,14 +883,14 @@ function calcSheet() {
    ===================================================================== */
 function bankPage(k) {
   const b = B[k];
-  const plans = [['5 years', 5, 8.25], ['4y 6m 11d', 4.53, 8.25], ['3y 4m', 3.33, 8.25], ['1 years', 1, 8.25]].map(([t, y, r]) => `<button class="dplan press" data-a="dplan" data-t="${t}" data-y="${y}" data-r="${r}">${I.bars('#c43960', 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#9a9a9a')}</button>`).join('');
-  const bars = [['6.30%', 78, '#d9dee6', 60], ['7.56%', 121, '#d9dee6', 160], ['8.32%', 176, '#7ce469', 265]].map(([v, h, c, x]) => `<div class="bar" style="left:${x}px"><span>${v}</span><i style="height:${h}px;background:${c}"></i></div>`).join('');
+  const plans = [['5 years', 5], ['4y 6m 11d', 4.53], ['3y 4m', 3.33], ['1 year', 1]].map(([t, y]) => [t, y, fdRate(k, y)]).map(([t, y, r]) => `<button class="dplan press" data-a="dplan" data-t="${t}" data-y="${y}" data-r="${r}">${I.bars('#c43960', 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#9a9a9a')}</button>`).join('');
+  const bars = [['6.30%', 78, '#d9dee6', 60], ['7.56%', 121, '#d9dee6', 160], [pct(maxRate(k)), Math.round(176 * maxRate(k) / 8.32), '#7ce469', 265]].map(([v, h, c, x]) => `<div class="bar" style="left:${x}px"><span>${v}</span><i style="height:${h}px;background:${c}"></i></div>`).join('');
   const tiles = [['btile1', 'Partial<br>withdrawals<br>available'], ['btile2', 'No withdrawal<br>penalty for 1Y<br>tenure'], ['btile3', 'Withdraw<br>instantly in 7<br>days'], ['btile4', 'Flexible<br>interest<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
   const p = mkPage('bank', `
     <div class="scroll">
       <div style="height:137px"></div>
-      <div class="bhero" data-st><div class="img"></div><div class="in"><h1>${b.l}</h1>${logo(k, 'w')}<p>${b.since}</p>
-        <div class="feats"><div>${I.bolt}DICGC insured up to ₹5 lakh</div><div>${I.sun}RBI-licensed Small Finance Bank</div><div>${I.shield()}Listed on NSE &amp; BSE</div></div></div></div>
+      <div class="bhero" data-st>${k === 'sur' ? '<div class="img"></div>' : `<div class="img gen">${logo(k, 'w')}</div>`}<div class="in"><h1>${b.l}</h1>${logo(k, 'w')}<p>${b.since}</p>
+        <div class="feats">${isNbfc(k) ? `<div>${I.bolt}CRISIL AAA rated deposits</div><div>${I.sun}RBI-registered NBFC</div>` : `<div>${I.bolt}DICGC insured up to ₹5 lakh</div><div>${I.sun}RBI-licensed Small Finance Bank</div>`}<div>${I.shield()}${BF[k] && BF[k].inst ? 'Instant withdrawal available' : 'Listed on NSE &amp; BSE'}</div></div></div></div>
       <h2 class="h2">Deposit plans</h2>
       <div class="card dcards">${plans}</div>
       <button class="obtn press" data-a="viewplans2" style="margin-top:23px">View all plans ${I.chevs()}</button>
@@ -1006,7 +1048,7 @@ function stepHTML(st) {
   const s = S.sel, m = mat(S.amt, s.rate, s.yrs);
   switch (st) {
     case 'select': {
-      const groups = PLANS[S.ptab ? 'rd' : 'fd'].map(([g, c, rows]) => `<div class="pgroup" data-st>${g}</div>` + rows.map(([t, y, r]) => `<button class="prow press" data-st data-a="pickplan" data-t="${t}" data-y="${y}" data-r="${r}" data-c="${c}">${I.bars(c, 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#1c1c1c')}</button>`).join('')).join('<div style="height:61px"></div>');
+      const groups = PLANS[S.ptab ? 'rd' : 'fd'].map(([g, c, rows]) => `<div class="pgroup" data-st>${g}</div>` + rows.map(([t, y, r0]) => { const r = S.ptab ? r0 : fdRate(S.sel.bank, y); return `<button class="prow press" data-st data-a="pickplan" data-t="${t}" data-y="${y}" data-r="${r}" data-c="${c}">${I.bars(c, 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#1c1c1c')}</button>`; }).join('')).join('<div style="height:61px"></div>');
       return `<div class="st" style="margin:20px 15px 25px">Select your plan</div>
         <div class="seg eq ptabs" id="ptabs"><i class="pill"></i><button data-a="ptab" data-i="0">Fixed deposit</button><button data-a="ptab" data-i="1">Recurring deposit</button></div>
         <div id="plist">${groups}</div><div style="height:40px"></div>`;
@@ -1231,7 +1273,7 @@ function payFlow() {
    ===================================================================== */
 function success() {
   S.paid = true; S.pend = null;
-  S.newDep = { a: S.amt, r: S.sel.rate, m: mat(S.amt, S.sel.rate, S.sel.yrs), s: 'pending', p: 0, left: 'Starts after VKYC', isNew: true };
+  S.newDep = { b: S.sel.bank, a: S.amt, r: S.sel.rate, yrs: S.sel.yrs, ten: S.sel.ten, m: mat(S.amt, S.sel.rate, S.sel.yrs), s: 'pending', p: 0, left: 'Starts after VKYC', isNew: true };
   const p = mkPage('succ', `
     <button class="cbtn l press press-s" data-a="done" aria-label="Close" style="left:21px;opacity:0">${I.x}</button>
     <div class="card" id="scard" style="position:absolute;left:27px;width:340px;top:112px;height:249px;opacity:0"></div>
@@ -1359,7 +1401,8 @@ const ACT = {
   plan(el) {
     if (busy) return;
     const k = el.dataset.b, amt = el.dataset.amt ? S.calcAmt : 0, t = CALC_T[S.calcT] || CALC_T[0];
-    planSheet(el, amt ? { bank: k, ten: t[2], yrs: t[1], rate: 8.5, amt } : { bank: k, ten: el.dataset.t || '5 years', yrs: +el.dataset.y || 5, rate: 8.5 });
+    const d = el.dataset, r = +d.r || rateFor(k, Math.round((amt ? t[1] : +d.y || 5) * 12)), ex = { pay: d.pay, inst: d.cat ? d.cat.includes('inst') : undefined };
+    planSheet(el, amt ? Object.assign({ bank: k, ten: t[2], yrs: t[1], rate: r, amt }, ex) : Object.assign({ bank: k, ten: d.t || '5 years', yrs: +d.y || 5, rate: r }, ex));
   },
   recopen(el) { openRecModal(el); },
   recplan(el) { // a card inside the open modal; on the banner itself a tap anywhere opens the modal
@@ -1467,7 +1510,7 @@ const ACT = {
   pick(el) {
     const k = el.dataset.k, [title, opts] = PICK[k], cur = S.form[k];
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    openSheet(`<div class="psheet"><h3>${title}</h3><div class="pbody"><div class="plist">${opts.map((o) => `<button class="prow2 ${o === cur ? 'on' : ''}" data-a="picksel" data-v="${esc(o)}"><span>${esc(o)}</span><span class="radio"></span></button>`).join('')}</div>
+    openSheet(`<div class="qsheet"><h3>${title}</h3><div class="pbody"><div class="plist">${opts.map((o) => `<button class="prow2 ${o === cur ? 'on' : ''}" data-a="picksel" data-v="${esc(o)}"><span>${esc(o)}</span><span class="radio"></span></button>`).join('')}</div>
       <button class="pconf press" data-a="pickset" data-k="${k}">Confirm</button></div></div>`, { cls: 'pks' });
   },
   picksel(el) {
@@ -1475,8 +1518,8 @@ const ACT = {
     A($('.radio', el), [{ transform: 'scale(.8)' }, { transform: 'none' }], BOUNCE);
   },
   pickset(el) {
-    const k = el.dataset.k, on = $('.prow2.on', el.closest('.psheet'));
-    if (!on) { const l = $('.plist', el.closest('.psheet')); A(l, [{ transform: 'none' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }], { e: 'ease-out', d: 400 }); return; }
+    const k = el.dataset.k, on = $('.prow2.on', el.closest('.qsheet'));
+    if (!on) { const l = $('.plist', el.closest('.qsheet')); A(l, [{ transform: 'none' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }], { e: 'ease-out', d: 400 }); return; }
     const v = on.dataset.v; S.form[k] = v;
     closeSheet().then(() => {
       const step = $('.step:last-child', bookEl()), val = $(PID[k], step), fe = val && val.closest('.field');
