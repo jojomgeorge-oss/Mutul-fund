@@ -89,7 +89,7 @@ const REC = [
 // an FD that was started but not finished; shows as "Complete your FD"
 S.pend = { bank: 'sur', amt: 500000, ten: '5Y 3M 16D', yrs: 5.29, rate: 8.31, stage: 'kyc', step: 'pan' };
 const STAGE = { kyc: ['Complete KYC', 'Start KYC'], pan: ['Verify PAN', 'Start'], details: ['Enter details', 'Start'] };
-const ORDER = ['select', 'amount', 'pan', 'aadhaar', 'personal', 'nominee', 'addnom', 'acct', 'addacct', 'review'];
+const ORDER = ['select', 'amount', 'pan', 'aadhaar', 'personal', 'income', 'nominee', 'addnom', 'acct', 'addacct', 'review'];
 const ASKQ = [['Mutual fund market', 'How mutual funds performed in the last 6 months?', '#ffe9ee'], ['FD investments', 'Is safe to invest in an FD?', '#fff1cc'], ['FD vs Savings', 'FD or savings - which is better for me?', '#f8f7cc'], ['FD taxes', 'How FD interest taxed?', '#e4e8ee'], ['DICGS insurance', 'What is DICGC insurance?', '#ffe9ee']];
 const TENURES = [['Upto<br>1 Year', 'Upto 1 Year'], ['Upto<br>5 Years', 'Upto 5 Years'], ['Beyond<br>5 Years', 'Beyond 5 Years']];
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -118,6 +118,7 @@ const I = {
   x: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="#292929" stroke-width="2" stroke-linecap="round"/></svg>',
   xw: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>',
   del: '<svg width="30" height="22" viewBox="0 0 24 18" fill="none"><path d="M7.5 1.5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-13L1.5 9z" stroke="#645f5f" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 5.5l7 7m0-7l-7 7" stroke="#645f5f" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  bell: '<svg width="18" height="19" viewBox="0 0 18 19" fill="none"><path d="M9 1.5a5 5 0 0 0-5 5v3.2L2.4 13h13.2L14 9.7V6.5a5 5 0 0 0-5-5z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M6.8 15.5a2.3 2.3 0 0 0 4.4 0" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>',
   lock: '<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="1" y="6" width="10" height="7" rx="2" fill="#1a8d1a"/><path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1a8d1a" stroke-width="1.6"/></svg>',
   bars: (c, s = 39, r = 12) => `<svg width="${s}" height="${s}" viewBox="0 0 39 39" style="flex:none"><rect width="39" height="39" rx="${r * 39 / s}" fill="${c}"/><rect x="10.5" y="21.5" width="3" height="4" rx="1.5" fill="#fff" opacity=".75"/><rect x="15.5" y="19.5" width="3" height="6" rx="1.5" fill="#fff" opacity=".85"/><rect x="20.5" y="16.5" width="3" height="9" rx="1.5" fill="#fff"/><rect x="25.5" y="13.5" width="3" height="12" rx="1.5" fill="#fff"/></svg>`,
   cat: {
@@ -331,13 +332,13 @@ function depCard(d, i) {
   return `<div class="dep card press rv ${d.isNew ? 'new' : ''}" data-st data-a="depopen" data-k="${d.key}" data-i="${i}">
     <div class="t">${logo('sur', 'sm')}<span>Suryoday SF bank FD</span>${I.chevs('rgba(0,0,0,.6)')}<span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
     <div class="r1"><div><small>Invested amount</small><b>${inr(d.a)}</b></div><div class="rt"><small>Interest rate</small><b class="green">${d.r.toFixed(2)}%</b></div></div>
-    <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog"><i style="transform:scaleX(${Math.max(d.p, .03)})"></i></div><div class="row">${d.s === 'matured' ? 'Matured on' : 'Tenure'}<b class="t2">${d.left}</b></div></div>
+    <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog"><i style="transform:scaleX(${Math.max(d.p, .03)})"></i></div><div class="row">${{ matured: 'Matured on', expired: 'Booking expired', refunded: 'Refunded' }[d.s] || 'Tenure'}<b class="t2">${d.left}</b></div></div>
   </div>`;
 }
 function deposits() {
   const base = { a: 50000, r: 8.75, m: 51208, left: '5Y 3M 15D left' };
   const L = {
-    pending: [Object.assign({}, base, { s: 'pending', p: 0, left: 'Starts after VKYC' })],
+    pending: [Object.assign({}, base, { s: 'pending', p: 0, left: 'Starts after VKYC' }), Object.assign({}, base, { s: 'expired', p: 0, left: 'VKYC not done in time' }), Object.assign({}, base, { s: 'refunded', p: 0, left: '₹50,000 back in HDFC ••3456' })],
     ongoing: [0, 1, 2].map(() => Object.assign({}, base, { s: 'ongoing', p: .06 })),
     matured: [Object.assign({}, base, { s: 'matured', p: 1, left: '12 Mar 2026', m: 54380 }), Object.assign({}, base, { s: 'matured', p: 1, left: '02 Jan 2026', a: 100000, m: 108250 })],
   };
@@ -626,25 +627,107 @@ function chatSend(q) {
 /* =====================================================================
    LISTINGS
    ===================================================================== */
-const LIST = ['shiv', 'shri', 'sur', 'jana', 'shiv', 'shri', 'sur', 'jana'];
+// listing rows: tenure in months, payouts and categories drive the filter sheet
+const LIST = [
+  { b: 'shiv', t: '4Y 6M 11D', y: 4.53, mo: 54, pay: 'mat qtr', cat: 'high' },
+  { b: 'shri', t: '5 Years', y: 5, mo: 60, pay: 'mat mon qtr', cat: 'high' },
+  { b: 'sur', t: '2Y 6M', y: 2.5, mo: 30, pay: 'mat mon qtr', cat: 'high inst' },
+  { b: 'jana', t: '1Y 3M', y: 1.25, mo: 15, pay: 'mat qtr', cat: 'high' },
+  { b: 'shiv', t: '11 Months', y: .92, mo: 11, pay: 'mat qtr', cat: 'inst' },
+  { b: 'shri', t: '3 Years', y: 3, mo: 36, pay: 'mat mon qtr', cat: '' },
+  { b: 'sur', t: '5Y 3M 16D', y: 5.29, mo: 63, pay: 'mat mon qtr', cat: 'high' },
+  { b: 'jana', t: '4Y 6M 11D', y: 4.53, mo: 54, pay: 'mat qtr', cat: '' },
+];
+const fdat = (k, mo, pay, cat) => `data-b="${k}" data-mo="${mo}" data-pay="${pay}" data-cat="${cat}" data-type="${isNbfc(k) ? 'nbfc' : 'sf'}"`;
 function listHdr(badgeCalc) {
   return `<div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle left">Fixed deposits</div>
     <button class="cbtn r2 press press-s" data-a="calcsheet" aria-label="Calculator">${I.calc}${badgeCalc ? '<span class="badge">1</span>' : ''}</button>
     <button class="cbtn r press press-s" data-a="filter" aria-label="Filter">${I.filter}</button></div>`;
 }
 function listPage(title) {
-  const rows = LIST.map((k, i) => `<button class="lrow card press rv" data-st data-a="plan" data-b="${k}" data-t="${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}" data-y="${i % 3 === 1 ? 5 : 4.53}">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>
-      <div class="r"><b>8.5%</b><small>${i % 3 === 1 ? '5 Years' : '4Y 6M 11D'}</small></div></button>`).join('');
-  const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle">${title}</h1>${rows}${qcards(3)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
+  const rows = LIST.map((r, i) => `<button class="lrow card press rv" data-st data-a="plan" ${fdat(r.b, r.mo, r.pay, r.cat)} data-i="${i}" data-t="${r.t}" data-y="${r.y}">${logo(r.b)}<span><b>${B[r.b].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span>
+      <div class="r"><b>8.5%</b><small>${r.t}</small></div></button>`).join('');
+  const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><div class="fapplied"></div><h1 class="ltitle">${title}</h1><div class="frows">${rows}</div>${qcards(3)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
 }
 function amtListPage() {
   const t = CALC_T[S.calcT] || CALC_T[0];
-  const rows = ['shiv', 'shri', 'jana', 'sur'].map((k, i) => `<button class="arow card press rv" data-st data-a="plan" data-b="${k}" data-amt="1">
+  const rows = ['shiv', 'shri', 'jana', 'sur'].map((k, i) => `<button class="arow card press rv" data-st data-a="plan" ${fdat(k, Math.round(t[1] * 12), k === 'shri' || k === 'sur' ? 'mat mon qtr' : 'mat qtr', i % 2 ? 'high' : 'high inst')} data-i="${i}" data-amt="1">
       <div class="t">${logo(k)}<span><b>${B[k].n}</b><span class="dicgc">${I.dicgc}DICGC insured</span></span><div class="r"><b>8.5%</b><small>${t[2]}</small></div></div>
       <div class="m"><div><b>${inr(S.calcAmt)}</b><small>Investing amount</small></div><div><b class="green">${inr(mat(S.calcAmt, 8.5, t[1]))}</b><small>At maturity</small></div></div></button>`).join('');
-  const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><h1 class="ltitle" data-a="calcsheet">Invest ${inr(S.calcAmt)} for ${t[2]}</h1>${rows}${qcards(2)}<div style="height:130px"></div></div>${listHdr(true)}${askbar()}`);
+  const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><div class="fapplied"></div><h1 class="ltitle" data-a="calcsheet">Invest ${inr(S.calcAmt)} for ${t[2]}</h1><div class="frows">${rows}</div>${qcards(2)}<div style="height:130px"></div></div>${listHdr(true)}${askbar()}`);
   hdrFade(p); bindAsk(p); return p;
+}
+
+/* =====================================================================
+   FILTER — sheet with live count; applied filters show as chips on the list
+   ===================================================================== */
+const FG = {
+  cat: ['FD Category', [['high', 'High return'], ['inst', 'Instant withdrawal']]],
+  ten: ['Tenure', [['u1', 'Up to 1Y'], ['b13', '1Y - 3Y'], ['b35', '3Y - 5Y'], ['b5', '5Y +']]],
+  pay: ['Interest payout', [['mat', 'At maturity'], ['mon', 'Monthly'], ['qtr', 'Quarterly']]],
+  type: ['Bank type', [['sf', 'Small finance'], ['nbfc', 'NBFC']]],
+};
+const fNew = () => ({ sort: 'rate', cat: [], ten: [], pay: [], type: [], banks: [], ins: false });
+const fCount = (f) => f.cat.length + f.ten.length + f.pay.length + f.type.length + f.banks.length + (f.ins ? 1 : 0);
+const tBucket = (mo) => (mo <= 12 ? 'u1' : mo <= 36 ? 'b13' : mo <= 60 ? 'b35' : 'b5');
+function fMatch(d, f) {
+  const any = (sel, v) => !sel.length || sel.includes(v);
+  return any(f.ten, tBucket(+d.mo)) && any(f.type, d.type) && any(f.banks, d.b) && (!f.ins || d.type !== 'nbfc') &&
+    (!f.pay.length || f.pay.some((x) => d.pay.split(' ').includes(x))) && (!f.cat.length || f.cat.every((x) => d.cat.split(' ').includes(x)));
+}
+const fRows = (p) => $$('.frows > button', p);
+function fLabel(g, v) {
+  if (g === 'banks') return B[v].n;
+  if (g === 'ins') return 'DICGC Insured';
+  return FG[g][1].find((x) => x[0] === v)[1];
+}
+function filterSheet(btn) {
+  const p = btn.closest('.page'), f = JSON.parse(JSON.stringify(p._flt || fNew()));
+  const banks = Array.from(new Set(fRows(p).map((r) => r.dataset.b)));
+  const chips = (g) => `<div class="fchips">${FG[g][1].map(([v, l]) => `<button class="fchip ${f[g].includes(v) ? 'on' : ''}" data-a="fchip" data-g="${g}" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const s = openSheet(`<div class="fsheet">
+    <div class="fh"><b>Filter</b><span class="fbadge" id="fbadge"></span><button class="fclr press" data-a="fclear">Clear all${I.x.replace(/width="16" height="16"/, 'width="9" height="9"').replace('stroke-width="2"', 'stroke-width="2.4"')}</button></div>
+    <div class="fbody">
+      <h4>Sort by</h4><div class="fseg"><button class="${f.sort === 'rate' ? 'on' : ''}" data-a="fsort" data-v="rate">Highest rate</button><button class="${f.sort === 'ten' ? 'on' : ''}" data-a="fsort" data-v="ten">Short tenure</button></div>
+      ${['cat', 'ten', 'pay', 'type'].map((g) => `<h4>${FG[g][0]}</h4>${chips(g)}`).join('')}
+      <h4>Insurance</h4><button class="fins" data-a="fins"><b>DICGC Insured</b><span class="toggle ${f.ins ? 'on' : ''}"><i></i></span><small>Deposits up to ₹5 lakh per bank are covered by DICGC, an RBI company</small></button>
+      <h4>Banks &amp; more</h4><div class="fbanks">${banks.map((k) => `<button class="fbank ${f.banks.includes(k) ? 'on' : ''}" data-a="fchip" data-g="banks" data-v="${k}">${logo(k, 'sm')}<span><b>${B[k].n}</b><small>Up to 8.5% /year</small></span><span class="radio"></span></button>`).join('')}</div>
+    </div>
+    <div class="ffoot"><button class="fshow press" data-a="fapply"><span id="fshow"></span></button></div></div>`, { cls: 'fsh' });
+  if (!s) return;
+  s.flt = f; s.page = p;
+  fLive();
+}
+function fLive() {
+  if (!sheet || !sheet.flt) return;
+  const f = sheet.flt, n = fRows(sheet.page).filter((r) => fMatch(r.dataset, f)).length, c = fCount(f);
+  const bd = $('#fbadge', sheet.el), sh = $('#fshow', sheet.el), btn = sh.parentElement;
+  bd.textContent = c; bd.classList.toggle('on', c > 0);
+  const t = n ? `Show ${n} FD${n === 1 ? '' : 's'}` : 'No FDs match these filters';
+  if (sh.textContent !== t) { sh.textContent = t; A(sh, [{ opacity: .3, transform: 'translateY(5px)' }, { opacity: 1, transform: 'none' }], QUICK); }
+  btn.classList.toggle('off', !n);
+}
+function applyFilter(p, anim = true) {
+  const f = p._flt || fNew(), rows = fRows(p), box = $('.frows', p), c = fCount(f);
+  const on = rows.filter((r) => fMatch(r.dataset, f));
+  const order = on.slice().sort((a, b) => (f.sort === 'ten' ? +a.dataset.mo - +b.dataset.mo : +a.dataset.i - +b.dataset.i));
+  rows.forEach((r) => { r.style.display = on.includes(r) ? '' : 'none'; });
+  order.forEach((r) => box.appendChild(r));
+  // applied chips replace the title; the filter button carries the count
+  const ap = $('.fapplied', p), list = [];
+  ['ten', 'pay', 'cat', 'type', 'banks'].forEach((g) => f[g].forEach((v) => list.push([g, v])));
+  if (f.ins) list.push(['ins', 1]);
+  ap.innerHTML = list.map(([g, v]) => `<button class="fap press" data-a="funset" data-g="${g}" data-v="${v}">${fLabel(g, v)}${I.x.replace(/width="16" height="16"/, 'width="9" height="9"').replace('#292929', '#fff').replace('stroke-width="2"', 'stroke-width="2.4"')}</button>`).join('');
+  p.classList.toggle('filtered', c > 0);
+  const fb = $('[data-a="filter"]', p); let bd = $('.badge', fb);
+  if (c) { if (!bd) { bd = document.createElement('span'); bd.className = 'badge'; fb.appendChild(bd); if (anim) A(bd, [{ transform: 'scale(0)' }, { transform: 'none' }], BOUNCE, { delay: 200 }); } bd.textContent = c; }
+  else if (bd) bd.remove();
+  if (anim) {
+    $$('.fap', ap).forEach((x, i) => A(x, [{ opacity: 0, transform: 'scale(.85)' }, { opacity: 1, transform: 'none' }], BOUNCE, { delay: 120 + i * 40 }));
+    order.slice(0, 6).forEach((r, i) => A(r, [{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: 80 + i * 45 }));
+    const sc = $('.scroll', p); if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 /* =====================================================================
@@ -687,7 +770,7 @@ function closeSheet(o = {}) {
 function dragSheet(el) {
   let d = null;
   el.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('button, input, [data-a]:not(.ptop)')) return;
+    if (e.target.closest('button, input, .fbody, [data-a]:not(.ptop)')) return;
     d = { y0: e.clientY, t0: performance.now(), dy: 0, id: e.pointerId };
   });
   el.addEventListener('pointermove', (e) => {
@@ -836,12 +919,15 @@ function discClose(p) {
 /* =====================================================================
    BOOKING — one card; the steps slide inside it and the button stays put
    ===================================================================== */
-const CTA = { personal: 'Confirm', amount: 'Continue', pan: 'Confirm', aadhaar: 'Proceed', nominee: 'Confirm', addnom: 'Confirm', acct: 'Confirm', addacct: 'Confirm', review: 'Confirm' };
-const PID = { rel: '#fRel', bank: '#fBank', occ: '#fOcc', edu: '#fEdu', inc: '#fInc' };
+const CTA = { personal: 'Confirm', income: 'Confirm', amount: 'Continue', pan: 'Confirm', aadhaar: 'Proceed', nominee: 'Confirm', addnom: 'Confirm', acct: 'Confirm', addacct: 'Confirm', review: 'Confirm' };
+const PID = { rel: '#fRel', bank: '#fBank', occ: '#fOcc', edu: '#fEdu', inc: '#fInc', src: '#fSrc', mar: '#fMar' };
+const isNbfc = (k = S.sel.bank) => /NBFC/.test(B[k].since || '');
 const PICK = {
   occ: ['Occupation', ['Salaried', 'Self-employed', 'Business owner', 'Student', 'Retired', 'Homemaker']],
-  edu: ['Education', ['Higher secondary', 'Graduate', 'Post graduate', 'Professional degree', 'Other']],
-  inc: ['Annual income', ['Below ₹5 lakh', '₹5 – 10 lakh', '₹10 – 25 lakh', '₹25 lakh – 1 crore', 'Above ₹1 crore']],
+  edu: ['Education', ['Below graduate', 'Graduate', 'Post - graduate']],
+  inc: ['Annual income', ['Up to ₹5L', '₹5L - ₹10L', '₹10L - ₹15L', '₹15L - ₹25L', '₹25L - ₹50L', '₹50L - ₹1Cr', 'Above ₹1Cr']],
+  src: ['Source of income', ['Salary', 'Business', 'Investments', 'Dependent', 'Other']],
+  mar: ['Marital status', ['Single', 'Married', 'Other']],
   rel: ['Relationship', ['Spouse', 'Father', 'Mother', 'Son', 'Daughter', 'Brother', 'Sister']],
   bank: ['Bank name', ['HDFC Bank', 'ICICI Bank', 'State Bank of India', 'Axis Bank', 'Kotak Mahindra Bank', 'Federal Bank']],
 };
@@ -857,13 +943,21 @@ function formErrors(st) {
     if (!f.rel) e.push(['rel', 'Choose how they’re related to you']);
     if (!dobOk(f.dob)) e.push(['dob', f.dob && f.dob.length === 10 ? 'That date of birth isn’t valid' : 'Enter date of birth as DD/MM/YYYY']);
   } else if (st === 'personal') {
+    if (!f.father || f.father.trim().length < 2) e.push(['father', 'Enter your father’s name']);
+    if (isNbfc()) { if (!f.occ) e.push(['occ', 'Choose your occupation']); }
+    else {
+      if (!f.mother || f.mother.trim().length < 2) e.push(['mother', 'Enter your mother’s name']);
+      if (!f.mar) e.push(['mar', 'Choose your marital status']);
+    }
+  } else if (st === 'income') {
     if (!f.occ) e.push(['occ', 'Choose your occupation']);
     if (!f.edu) e.push(['edu', 'Choose your education']);
     if (!f.inc) e.push(['inc', 'Choose your annual income']);
+    if (!f.src) e.push(['src', 'Choose your source of income']);
   } else if (st === 'addacct') {
     const n = (f.accno || '').replace(/\D/g, '');
     if (n.length < 9) e.push(['accno', 'Account numbers have 9 to 18 digits']);
-    if (!f.bank) e.push(['bank', 'Choose your bank']);
+    if (!f.bank) e.push(['bank', n.length >= 9 ? 'We couldn’t find the bank, try again' : 'Choose your bank']);
     if (!f.holder || f.holder.trim().length < 2) e.push(['holder', 'Enter the name on the account']);
   }
   return e;
@@ -872,6 +966,8 @@ function formErrors(st) {
 stage.addEventListener('input', (e) => {
   const t = e.target, f = S.form;
   if (t.id === 'fName') f.name = t.value;
+  else if (t.id === 'fFather') f.father = t.value;
+  else if (t.id === 'fMother') f.mother = t.value;
   else if (t.id === 'fHolder') f.holder = t.value;
   else if (t.id === 'fDob') {
     const d = t.value.replace(/\D/g, '').slice(0, 8);
@@ -887,7 +983,8 @@ stage.addEventListener('input', (e) => {
 stage.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
   const nx = { fName: null, fAcc: null }[e.target.id];
-  if (e.target.id === 'fName' || e.target.id === 'fAcc') { e.preventDefault(); e.target.blur(); const b = e.target.closest('.step').querySelector('[data-a="pick"]'); if (b) b.click(); }
+  if (e.target.id === 'fFather' && $('#fMother')) { e.preventDefault(); $('#fMother').focus(); }
+  else if (e.target.id === 'fName' || e.target.id === 'fAcc' || e.target.id === 'fFather' || e.target.id === 'fMother') { e.preventDefault(); e.target.blur(); const b = e.target.closest('.step').querySelector('[data-a="pick"]'); if (b) b.click(); }
   else if (e.target.id === 'fDob' || e.target.id === 'fHolder') { e.preventDefault(); e.target.blur(); }
 });
 function bookPage() {
@@ -928,9 +1025,12 @@ function stepHTML(st) {
         <div class="adesc" data-st>You will be redirected to the bank page, enter your Aadhaar number and confirm with OTP</div>
         <div class="abox" data-st><img src="img/aadhaar.png" alt="Aadhaar card"><div>Keep your Aadhaar number handy</div></div>
         <div class="ashare" data-st>${I.shield('#037600', 16)}Shared directly with the bank KYC</div>`;
-    case 'personal': {
-      const f = S.form, pf = (k, l) => `<button class="field" data-st data-f="${k}" data-a="pick" data-k="${k}"><small>${l}</small><span class="val ${f[k] ? '' : 'phv'}" id="${PID[k].slice(1)}">${f[k] || 'Select one'}${I.chevd.replace('#4a1d17', '#aba6a6')}</span></button>`;
-      return `<div class="st">Add your details</div>${pf('occ', 'Occupations')}${pf('edu', 'Education')}${pf('inc', 'Annual income')}<div class="ferr" id="ferr"></div>`;
+    case 'personal': case 'income': {
+      const f = S.form, pf = (k, l) => `<button class="field" data-st data-f="${k}" data-a="pick" data-k="${k}"><small>${l}</small><span class="val ${f[k] ? '' : 'phv'}" id="${PID[k].slice(1)}">${f[k] ? esc(f[k]) : 'Select one'}${I.chevd.replace('#4a1d17', '#aba6a6')}</span></button>`;
+      const tf = (k, id, l) => `<label class="field" data-st data-f="${k}"><small>${l}</small><input id="${id}" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="next" placeholder="Enter name" value="${esc(f[k] || '')}"></label>`;
+      if (st === 'income') return `<div class="st">Income details</div>${pf('occ', 'Occupation')}${pf('edu', 'Education')}${pf('inc', 'Annual income')}${pf('src', 'Source of income')}<div class="ferr" id="ferr"></div>`;
+      if (isNbfc()) return `<div class="st">Personal details</div>${tf('father', 'fFather', 'Father’s name')}${pf('occ', 'Your occupation')}<div class="ferr" id="ferr"></div>`;
+      return `<div class="st">Personal details</div>${tf('father', 'fFather', 'Father’s name')}${tf('mother', 'fMother', 'Mother’s name')}${pf('mar', 'Marital status')}<div class="ferr" id="ferr"></div>`;
     }
     case 'nominee':
       return `<div class="st">Choose your nominee</div>` +
@@ -954,7 +1054,7 @@ function stepHTML(st) {
         <label class="field" data-st data-f="accno"><small>Account number</small><input id="fAcc" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" placeholder="Enter account number" value="${f.accno || ''}"></label>
         <button class="field" data-st data-f="bank" data-a="pick" data-k="bank"><small>Bank name</small><span class="val ${f.bank ? '' : 'phv'}" id="fBank">${f.bank || 'Select one'}${I.chevd.replace('#4a1d17', '#aba6a6')}</span></button>
         <label class="field" data-st data-f="holder"><small>Name on account</small><input id="fHolder" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="done" placeholder="Enter name" value="${esc(f.holder || '')}"></label>
-        <div class="ferr" id="ferr"></div>`;
+        <div class="ferr bot" id="ferr"></div>`;
     }
     case 'review':
       return `<div class="rvh"><div>Review your FD</div><button data-a="edit">Edit</button></div>
@@ -1004,7 +1104,7 @@ function renderStep(dir, o = {}) {
 function updateCta() {
   const p = bookEl(); if (!p) return;
   const st = S.steps[S.steps.length - 1];
-  $('.cta', p).classList.toggle('off', (st === 'pan' && !S.pan.every(Boolean)) || ((st === 'addnom' || st === 'addacct' || st === 'personal') && formErrors(st).length > 0));
+  $('.cta', p).classList.toggle('off', (st === 'pan' && !S.pan.every(Boolean)) || (['addnom', 'addacct', 'personal', 'income'].includes(st) && formErrors(st).length > 0));
 }
 function reach(st) { const i = ORDER.indexOf(st); if (i > (S.reached ?? -1)) S.reached = i; }
 function goStep(st, o = {}) {
@@ -1138,9 +1238,7 @@ function success() {
     <div class="sgroup" id="sg" style="position:absolute;left:27px;width:340px;top:152px">
       <div class="tickc"><svg width="24" height="18" viewBox="0 0 26 20" fill="none"><path d="M3 10.5l7 7L23 3" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="amt num" id="samt">₹0</div><div class="ok">Payment successful</div><button class="vd" data-a="details" style="opacity:0">View details</button></div>
-    <div class="vk card" id="vk" style="opacity:0"><div class="img"></div><h4>Complete VKYC <small>takes ~3min</small></h4>
-      <p>You need to do video KYC with the bank by <b>17 November 2026, 11:45 PM</b> to complete your FD booking</p>
-      <div class="av"><i></i>Bank agent available</div><button class="bigbtn press" data-a="vkyc">Start VKYC</button></div>`);
+    ${vkCard()}`);
   p.dataset.noswipe = 1;
   // everything else in the stack goes away under it
   pagesEl.appendChild(p);
@@ -1169,6 +1267,18 @@ function success() {
     A($('#vk', p), [{ opacity: 1, transform: 'translateY(520px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: 90 });
     A($('[data-a="done"]', p), [{ opacity: 0, transform: 'scale(.5)' }, { opacity: 1, transform: 'none' }], BOUNCE, { delay: 300 });
   }, 1750);
+}
+function agentsOn() {
+  const q = new URLSearchParams(location.search).get('vk'); if (q === 'off') return false; if (q === 'on') return true;
+  const ist = new Date(Date.now() + (new Date().getTimezoneOffset() + 330) * 60000), d = ist.getDay(), h = ist.getHours();
+  return d >= 1 && d <= 5 && h >= 9 && h < 21;
+}
+function vkCard() {
+  const on = agentsOn(), due = '<p>You need to do video KYC with the bank by <b>17 November 2026, 11:45 PM</b> to complete your FD booking</p>';
+  return on ? `<div class="vk card" id="vk" style="opacity:0"><div class="img"></div><h4>Complete VKYC <small>takes ~3min</small></h4>${due}
+      <div class="av"><i></i>Bank agent available</div><button class="bigbtn press" data-a="vkyc">Start VKYC</button></div>`
+    : `<div class="vk card off" id="vk" style="opacity:0"><div class="img"></div><h4>Complete VKYC <small>No agents available</small></h4>${due}
+      <div class="av">Available Mon -Fri 9AM to 9PM</div><button class="bigbtn press" data-a="remind">${I.bell}<span>Remind me</span></button></div>`;
 }
 function vkycCall() {
   const p = present(`<div class="ph"><div class="agent"></div><div id="cst" style="margin-top:26px;font-size:18px;font-weight:500">Connecting you to a bank agent…</div>
@@ -1273,7 +1383,32 @@ const ACT = {
   },
   calc() { if (busy) return; if (sheet) closeSheet().then(() => push(amtListPage())); else push(amtListPage()); },
   calcsheet() { calcSheet(); },
-  filter(el) { A(el, [{ transform: 'rotate(0)' }, { transform: 'rotate(-8deg)' }, { transform: 'rotate(6deg)' }, { transform: 'none' }], { e: 'ease-out', d: 420 }); },
+  filter(el) { if (!busy) filterSheet(el); },
+  fchip(el) {
+    const f = sheet.flt, g = el.dataset.g, v = el.dataset.v, i = f[g].indexOf(v);
+    if (i >= 0) f[g].splice(i, 1); else f[g].push(v);
+    el.classList.toggle('on', i < 0); A(el, [{ transform: 'scale(.93)' }, { transform: 'none' }], BOUNCE); fLive();
+  },
+  fsort(el) { sheet.flt.sort = el.dataset.v; $$('.fseg button', sheet.el).forEach((b) => b.classList.toggle('on', b === el)); fLive(); },
+  fins(el) { const f = sheet.flt; f.ins = !f.ins; $('.toggle', el).classList.toggle('on', f.ins); fLive(); },
+  fclear() {
+    const f = sheet.flt, nf = fNew(); Object.keys(nf).forEach((k) => { f[k] = nf[k]; });
+    $$('.fchip.on, .fbank.on', sheet.el).forEach((b) => b.classList.remove('on')); $('.fins .toggle', sheet.el).classList.remove('on');
+    $$('.fseg button', sheet.el).forEach((b) => b.classList.toggle('on', b.dataset.v === 'rate')); fLive();
+  },
+  fapply(el) {
+    if (el.classList.contains('off')) { A(el, [{ transform: 'none' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(6px)' }, { transform: 'none' }], { e: 'ease-out', d: 380 }); return; }
+    const p = sheet.page; p._flt = sheet.flt; closeSheet().then(() => applyFilter(p));
+  },
+  funset(el) {
+    const p = el.closest('.page'), f = p._flt, g = el.dataset.g, v = el.dataset.v;
+    if (g === 'ins') f.ins = false; else f[g] = f[g].filter((x) => x !== v);
+    const hid = fRows(p).filter((r) => r.style.display === 'none');
+    A(el, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.8)' }], QUICK).then(() => {
+      applyFilter(p, false);
+      hid.filter((r) => r.style.display !== 'none').forEach((r, i) => A(r, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: i * 40 }));
+    });
+  },
   stepback() { if (!busy) bookBack(false); },
   ptab(el) {
     const i = +el.dataset.i; if (i === S.ptab) return; const dir = i > S.ptab ? 1 : -1; S.ptab = i;
@@ -1300,7 +1435,7 @@ const ACT = {
     if (st === 'amount' && S.amt < 1000) { A($('#amtv', bookEl()), [{ transform: 'none' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(7px)' }, { transform: 'none' }], { e: 'ease-out', d: 380 }); $('#amtm', bookEl()).textContent = 'Minimum deposit is ₹1,000'; return; }
     if (next) return goStep(next);
     if (st === 'aadhaar') return bankKyc();
-    if (st === 'addnom' || st === 'addacct' || st === 'personal') {
+    if (['addnom', 'addacct', 'personal', 'income'].includes(st)) {
       const errs = formErrors(st), step = $('.step:last-child', bookEl());
       if (errs.length) {
         errs.forEach(([k]) => { const fe = $(`[data-f="${k}"]`, step); if (fe) fe.classList.add('err'); });
@@ -1312,7 +1447,8 @@ const ACT = {
         return;
       }
       const f = S.form;
-      if (st === 'personal') { S.me = { occ: f.occ, edu: f.edu, inc: f.inc }; S.form = {}; goStep('nominee'); return; }
+      if (st === 'personal' && !isNbfc()) { goStep('income'); return; }
+      if (st === 'personal' || st === 'income') { S.me = Object.assign({}, f); S.form = {}; goStep('nominee'); return; }
       if (st === 'addnom') { S.noms.forEach((m) => { m.isNew = false; }); S.noms.push({ n: f.name.trim(), r: f.rel, d: f.dob, isNew: true }); S.nom = S.noms.length - 1; goStep('nominee'); }
       else { S.accts.forEach((a) => { a.isNew = false; }); const n = f.accno.replace(/\D/g, ''); S.accts.push({ b: f.bank, s: f.bank.split(' ')[0], n: n.slice(-4), lg: f.bank === 'HDFC Bank' ? 'hdfc' : '', isNew: true }); S.acc = S.accts.length - 1; goStep('acct'); }
       return;
@@ -1330,20 +1466,27 @@ const ACT = {
   pick(el) {
     const k = el.dataset.k, [title, opts] = PICK[k], cur = S.form[k];
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    openSheet(`<div class="esheet"><h3>${title}</h3><div class="box">${opts.map((o) => `<button class="kv pk ${o === cur ? 'on' : ''}" data-a="pickset" data-k="${k}" data-v="${o}"><b style="font-weight:400;font-size:17px">${o}</b><span class="radio"></span></button>`).join('')}</div></div>`);
+    openSheet(`<div class="psheet"><h3>${title}</h3><div class="pbody"><div class="plist">${opts.map((o) => `<button class="prow2 ${o === cur ? 'on' : ''}" data-a="picksel" data-v="${esc(o)}"><span>${esc(o)}</span><span class="radio"></span></button>`).join('')}</div>
+      <button class="pconf press" data-a="pickset" data-k="${k}">Confirm</button></div></div>`);
+  },
+  picksel(el) {
+    $$('.prow2', el.parentElement).forEach((x) => x.classList.toggle('on', x === el));
+    A($('.radio', el), [{ transform: 'scale(.8)' }, { transform: 'none' }], BOUNCE);
   },
   pickset(el) {
-    const k = el.dataset.k, v = el.dataset.v; S.form[k] = v;
-    $$('.pk', el.parentElement).forEach((x) => x.classList.toggle('on', x === el));
-    setTimeout(() => closeSheet().then(() => {
+    const k = el.dataset.k, on = $('.prow2.on', el.closest('.psheet'));
+    if (!on) { const l = $('.plist', el.closest('.psheet')); A(l, [{ transform: 'none' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }], { e: 'ease-out', d: 400 }); return; }
+    const v = on.dataset.v; S.form[k] = v;
+    closeSheet().then(() => {
       const step = $('.step:last-child', bookEl()), val = $(PID[k], step), fe = val && val.closest('.field');
       if (!val) return;
       val.innerHTML = esc(v) + I.chevd.replace('#4a1d17', '#aba6a6'); val.classList.remove('phv'); fe.classList.remove('err'); const er = $('#ferr', step); if (er) er.textContent = '';
       A(val, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], SOFT);
       updateCta();
       const nx = k === 'rel' ? $('#fDob', step) : k === 'bank' ? $('#fHolder', step) : null; if (nx && !nx.value) nx.focus({ preventScroll: true });
-      if (['occ', 'edu', 'inc'].includes(k)) { const nk = ['occ', 'edu', 'inc'].find((x) => !S.form[x]); if (nk) setTimeout(() => { const b = $(`[data-k="${nk}"]`, step); if (b && !sheet) ACT.pick(b); }, 280); }
-    }), 160);
+      // income details: walk on to the next empty picker
+      if (step.dataset.step === 'income') { const nb = $$('[data-a="pick"]', step).find((b) => !S.form[b.dataset.k]); if (nb) setTimeout(() => { if (!sheet) ACT.pick(nb); }, 280); }
+    });
   },
   reinv(el) { S.reinv = !S.reinv; el.classList.toggle('on', S.reinv); },
   edit() {
@@ -1355,6 +1498,13 @@ const ACT = {
     openSheet(`<div class="esheet"><h3>Your FD</h3><div class="box fill">${[['Bank', B[S.sel.bank].n], ['Amount', inr(S.amt)], ['Tenure', titleTen(S.sel.ten)], ['Interest rate', S.sel.rate.toFixed(2) + '%'], ['At maturity', inr(mat(S.amt, S.sel.rate, S.sel.yrs))]].map(([l, v]) => `<div class="kv"><span>${l}</span><b>${v}</b></div>`).join('')}</div></div>`);
   },
   vkyc() { vkycCall(); },
+  remind(el) {
+    if (el.classList.contains('set')) return;
+    el.classList.add('set'); const t = $('span', el);
+    A(t, [{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px)' }], QUICK).then(() => { t.textContent = 'Reminder set for 9AM'; A(t, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], SOFT); });
+    A($('svg', el), [{ transform: 'rotate(0)' }, { transform: 'rotate(-18deg)' }, { transform: 'rotate(14deg)' }, { transform: 'rotate(-8deg)' }, { transform: 'none' }], { e: 'ease-out', d: 600 });
+    toast('We’ll remind you when bank agents are available');
+  },
   depopen(el) { // the card lifts out of the list and settles at the top of FD details
     if (busy) return;
     const L = deposits(), d = L[el.dataset.k][+el.dataset.i];

@@ -565,3 +565,63 @@ img { display: block; -webkit-user-drag: none; }
 .field .val svg { display: inline-block; vertical-align: 3px; margin-left: 5px; }
 
 .tile { padding-right: 8px; }
+/* picker sheet (Figma: Personal details pickers) — centred title, radio list, Confirm */
+.psheet { margin: 0 11px 25px; background: #fff; border-radius: 27px; overflow: hidden; box-shadow: var(--shadow); }
+.psheet h3 { margin: 0; height: 77px; display: grid; place-items: center; padding-top: 2px; font-weight: 500; font-size: 19px; line-height: 25px; color: var(--ink); border-bottom: 1px solid #ebe8e6; }
+.pbody { padding: 23px 21px 21px; }
+.plist { border: 1px solid #e3e0de; border-radius: 21px; overflow: hidden; }
+.prow2 { position: relative; display: flex; align-items: center; width: 100%; height: 57px; padding: 0 50px 0 17px; font-size: 15px; line-height: 21px; font-weight: 500; color: var(--ink); background: #fff; transition: background-color .2s; }
+.prow2 + .prow2 { border-top: 1px solid #efedeb; }
+.prow2:active { background: #f7f6f4; }
+.prow2 .radio { top: 20px; right: 17px; width: 17px; height: 17px; border-width: 1.2px; }
+.prow2 .radio::after { width: 9px; height: 9px; }
+.pconf { display: grid; place-items: center; width: 100%; height: 55px; margin-top: 23px; border-radius: 30px; background: var(--dark); border: 2px solid rgba(0,0,0,.05); color: #fff; font-size: 17px; line-height: 23px; font-weight: 500; box-shadow: 0 3px 30px rgba(0,0,0,.12); }
+/* filter sheet (Figma 1014:24642) */
+.fsh { top: 54px; display: flex; flex-direction: column; }
+.fsheet { flex: 1; min-height: 0; margin: 0 11px 11px; background: #fff; border-radius: 27px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: var(--shadow); }
+.fh { flex: none; display: flex; align-items: center; height: 77px; padding: 0 19px 0 20px; border-bottom: 1px solid #ebe8e6; }
+.fh b { font-weight: 500; font-size: 19px; line-height: 25px; color: var(--ink); }
+.fbadge { margin-left: 8px; min-width: 22px; height: 18px; padding: 0 6px; border-radius: 9px; background: #d8442f; color: #fff; font-size: 11px; font-weight: 500; display: grid; place-items: center; transform: scale(0); transition: transform .35s cubic-bezier(.2,1.5,.35,1); }
+.fbadge.on { transform: none; }
+.fclr { margin-left: auto; display: flex; align-items: center; gap: 8px; height: 31px; padding: 0 12px 0 13px; border: 1px solid #262626; border-radius: 20px; font-size: 13px; line-height: 17px; color: var(--ink); }
+.fbody { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 4px 19px 110px 20px; overscroll-behavior: contain; }
+.fbody::-webkit-scrollbar { display: none; }
+.fbody h4 { margin: 22px 0 12px; font-weight: 400; font-size: 15px; line-height: 21px; color: var(--ink); }
+.fseg { display: flex; padding: 4px; border-radius: 23px; background: #f3f3ee; gap: 4px; }
+.fseg button { flex: 1; height: 33px; border-radius: 20px; border: 1px solid #e3e0de; background: #f7f7f3; font-size: 13px; line-height: 17px; color: var(--sub); text-align: center; transition: background-color .3s, color .3s, border-color .3s; }
+.fseg button.on { background: var(--dark); border-color: var(--dark); color: #fff; }
+.fchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fchip { height: 33px; padding: 0 11px; border: 1px solid #dfdcda; border-radius: 20px; font-size: 13px; line-height: 17px; color: var(--sub); background: #fff; transition: background-color .25s, color .25s, border-color .25s; }
+.fchip.on { background: var(--dark); border-color: var(--dark); color: #fff; }
+.fins { position: relative; display: block; width: 100%; padding: 16px 16px 15px; border: 1px solid #dfdcda; border-radius: 17px; text-align: left; }
+.fins b { display: block; font-weight: 500; font-size: 14px; line-height: 19px; color: var(--ink); }
+.fins small { display: block; margin-top: 8px; width: 240px; font-size: 12px; line-height: 18px; color: var(--sub); }
+.fins .toggle { position: absolute; right: 16px; top: 15px; width: 38px; height: 19px; padding: 2px; }
+.fins .toggle i { width: 21px; height: 15px; }
+.fins .toggle.on i { transform: translateX(13px); }
+.fbanks { border: 1px solid #dfdcda; border-radius: 17px; overflow: hidden; }
+.fbank { position: relative; display: flex; align-items: center; gap: 13px; width: 100%; height: 66px; padding: 0 44px 0 14px; text-align: left; background: #fff; }
+.fbank + .fbank { border-top: 1px solid #efedeb; }
+.fbank .logo.sm { width: 42px; height: 42px; border-radius: 12px; background: #f6f6f3; border: 0; }
+.fbank .logo.sm i { width: 30px; height: 30px; border-radius: 8px; background: #fff; }
+.fbank b { display: block; font-weight: 500; font-size: 14px; line-height: 19px; color: var(--ink); }
+.fbank small { display: block; font-size: 11px; line-height: 15px; color: var(--green); margin-top: 2px; }
+.fbank .radio { top: 23px; right: 16px; width: 17px; height: 17px; border-width: 1.2px; }
+.fbank .radio::after { width: 9px; height: 9px; }
+.ffoot { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 8px 9px; background: linear-gradient(rgba(255,255,255,0), #fff 32%); }
+.fshow { position: relative; display: grid; place-items: center; width: 100%; height: 51px; border-radius: 30px; background: var(--dark); color: #fff; font-size: 15px; line-height: 21px; font-weight: 500; box-shadow: 0 0 0 6px #fff, 0 3px 30px rgba(0,0,0,.12); transition: opacity .3s; }
+.fshow.off { opacity: .35; }
+/* applied filters on the listing (Figma 1014:25479) */
+.fapplied { display: none; flex-wrap: wrap; gap: 7px; margin: -33px 15px 22px; }
+.filtered .fapplied { display: flex; }
+.filtered .ltitle { display: none; }
+.fap { display: inline-flex; align-items: center; gap: 9px; height: 31px; padding: 0 11px 0 12px; border-radius: 20px; background: var(--dark); color: #fff; font-size: 13px; line-height: 17px; }
+.cbtn .badge { right: -4px; top: -6px; background: #d8442f; }
+/* Ver_2 additions: bank lookup error, expired/refunded bookings, VKYC outside agent hours */
+.step .ferr.bot { position: absolute; left: 0; right: 0; bottom: 30px; margin: 0; text-align: center; font-size: 15px; line-height: 21px; color: #a8322a; }
+.s.expired { background: #ffd9d4; color: #c0392b; } .s.refunded { background: #dcf7d6; color: #0e7a3a; }
+.vk.off h4 small { color: #b5352a; }
+.vk.off .av { color: var(--green-d); }
+.vk .bigbtn { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.vk.off .bigbtn svg { position: absolute; left: 22px; }
+.vk.off .bigbtn { position: relative; }
