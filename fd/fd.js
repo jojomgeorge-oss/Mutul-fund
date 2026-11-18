@@ -97,8 +97,8 @@ const REC = [
   { v: 3, bank: 'sur', amt: 500000, rate: 8.31, ten: '5Y 3M 16D', yrs: 5.29 },
 ];
 // an FD that was started but not finished; shows as "Complete your FD"
-S.pend = { bank: 'sur', amt: 500000, ten: '5Y 3M 16D', yrs: 5.29, rate: 8.31, stage: 'kyc', step: 'pan' };
-const STAGE = { kyc: ['Complete KYC', 'Start KYC'], pan: ['Verify PAN', 'Start'], details: ['Enter details', 'Start'] };
+S.pend = null; // set only when someone pays but leaves before finishing video KYC
+const STAGE = { vkyc: ['Complete VKYC', 'Start VKYC'] };
 const ORDER = ['select', 'amount', 'pan', 'aadhaar', 'personal', 'income', 'nominee', 'addnom', 'acct', 'addacct', 'review'];
 const ASKQ = [['Mutual fund market', 'How mutual funds performed in the last 6 months?', '#ffe9ee'], ['FD investments', 'Is safe to invest in an FD?', '#fff1cc'], ['FD vs Savings', 'FD or savings - which is better for me?', '#f8f7cc'], ['FD taxes', 'How FD interest taxed?', '#e4e8ee'], ['DICGS insurance', 'What is DICGC insurance?', '#ffe9ee']];
 // what each listing shows: the page title decides which deposits belong on it
@@ -330,11 +330,12 @@ function recCard(i) {
 /* "Complete your FD": an FD that was started but not finished */
 function actionCard() {
   const d = S.pend; if (!d) return '';
-  const [msg, btn] = STAGE[d.stage];
+  const [msg, btn0] = STAGE[d.stage] || STAGE.vkyc, on = agentsOn();
+  const btn = on ? btn0 : 'Remind me', act = on ? 'pendgo' : 'remind';
   return `<div class="acard card" data-st>
     <div class="top"><span class="rlogo"><img src="img/${B[d.bank].img}.png" alt=""></span><span>${bankName(d.bank)}</span></div>
     <div class="apbox"><div class="r"><div><label>Invest</label><b>${inr(d.amt)}</b></div><div class="rt"><label>Tenure</label><b>${d.ten}</b></div></div>
-      <div class="f"><span>${msg}</span><button class="go press" data-a="pendgo">${btn}</button></div></div></div>`;
+      <div class="f"><span>${msg}</span><button class="go press" data-a="${act}"><span>${btn}</span></button></div></div></div>`;
 }
 function refreshPend(p) {
   const a = $('#pendA', p), b = $('#pendB', p); if (!a) return;
@@ -1167,13 +1168,6 @@ function bookBack(fromSwipe, dx = 0) {
     }
     S.steps.pop(); lock(320); renderStep(-1); return;
   }
-  // leaving a booking part-way keeps it on the home screen as "Complete your FD"
-  const r = S.reached ?? -1, sel = S.sel;
-  if (r >= ORDER.indexOf('amount') && !S.paid) {
-    const stage = r >= ORDER.indexOf('personal') ? 'details' : r === ORDER.indexOf('pan') ? 'pan' : 'kyc';
-    const step = stage === 'details' ? 'personal' : r >= ORDER.indexOf('aadhaar') ? 'aadhaar' : 'pan';
-    S.pend = { bank: sel.bank, amt: S.amt, ten: sel.ten, yrs: sel.yrs, rate: sel.rate, color: sel.color, stage, step };
-  }
   pop(dx);
 }
 /* opening the booking card: whatever was tapped grows into it */
@@ -1272,7 +1266,7 @@ function payFlow() {
    SUCCESS — rings + tick, then the result folds up into a card and VKYC rises
    ===================================================================== */
 function success() {
-  S.paid = true; S.pend = null;
+  S.paid = true; S.kycDone = false; S.pend = null;
   S.newDep = { b: S.sel.bank, a: S.amt, r: S.sel.rate, yrs: S.sel.yrs, ten: S.sel.ten, m: mat(S.amt, S.sel.rate, S.sel.yrs), s: 'pending', p: 0, left: 'Starts after VKYC', isNew: true };
   const p = mkPage('succ', `
     <button class="cbtn l press press-s" data-a="done" aria-label="Close" style="left:21px;opacity:0">${I.x}</button>
@@ -1327,12 +1321,13 @@ function vkycCall() {
   const p = present(`<div class="ph"><div class="agent"></div><div id="cst" style="margin-top:26px;font-size:18px;font-weight:500">Connecting you to a bank agent…</div>
       <div id="csub" style="font-size:14px;opacity:.6;margin-top:6px">Keep your PAN card ready</div><div class="wave" id="wave" style="opacity:0">${[0, 1, 2, 3, 4, 5, 6].map((i) => `<i style="animation-delay:${i * 90}ms"></i>`).join('')}</div></div>
     <div class="me"></div><button class="end press" data-a="noop" aria-label="End call"><svg width="26" height="12" viewBox="0 0 26 12"><path d="M1 8c7-7 17-7 24 0l-3 3-4-2V6c-3-1-7-1-10 0v3l-4 2z" fill="#fff"/></svg></button>`, 'call', { dark: true });
-  setTimeout(() => { $('#cst', p).textContent = 'Riya · Suryoday SF Bank'; $('#csub', p).textContent = 'Video KYC in progress'; A($('#wave', p), [{ opacity: 0 }, { opacity: 1 }], FADE); }, 1500);
+  setTimeout(() => { $('#cst', p).textContent = 'Riya · ' + bankName(S.sel.bank); $('#csub', p).textContent = 'Video KYC in progress'; A($('#wave', p), [{ opacity: 0 }, { opacity: 1 }], FADE); }, 1500);
   setTimeout(() => finishKyc(p), 3600);
 }
 /* the call screen shrinks into the "sit back and relax" sheet over Your deposits */
 function finishKyc(callP) {
-  S.tab = 1; S.dtab = 0;
+  S.tab = 1; S.dtab = 0; S.kycDone = true; S.pend = null;
+  if (S.newDep) S.newDep.left = 'KYC under verification';
   const home = homePage();
   stack.splice(0).forEach((x) => { if (x !== callP) x.remove(); });
   pagesEl.insertBefore(home, callP); stack.push(home); home._init();
@@ -1365,12 +1360,10 @@ const ACT = {
   chatq(el) { chatSend(el.textContent); const i = $('.chat input', sheet && sheet.el); if (i) i.focus({ preventScroll: true }); },
   recclose() { closeRecModal(); },
   send(el) { const b = el.closest('.askbar'); if (b) sendAsk(b); else discClose(el.closest('.page')); },
-  pendgo(el) { // resume the unfinished FD at the step it stopped
+  pendgo() { // the paid FD is waiting on video KYC: go straight to the call
     const d = S.pend; if (!d || busy) return;
-    S.sel = { bank: d.bank, ten: d.ten, yrs: d.yrs, rate: d.rate, color: d.color }; S.amt = d.amt; S.planAmt = 0;
-    if (d.step === 'personal') S.form = {};
-    const card = el.closest('.acard');
-    openBooking([d.step], card, { r0: 23, logo: $('.rlogo', card) });
+    S.sel = { bank: d.bank, ten: d.ten, yrs: d.yrs, rate: d.rate, color: d.color }; S.amt = d.amt;
+    vkycCall();
   },
   tenure(el) {
     if (busy) return;
@@ -1544,9 +1537,9 @@ const ACT = {
   vkyc() { vkycCall(); },
   remind(el) {
     if (el.classList.contains('set')) return;
-    el.classList.add('set'); const t = $('span', el);
-    A(t, [{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px)' }], QUICK).then(() => { t.textContent = 'Reminder set for 9AM'; A(t, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], SOFT); });
-    A($('svg', el), [{ transform: 'rotate(0)' }, { transform: 'rotate(-18deg)' }, { transform: 'rotate(14deg)' }, { transform: 'rotate(-8deg)' }, { transform: 'none' }], { e: 'ease-out', d: 600 });
+    el.classList.add('set'); const t = $('span', el) || el;
+    A(t, [{ opacity: 1 }, { opacity: 0, transform: 'translateY(-10px)' }], QUICK).then(() => { t.textContent = el.closest('.acard') ? 'Reminder set' : 'Reminder set for 9AM'; A(t, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], SOFT); });
+    if ($('svg', el)) A($('svg', el), [{ transform: 'rotate(0)' }, { transform: 'rotate(-18deg)' }, { transform: 'rotate(14deg)' }, { transform: 'rotate(-8deg)' }, { transform: 'none' }], { e: 'ease-out', d: 600 });
     toast('We’ll remind you when bank agents are available');
   },
   depopen(el) { // the card lifts out of the list and settles at the top of FD details
@@ -1575,6 +1568,8 @@ const ACT = {
   dl(el) { const c = el.closest('.kv').querySelector('.pen'); A(c, [{ transform: 'translateY(0)' }, { transform: 'translateY(4px)' }, { transform: 'none' }], BOUNCE); toast('Receipt downloaded'); },
   f121() { toast('Form 121 opens on the bank’s site'); },
   done() {
+    // paid but left without video KYC: the FD waits on home as "Complete your FD"
+    if (S.paid && !S.kycDone) { const sel = S.sel; S.pend = { bank: sel.bank, amt: S.amt, ten: sel.ten, yrs: sel.yrs, rate: sel.rate, color: sel.color, stage: 'vkyc' }; }
     S.tab = 1; S.dtab = 0;
     const home = homePage(); const cur = top();
     pagesEl.insertBefore(home, cur);

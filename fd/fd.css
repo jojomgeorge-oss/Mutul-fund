@@ -636,3 +636,4 @@ img { display: block; -webkit-user-drag: none; }
 /* bank hero for issuers without their own photo: a quiet wash with the logo */
 .bhero .img.gen { background: radial-gradient(120% 90% at 30% 20%, #fbf7f1 0%, #efe7dc 55%, #e5dccf 100%); display: grid; place-items: center; }
 .bhero .img.gen .logo { position: static; transform: scale(1.9); box-shadow: 0 10px 40px rgba(77,28,20,.12); }
+.acard .go span { color: #fff; font-size: inherit; }
