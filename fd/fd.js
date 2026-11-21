@@ -55,6 +55,9 @@ const lock = (ms = 380) => { busy = true; clearTimeout(lock.t); lock.t = setTime
 /* ---------------- data ---------------- */
 const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
 const mat = (a, r, y) => a * Math.pow(1 + r / 100, y);
+// recurring deposit: the same amount every month, each instalment compounding monthly until maturity
+const rdMat = (a, r, y) => { const n = Math.max(1, Math.round(y * 12)); let t = 0; for (let i = 1; i <= n; i++) t += a * Math.pow(1 + r / 1200, i); return t; };
+const matOf = (a, r, y) => (S.rd ? rdMat(a, r, y) : mat(a, r, y));
 const B = {
   shiv: { n: 'Shivalik SF Bank', l: 'Shivalik Small Finance Bank', img: 'shivalik', since: 'Since 2010 • Small finance bank', tag: 'DICGC insured' },
   shri: { n: 'Shriram finance', l: 'Shriram Finance', img: 'shriram', full: 1, since: 'Since 1979 • NBFC', tag: 'DICGC insured' },
@@ -74,7 +77,7 @@ const pct = (x) => x.toFixed(2).replace(/0$/, '') + '%';
 const TOP = Math.max.apply(null, Object.keys(RT).map(maxRate));
 const CATS = {
   high: ['High returns', `Up to ${TOP.toFixed(2)}% a year`, '#21a32a'], monthly: ['Monthly payouts', 'Interest paid monthly', '#e8517a'],
-  instant: ['Instant withdrawals', 'Break it anytime', '#9a55b5'],
+  instant: ['Instant withdrawals', 'Break it anytime', '#9a55b5'], rd: ['Recurring deposits', 'Deposit monthly', '#9a55b5'],
 };
 const PLANS = {
   fd: [['More than 1 year', '#c43960', [['5 years', 5, 8.25], ['3 years', 3, 4], ['1 year', 1, 4]]],
@@ -105,7 +108,7 @@ const ASKQ = [['Mutual fund market', 'How mutual funds performed in the last 6 m
 const SCOPE = {
   'Monthly payouts': (r) => r.pay.includes('mon'), 'Instant withdrawals': (r) => r.cat.includes('inst'),
   'Upto 1 Year': (r) => r.mo <= 12, 'Upto 5 Years': (r) => r.mo <= 60, 'Beyond 5 Years': (r) => r.mo > 60,
-  'High returns': (r) => rateFor(r.b, r.mo) >= 8.25,
+  'High returns': (r) => rateFor(r.b, r.mo) >= 8.25, 'Recurring deposits': (r) => r.mo >= 12 && r.mo <= 120,
 };
 const TENURES = [['Upto<br>1 Year', 'Upto 1 Year'], ['Upto<br>5 Years', 'Upto 5 Years'], ['Beyond<br>5 Years', 'Beyond 5 Years']];
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -141,6 +144,7 @@ const I = {
   cat: {
     high: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 23v-4M9.5 23v-7M15 23v-5M20.5 23v-9" stroke="#21a32a" stroke-width="2" stroke-linecap="round"/><path d="M3.5 13.5l6-6 4.5 3.5 7.5-7.5M16.5 3.5h5v5" stroke="#21a32a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     monthly: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="3.5" y="5" width="19" height="17" rx="4" stroke="#e8517a" stroke-width="1.9"/><path d="M3.5 10.5h19M8.5 3v4M17.5 3v4" stroke="#e8517a" stroke-width="1.9" stroke-linecap="round"/><circle cx="13" cy="16" r="2.4" stroke="#e8517a" stroke-width="1.7"/></svg>',
+    get rd() { return this.instant; },
     instant: '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="3.5" y="6" width="19" height="16" rx="4" stroke="#9a55b5" stroke-width="1.9"/><path d="M6 6l9-2.5a2 2 0 0 1 2.5 1.5L18 6" stroke="#9a55b5" stroke-width="1.9" stroke-linejoin="round"/><path d="M14 10l-3 4.5h4L12 19" stroke="#9a55b5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   },
 };
@@ -212,7 +216,7 @@ let sw = null;
 stage.addEventListener('pointerdown', (e) => {
   if (busy || stack.length < 2 || layer.children.length) return;
   const x = (e.clientX - stage.getBoundingClientRect().left) / K;
-  const p = top(); if (x > 26 || p.dataset.noswipe) return;
+  const p = top(); if (x > 26 || p.dataset.noswipe || deckReady()) return;
   sw = { x0: e.clientX, t0: performance.now(), p, prev: stack[stack.length - 2], dx: 0, id: e.pointerId, on: false };
 }, true);
 stage.addEventListener('pointermove', (e) => {
@@ -348,14 +352,16 @@ const REC_TEXT = (bank = 'Suryoday SF Bank') => `Hi Arunima, Decade suggests mov
 const askd = () => `<button class="askd press" data-a="askchat">${I.mark('rgba(255,255,255,.85)', 17)}Ask Decade ${I.chevs('rgba(255,255,255,.75)')}</button>`;
 // total invested in running deposits, and the interest they have earned so far
 function depTotals() {
-  const on = deposits().ongoing, a = on.reduce((x, d) => x + d.a, 0) + (S.newDep ? S.newDep.a : 0);
-  return { a, g: Math.round(on.reduce((x, d) => x + (d.m - d.a) * d.p, 0)) };
+  // an RD counts what has been paid in so far
+  const paid = (d) => (d.rd ? d.a * Math.round(d.yrs * 12 * d.p) : d.a), on = deposits().ongoing;
+  const a = on.reduce((x, d) => x + paid(d), 0) + (S.newDep ? (S.newDep.rd ? S.newDep.a : S.newDep.a) : 0);
+  return { a, g: Math.round(on.reduce((x, d) => x + (d.m - (d.rd ? d.a * d.yrs * 12 : d.a)) * d.p, 0)) };
 }
 function depCard(d, i) {
   return `<div class="dep card press rv ${d.isNew ? 'new' : ''}" data-st data-a="depopen" data-k="${d.key}" data-i="${i}">
-    <div class="t">${logo(d.b || 'sur', 'sm')}<span>${B[d.b || 'sur'].n} FD</span>${I.chevs('rgba(0,0,0,.6)')}<span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
-    <div class="r1"><div><small>Invested amount</small><b>${inr(d.a)}</b></div><div class="rt"><small>Interest rate</small><b class="green">${d.r.toFixed(2)}%</b></div></div>
-    <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog"><i style="transform:scaleX(${Math.max(d.p, .03)})"></i></div><div class="row">${{ matured: 'Matured on', expired: 'Booking expired', refunded: 'Refunded' }[d.s] || 'Tenure'}<b class="t2">${d.left}</b></div></div>
+    <div class="t">${logo(d.b || 'sur', 'sm')}<span>${B[d.b || 'sur'].n} ${d.rd ? 'RD' : 'FD'}</span>${I.chevs('rgba(0,0,0,.6)')}<span class="s ${d.s}">${d.s[0].toUpperCase() + d.s.slice(1)}</span></div>
+    <div class="r1"><div><small>Invested amount</small><b>${inr(d.a)}${d.rd ? '/Month' : ''}</b></div><div class="rt"><small>Interest rate</small><b class="green">${d.r.toFixed(2)}%</b></div></div>
+    <div class="in"><div class="row">Maturity amount<b>${inr(d.m)}</b></div><div class="prog ${d.s}"><i style="transform:scaleX(${d.s === 'expired' ? 0 : Math.max(d.p, .03)})"></i></div><div class="row">${{ matured: 'Matured on', expired: 'Booking expired', refunded: 'Refunded' }[d.s] || 'Tenure'}<b class="t2">${d.left}</b></div></div>
   </div>`;
 }
 // each deposit carries its own issuer, amount, rate and tenure; maturity and progress follow from them
@@ -363,9 +369,10 @@ const mkDep = (b, a, r, yrs, ten, s, p, left) => ({ b, a, r, yrs, ten, s, p, lef
 function deposits() {
   const L = {
     pending: [mkDep('sur', 50000, 8.6, 5, '5 Years', 'pending', 0, 'Starts after VKYC'), mkDep('jana', 100000, 8.25, 3, '3 Years', 'expired', 0, 'VKYC not done in time'),
-      mkDep('shiv', 25000, 8.1, 2, '2 Years', 'refunded', 0, '₹25,000 back in HDFC ••4563')],
+      mkDep('shiv', 25000, 8.1, 2, '2 Years', 'refunded', 1, '₹25,000 back in HDFC ••4563')],
     ongoing: [mkDep('sur', 200000, 8.6, 5, '5 Years', 'ongoing', .32, '3Y 4M 12D left'), mkDep('unity', 75000, 8.15, 2, '2 Years', 'ongoing', .55, '10M 20D left'),
-      mkDep('shiv', 150000, 8.5, 4, '4 Years', 'ongoing', .12, '3Y 6M 3D left')],
+      mkDep('shiv', 150000, 8.5, 4, '4 Years', 'ongoing', .12, '3Y 6M 3D left'),
+      Object.assign(mkDep('jana', 5000, 8.25, 2, '2 Years', 'ongoing', .42, '1Y 2M 9D left'), { rd: true, m: rdMat(5000, 8.25, 2) })],
     matured: [mkDep('shri', 50000, 8.3, 1, '1 Year', 'matured', 1, '12 Mar 2026'), mkDep('jana', 100000, 8.25, 1, '1 Year', 'matured', 1, '02 Jan 2026')],
   };
   if (S.newDep) L.pending.unshift(S.newDep);
@@ -388,10 +395,10 @@ function detailsPage(d) {
       <div class="dband">
         <svg class="ovals" viewBox="0 0 429 512" fill="none" stroke="#d2cecc" stroke-width=".45" aria-hidden="true"><ellipse cx="86" cy="128" rx="85.8" ry="127.8"/><ellipse cx="86" cy="256" rx="85.8" ry="127.8"/><ellipse cx="86" cy="384" rx="85.8" ry="127.8"/><ellipse cx="172" cy="128" rx="85.8" ry="127.8"/><ellipse cx="172" cy="256" rx="85.8" ry="127.8"/><ellipse cx="172" cy="384" rx="85.8" ry="127.8"/><ellipse cx="258" cy="128" rx="85.8" ry="127.8"/><ellipse cx="258" cy="256" rx="85.8" ry="127.8"/><ellipse cx="258" cy="384" rx="85.8" ry="127.8"/><ellipse cx="343" cy="128" rx="85.8" ry="127.8"/><ellipse cx="343" cy="256" rx="85.8" ry="127.8"/><ellipse cx="343" cy="384" rx="85.8" ry="127.8"/></svg>
         <div class="dslot">${depCard(d, 0).replace('data-a="depopen"', '')}</div>
-        <button class="again press" data-a="again">Invest again${I.chevs('#fff')}</button>
+        <button class="again press" data-a="${{ pending: 'dvkyc', matured: 'withdraw' }[d.s] || 'again'}">${{ pending: 'Complete VKYC', matured: 'Withdraw' }[d.s] || 'Invest again'}${I.chevs('#fff')}</button>
       </div>
       <div class="dtable rv" data-st>
-        ${row('Investment date', date, '', 'n')}${row('Investment amount', inr(d.a), '', 'n')}${row('Tenure', isNew ? titleTen(S.sel.ten) : d.ten || '4Y 5M 14D', '', 'n')}
+        ${row('Investment date', date, '', 'n')}${row('Investment amount', inr(d.a) + (d.rd ? '/Month' : ''), '', 'n')}${row('Tenure', isNew ? titleTen(S.sel.ten) : d.ten || '4Y 5M 14D', '', 'n')}
         ${row('Maturity instruction', `<span id="mi">${S.reinv ? 'Reinvest' : 'Reinvest'}</span>`, chip(I.pen, 'mi'))}
         ${row('Transaction ID', '23456781098354721083')}${row('Payment method', 'UPI')}${row('Nominee', esc(nom.n))}${row('Nominee relation', esc(nom.r))}
         ${row('Receipt', '<u data-a="dl">Download</u>', chip(dl, 'dl'))}${row('Form 121', '<u data-a="f121">Apply</u>', chip(cr, 'f121'))}
@@ -402,7 +409,7 @@ function detailsPage(d) {
       </div>
       <div style="height:187px"></div>
     </div>
-    <div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle">FD details</div></div>
+    <div class="hdr"><button class="cbtn l press press-s" data-a="back" aria-label="Back">${I.back}</button><div class="htitle">${d.rd ? 'RD' : 'FD'} details</div></div>
     ${askbar()}`);
   p._dep = d;
   hdrFade(p); bindAsk(p);
@@ -678,12 +685,14 @@ function listHdr(badgeCalc) {
     <button class="cbtn r press press-s" data-a="filter" aria-label="Filter">${I.filter}</button></div>`;
 }
 function listPage(title) {
+  const rd = title === 'Recurring deposits';
   // only the deposits that fit this page, best rate first
   const pick = LIST.filter(SCOPE[title] || (() => true)).sort((a, b) => rateFor(b.b, b.mo) - rateFor(a.b, a.mo) || a.mo - b.mo);
   const rows = pick.map((r, i) => `<button class="lrow card press rv" data-st data-a="plan" ${fdat(r.b, r.mo, r.pay, r.cat)} data-i="${i}" data-t="${r.t}" data-y="${r.y}">${logo(r.b)}<span><b>${B[r.b].n}</b>${safety(r.b)}</span>
       <div class="r"><b>${pct(rateFor(r.b, r.mo))}</b><small>${r.t}</small></div></button>`).join('');
   const p = mkPage('list', `<div class="scroll"><div style="height:147px"></div><div class="fapplied"></div><h1 class="ltitle">${title}</h1><div class="frows">${rows}</div>${qcards(3)}<div style="height:130px"></div></div>${listHdr(false)}${askbar()}`);
-  hdrFade(p); bindAsk(p); return p;
+  hdrFade(p); bindAsk(p); if (rd) p.dataset.rd = 1;
+  return p;
 }
 function amtListPage() {
   const t = CALC_T[S.calcT] || CALC_T[0];
@@ -830,6 +839,8 @@ function dragSheet(el) {
 
 /* what this particular deposit offers: withdrawal, payouts and safety */
 function planFeats(plan) {
+  if (plan.rd) return `<div>${I.bolt}Save a fixed amount every month</div><div>${I.sun}Start from ₹500 a month</div>
+    <div>${I.shield()}${isNbfc(plan.bank) ? 'CRISIL AAA · not DICGC insured' : 'DICGC insures up to ₹5 lakh'}</div>`;
   const k = plan.bank, f = BF[k] || {}, pay = plan.pay || f.pay || 'mat', inst = plan.inst !== undefined ? plan.inst : !!f.inst;
   const pl = pay.includes('mon') ? 'Monthly, quarterly or at maturity' : pay.includes('qtr') ? 'Quarterly or at maturity' : 'Interest paid at maturity';
   return `<div>${I.bolt}${inst ? 'Instant withdrawal available' : 'Early withdrawal at 1% lower rate'}</div><div>${I.sun}${pl}</div>
@@ -843,10 +854,10 @@ function planSheet(src, plan) {
     <div class="ptop" data-a="sheetbank"><h3>${b.l}${I.chevs('#282424')}</h3><p>${b.since}</p>${logo(k, 'w')}</div>
     <div class="pmain"><div class="pkv"><div><b>${plan.ten}</b><small>Tenure</small></div><div class="rt"><b class="green">${plan.rate.toFixed(2)}%</b><small>Interest rate</small></div></div>${amtRow}
       <div class="feats">${planFeats(plan)}</div>
-      <button class="bigbtn press" data-a="startfd" style="margin-top:22px">Start FD</button></div>
+      <button class="bigbtn press" data-a="startfd" style="margin-top:22px">Start ${plan.rd ? 'RD' : 'FD'}</button></div>
     <button class="allplans press" data-a="viewplans">View all plans ${I.chevs()}</button></div>`;
   S.sel = { bank: k, ten: plan.ten, yrs: plan.yrs, rate: plan.rate };
-  S.planAmt = plan.amt || 0;
+  S.planAmt = plan.amt || 0; S.rdNext = !!plan.rd;
   const s = openSheet(html, { custom: true, src });
   if (!s) return;
   const el = s.el, ptop = $('.ptop', el), pmain = $('.pmain', el), ap = $('.allplans', el), lg = $('.logo', ptop), hd = $('.handle', el);
@@ -1046,7 +1057,7 @@ function bookPage() {
 }
 function bookEl() { return stack.slice().reverse().find((p) => p.dataset.book); }
 function stepHTML(st) {
-  const s = S.sel, m = mat(S.amt, s.rate, s.yrs);
+  const s = S.sel, m = matOf(S.amt, s.rate, s.yrs), kind = S.rd ? 'RD' : 'FD';
   switch (st) {
     case 'select': {
       const groups = PLANS[S.ptab ? 'rd' : 'fd'].map(([g, c, rows]) => `<div class="pgroup" data-st>${g}</div>` + rows.map(([t, y, r0]) => { const r = S.ptab ? r0 : fdRate(S.sel.bank, y); return `<button class="prow press" data-st data-a="pickplan" data-t="${t}" data-y="${y}" data-r="${r}" data-c="${c}">${I.bars(c, 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#1c1c1c')}</button>`; }).join('')).join('<div style="height:61px"></div>');
@@ -1056,8 +1067,9 @@ function stepHTML(st) {
     }
     case 'amount':
       return `<div class="ptop2b" data-morph="plan"><div class="ptop2">${I.bars(s.color || '#c43960', 47, 15)}<div><b>${titleTen(s.ten)}</b><small>${B[s.bank].n.replace('bank', 'Bank')}</small></div><span class="rt">${s.rate.toFixed(2)}%</span></div>
-          <div class="pay-row"><span>Interest payout</span><span class="r">On maturity<span class="pen">${I.pen}</span></span></div></div>
-        <div class="bigamt"><div class="v" id="amtv">${amtSpans(S.amt)}</div><div class="m" id="amtm">Your FD at maturity will be ${inr(m)}</div></div>
+          ${S.rd ? '<div class="pay-row"><span>Frequency</span><span class="r">Monthly</span></div>' : `<div class="pay-row"><span>Interest payout</span><span class="r">On maturity<span class="pen">${I.pen}</span></span></div>`}</div>
+        <div class="bigamt"><div class="v" id="amtv">${amtSpans(S.amt)}</div><div class="m" id="amtm">Your ${kind} at maturity will be ${inr(m)}</div></div>
+        <div class="qamt">${(S.rd ? [1000, 5000, 10000] : [10000, 20000, 100000]).map((v) => `<button class="press" data-a="qamt" data-v="${v}">${inr(v)}</button>`).join('')}</div>
         <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'd'].map((k) => k === '' ? '<span></span>' : `<button data-a="key" data-k="${k}" aria-label="${k === 'd' ? 'Delete' : k}">${k === 'd' ? I.del : k}</button>`).join('')}</div>`;
     case 'pan':
       return `<div class="st c" style="margin-bottom:35px">Confirm your PAN details</div>
@@ -1101,12 +1113,14 @@ function stepHTML(st) {
         <div class="ferr bot" id="ferr"></div>`;
     }
     case 'review':
-      return `<div class="rvh"><div>Review your FD</div><button data-a="edit">Edit</button></div>
-        <div class="rv1" data-st><div class="a">Amount<b>${inr(S.amt)}</b></div>
-          <div class="m"><div><small>Maturity amount</small><b>${inr(m)}</b></div><div><small>Interest gain</small><b class="g">+${inr(m - S.amt)}</b></div></div></div>
-        <div class="rv2" data-st>
-          ${[['Tenure', titleTen(s.ten), 'n'], ['Interest rate', s.rate.toFixed(2) + '%', 'n'], ['Interest payout', 'At maturity', ''], ['Nominee', esc(S.noms[S.nom].n), '']].map(([l, v, c]) => `<div class="kv"><span>${l}</span><b class="${c}">${v}</b></div>`).join('')}
-          <div class="kv"><b>Reinvest on maturity</b><button class="toggle ${S.reinv ? 'on' : ''}" data-a="reinv" aria-label="Reinvest on maturity"><i></i></button></div></div>`;
+      { const paid = S.rd ? S.amt * Math.max(1, Math.round(s.yrs * 12)) : S.amt, ac = S.accts[S.acc];
+      return `<div class="rvh"><div>Review your ${kind}</div><button data-a="edit">Edit</button></div>
+        <div class="rv1" data-st><div class="a">Amount<b>${inr(S.amt)}${S.rd ? '<small class="pm">/Month</small>' : ''}</b></div>
+          <div class="m"><div><small>Maturity amount</small><b>${inr(m)}</b></div><div><small>Interest gain</small><b class="g">+${inr(m - paid)}</b></div></div></div>
+        <div class="rv2 ${S.rd ? 'rd' : ''}" data-st>
+          ${(S.rd ? [['Tenure', titleTen(s.ten), 'n'], ['Interest rate', s.rate.toFixed(2) + '%', 'n'], ['Savings bank', `${esc(ac.s)} •••• ${ac.n}`, 'n'], ['Frequency', 'Monthly', ''], ['Nominee', esc(S.noms[S.nom].n), '']]
+            : [['Tenure', titleTen(s.ten), 'n'], ['Interest rate', s.rate.toFixed(2) + '%', 'n'], ['Interest payout', 'At maturity', ''], ['Nominee', esc(S.noms[S.nom].n), '']]).map(([l, v, c]) => `<div class="kv"><span>${l}</span><b class="${c}">${v}</b></div>`).join('')}
+          <div class="kv"><b>Reinvest on maturity</b><button class="toggle ${S.reinv ? 'on' : ''}" data-a="reinv" aria-label="Reinvest on maturity"><i></i></button></div></div>`; }
   }
   return '';
 }
@@ -1141,10 +1155,77 @@ function renderStep(dir, o = {}) {
   const nw = $('[data-new]', el);
   if (nw) { nw.removeAttribute('data-new'); A(nw, [{ transform: 'scale(.92)', opacity: 0 }, { transform: 'none', opacity: 1 }], BOUNCE, { delay: 260 }); [S.noms, S.accts].forEach((l) => l.forEach((x) => { x.isNew = false; })); }
   if (!dir) { old.forEach((x) => x.remove()); stagger(el, 60); return; }
+  // after the amount, each step is its own card: continue swipes the card away, back deals the last one in again
+  if (old.length && inDeck(old[old.length - 1].dataset.step) && inDeck(st)) { cardSwap(p, dir, old, el, o); return; }
   old.forEach((x) => A(x, [{ transform: 'none', opacity: 1 }, { transform: `translateX(${-dir * 90}px)`, opacity: 0 }], SNAP).then(() => x.remove()));
   A(el, [{ transform: `translateX(${dir * 120}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], SNAP);
   if (dir > 0) $$('[data-st]', el).slice(0, 6).forEach((x, i) => A(x, [{ transform: `translateX(${30 + i * 14}px)` }, { transform: 'none' }], SOFT, { delay: 20 }));
 }
+/* ---------------- card deck for the steps after the amount ---------------- */
+const inDeck = (st) => ORDER.indexOf(st) >= ORDER.indexOf('amount');
+const OFF = 'translateX(-430px) rotate(-8deg)', UNDERC = 'translateY(16px) scale(.94)';
+function deckGhost(card) { const g = card.cloneNode(true); g.classList.add('ghost'); g.removeAttribute('style'); $$('input', g).forEach((i) => { i.tabIndex = -1; }); return g; }
+function cardSwap(p, dir, old, el, o = {}) {
+  const card = $('.bcardx', p);
+  el.remove(); // the outgoing card keeps the old step; the real card takes the new one
+  const g = deckGhost(card);
+  old.forEach((x) => x.remove()); $('.steps', card).appendChild(el);
+  lock(460);
+  if (dir > 0) {
+    card.after(g);
+    A(g, [{ transform: 'none' }, { transform: OFF, opacity: .4 }], { e: 'cubic-bezier(.45,0,.2,1)', d: 440 }).then(() => g.remove());
+    A(card, [{ transform: UNDERC }, { transform: 'none' }], SOFT, { delay: 60 });
+    $$('[data-st]', el).slice(0, 6).forEach((x, i) => A(x, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], SOFT, { delay: 140 + i * 45 }));
+  } else {
+    card.before(g);
+    const from = o.deckFrom || OFF;
+    A(card, [{ transform: from }, { transform: 'none' }], SOFT);
+    A(g, [{ transform: o.deckUnder || 'none', opacity: 1 }, { transform: UNDERC, opacity: 0 }], SOFT).then(() => g.remove());
+  }
+}
+/* drag the card right to pull the previous step's card back in */
+let cd = null;
+function deckReady() {
+  const p = top(); if (!p || !p.dataset.book || busy || sheet || S.steps.length < 2) return null;
+  const n = S.steps.length; return inDeck(S.steps[n - 1]) && inDeck(S.steps[n - 2]) ? p : null;
+}
+stage.addEventListener('pointerdown', (e) => {
+  const p = deckReady(); if (!p || layer.children.length) return;
+  const card = $('.bcardx', p); if (!card.contains(e.target) || e.target.closest('input, textarea, .numpad, .kp')) return;
+  cd = { x0: e.clientX, y0: e.clientY, t0: performance.now(), p, card, id: e.pointerId, on: false, dx: 0 };
+}, true);
+stage.addEventListener('pointermove', (e) => {
+  if (!cd || e.pointerId !== cd.id) return;
+  const dx = (e.clientX - cd.x0) / K, dy = (e.clientY - cd.y0) / K;
+  if (!cd.on) {
+    if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { cd = null; return; }
+    if (dx < 12 || dx < Math.abs(dy) * 1.5) return;
+    cd.on = true; try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    const prev = S.steps[S.steps.length - 2], g = deckGhost(cd.card);
+    const box = $('.steps', g); box.innerHTML = ''; const st = document.createElement('div'); st.className = 'step'; st.dataset.step = prev; st.innerHTML = stepHTML(prev); box.appendChild(st);
+    cd.card.after(g); cd.g = g;
+  }
+  cd.dx = Math.max(0, dx); const k = Math.min(1, cd.dx / 390);
+  cd.g.style.transform = `translateX(${-430 + 430 * k}px) rotate(${-8 * (1 - k)}deg)`;
+  cd.card.style.transform = `translateY(${16 * k}px) scale(${1 - .06 * k})`;
+  e.preventDefault();
+}, true);
+const endDeck = (e) => {
+  if (!cd || e.pointerId !== cd.id) return;
+  const c = cd; cd = null; if (!c.on) return;
+  blockClick(); e.stopPropagation();
+  const v = c.dx / Math.max(1, performance.now() - c.t0);
+  if (c.dx > 110 || v > .5) {
+    const from = c.g.style.transform, under = c.card.style.transform;
+    c.g.remove(); c.card.style.transform = '';
+    S.steps.pop(); lock(460); renderStep(-1, { deckFrom: from, deckUnder: under });
+  } else {
+    A(c.g, [{ transform: c.g.style.transform }, { transform: OFF }], SNAP).then(() => c.g.remove());
+    A(c.card, [{ transform: c.card.style.transform }, { transform: 'none' }], SNAP);
+  }
+};
+stage.addEventListener('pointerup', endDeck, true);
+stage.addEventListener('pointercancel', endDeck, true);
 function updateCta() {
   const p = bookEl(); if (!p) return;
   const st = S.steps[S.steps.length - 1];
@@ -1174,7 +1255,9 @@ function bookBack(fromSwipe, dx = 0) {
 function openBooking(steps, src, o = {}) {
   if (busy) return; lock(700);
   S.steps = steps.slice(); S.fresh = true; S.ptab = 0; S.paid = false; S.reached = -1; steps.forEach(reach);
+  S.rd = !!S.rdNext; S.rdNext = false;
   if (S.planAmt && steps[0] === 'amount') S.amt = S.planAmt;
+  else if (S.rd && steps[0] === 'amount') S.amt = 5000;
   if (recM) closeRecModal(true);
   const p = bookPage();
   const prev = top();
@@ -1224,7 +1307,14 @@ function key(k) {
   const sp = $$('span', v);
   if (k !== 'd') { const last = sp[sp.length - 1]; A(last, [{ transform: 'translateY(26px) scale(.6)', opacity: 0 }, { transform: 'none', opacity: 1 }], BOUNCE); }
   if (inr(old).length !== inr(S.amt).length) A(v, [{ transform: `scale(${k === 'd' ? 1.04 : .97})` }, { transform: 'none' }], SOFT);
-  $('#amtm', p).textContent = 'Your FD at maturity will be ' + inr(mat(S.amt, S.sel.rate, S.sel.yrs));
+  $('#amtm', p).textContent = `Your ${S.rd ? 'RD' : 'FD'} at maturity will be ` + inr(matOf(S.amt, S.sel.rate, S.sel.yrs));
+}
+function setAmt(v) { // a quick-amount chip: the figure rolls to the new value
+  const p = bookEl(), el = $('#amtv', p); S.amt = v; S.fresh = false;
+  A(el, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-14px)' }], QUICK).then(() => {
+    el.innerHTML = amtSpans(v); A(el, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], SOFT);
+  });
+  $('#amtm', p).textContent = `Your ${S.rd ? 'RD' : 'FD'} at maturity will be ` + inr(matOf(v, S.sel.rate, S.sel.yrs));
 }
 
 /* =====================================================================
@@ -1249,7 +1339,7 @@ function bankKyc() {
 }
 function payFlow() {
   const p = present(`<div class="hdr" style="height:100px;background:#fff"><div style="position:absolute;top:58px;left:0;right:0;text-align:center;font-size:13px;color:var(--mute);display:flex;justify-content:center;gap:6px;align-items:center">${I.lock}pay.suryodaybank.com</div></div>
-    <div class="ph" style="background:#fff;justify-content:flex-start;padding-top:170px"><div style="font-size:14px;color:var(--mute)">Paying Suryoday SF Bank</div><div class="num" style="font-size:40px;font-weight:500;margin:10px 0 40px">${inr(S.amt)}</div>
+    <div class="ph" style="background:#fff;justify-content:flex-start;padding-top:170px"><div style="font-size:14px;color:var(--mute)">Paying ${bankName(S.sel.bank)}</div><div class="num" style="font-size:40px;font-weight:500;margin:10px 0 40px">${inr(S.amt)}</div>
       <div class="box" style="width:100%;text-align:left">${['UPI app', 'Net banking', 'Debit card'].map((t, i) => `<div class="kv" style="height:62px" ${i === 0 ? 'id="upi"' : ''}><b style="font-weight:400;font-size:16px">${t}</b><span class="radio" style="position:static;margin:0"></span></div>`).join('')}</div>
       <div id="paymsg" style="margin-top:30px;font-size:14px;color:var(--mute)"></div></div>`);
   setTimeout(() => { const u = $('#upi', p); u.classList.add('on'); u.style.background = 'var(--sel)'; u.style.transition = 'background .3s'; $('#paymsg', p).textContent = 'Opening your UPI app…'; }, 900);
@@ -1258,8 +1348,22 @@ function payFlow() {
       <div style="font-size:16px;font-weight:500">Enter UPI PIN</div><div id="pin" style="display:flex;gap:14px;margin-top:22px">${'<i style="width:14px;height:14px;border-radius:50%;border:1.5px solid #8d6197;display:block"></i>'.repeat(6)}</div></div>`);
     const dots = $$('#pin i', q);
     dots.forEach((d, i) => setTimeout(() => { d.style.background = '#8d6197'; A(d, [{ transform: 'scale(1.5)' }, { transform: 'none' }], BOUNCE); }, 500 + i * 160));
-    setTimeout(() => success(), 1700);
+    setTimeout(() => { if (S.failPay) { S.failPay = false; payFailed(); } else success(); }, 1700);
   }, 2000);
+}
+S.failPay = new URLSearchParams(location.search).get('pay') === 'fail';
+/* payment didn't go through: back on the review card with a retry sheet */
+function payFailed() {
+  dismiss(); setTimeout(() => dismiss(), 60);
+  setTimeout(() => {
+    openSheet(`<div class="rsheet fail"><div class="img"></div><h3>Payment failed. Retry again</h3><p>Your payment has not gone through. Please try again</p><button class="bigbtn press" data-a="payretry">Retry</button></div>`, { custom: true });
+  }, 520);
+}
+/* generic failure: full screen with a refresh */
+function errorPage() {
+  const p = present(`<div class="errp"><div class="img"></div><h3>Something went wrong</h3><p>Finding it difficult to connect. Try again after sometime.</p></div>
+    <button class="cta press" data-a="errrefresh"><span>Refresh</span></button>`, 'err');
+  return p;
 }
 
 /* =====================================================================
@@ -1267,7 +1371,7 @@ function payFlow() {
    ===================================================================== */
 function success() {
   S.paid = true; S.kycDone = false; S.pend = null;
-  S.newDep = { b: S.sel.bank, a: S.amt, r: S.sel.rate, yrs: S.sel.yrs, ten: S.sel.ten, m: mat(S.amt, S.sel.rate, S.sel.yrs), s: 'pending', p: 0, left: 'Starts after VKYC', isNew: true };
+  S.newDep = { b: S.sel.bank, a: S.amt, r: S.sel.rate, yrs: S.sel.yrs, ten: S.sel.ten, m: matOf(S.amt, S.sel.rate, S.sel.yrs), rd: S.rd, s: 'pending', p: 0, left: 'Starts after VKYC', isNew: true };
   const p = mkPage('succ', `
     <button class="cbtn l press press-s" data-a="done" aria-label="Close" style="left:21px;opacity:0">${I.x}</button>
     <div class="card" id="scard" style="position:absolute;left:27px;width:340px;top:112px;height:249px;opacity:0"></div>
@@ -1311,7 +1415,7 @@ function agentsOn() {
   return d >= 1 && d <= 5 && h >= 9 && h < 21;
 }
 function vkCard() {
-  const on = agentsOn(), due = '<p>You need to do video KYC with the bank by <b>17 November 2026, 11:45 PM</b> to complete your FD booking</p>';
+  const on = agentsOn(), due = `<p>You need to do video KYC with the bank by <b>17 November 2026, 11:45 PM</b> to complete your ${S.rd ? 'RD' : 'FD'} booking</p>`;
   return on ? `<div class="vk card" id="vk" style="opacity:0"><div class="img"></div><h4>Complete VKYC <small>takes ~3min</small></h4>${due}
       <div class="av"><i></i>Bank agent available</div><button class="bigbtn press" data-a="vkyc">Start VKYC</button></div>`
     : `<div class="vk card off" id="vk" style="opacity:0"><div class="img"></div><h4>Complete VKYC <small>No agents available</small></h4>${due}
@@ -1395,6 +1499,7 @@ const ACT = {
     if (busy) return;
     const k = el.dataset.b, amt = el.dataset.amt ? S.calcAmt : 0, t = CALC_T[S.calcT] || CALC_T[0];
     const d = el.dataset, r = +d.r || rateFor(k, Math.round((amt ? t[1] : +d.y || 5) * 12)), ex = { pay: d.pay, inst: d.cat ? d.cat.includes('inst') : undefined };
+    ex.rd = !!el.closest('[data-rd]');
     planSheet(el, amt ? Object.assign({ bank: k, ten: t[2], yrs: t[1], rate: r, amt }, ex) : Object.assign({ bank: k, ten: d.t || '5 years', yrs: +d.y || 5, rate: r }, ex));
   },
   recopen(el) { openRecModal(el); },
@@ -1464,12 +1569,13 @@ const ACT = {
     goStep('amount', { morphFrom: from, icon });
   },
   key(el) { key(el.dataset.k); },
+  qamt(el) { setAmt(+el.dataset.v); A(el, [{ transform: 'scale(.92)' }, { transform: 'none' }], BOUNCE); },
   cta(el) {
     if (busy) return;
     const st = S.steps[S.steps.length - 1];
     if (st === 'pan' && !S.pan.every(Boolean)) { const c = $('#consents', bookEl()); A(c, [{ transform: 'none' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(-4px)' }, { transform: 'none' }], { e: 'ease-out', d: 420 }); return; }
     const next = { amount: 'pan', pan: 'aadhaar', nominee: 'acct', acct: 'review' }[st];
-    if (st === 'amount' && S.amt < 1000) { A($('#amtv', bookEl()), [{ transform: 'none' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(7px)' }, { transform: 'none' }], { e: 'ease-out', d: 380 }); $('#amtm', bookEl()).textContent = 'Minimum deposit is ₹1,000'; return; }
+    if (st === 'amount' && S.amt < (S.rd ? 500 : 1000)) { A($('#amtv', bookEl()), [{ transform: 'none' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(7px)' }, { transform: 'none' }], { e: 'ease-out', d: 380 }); $('#amtm', bookEl()).textContent = 'Minimum deposit is ₹1,000'; return; }
     if (next) return goStep(next);
     if (st === 'aadhaar') return bankKyc();
     if (['addnom', 'addacct', 'personal', 'income'].includes(st)) {
@@ -1554,6 +1660,19 @@ const ACT = {
     A($('.dband', p), [{ opacity: 0 }, { opacity: 1 }], FADE);
     morphEl(el, from, to, SOFT).then((g) => { slot.style.opacity = ''; g.remove(); el.style.visibility = ''; });
   },
+  payretry() { closeSheet().then(() => payFlow()); },
+  errrefresh(el) {
+    const s = $('span', el); s.textContent = 'Refreshing…';
+    setTimeout(() => { if (navigator.onLine === false) { s.textContent = 'Refresh'; A($('.errp', top()), [{ transform: 'none' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(6px)' }, { transform: 'none' }], { e: 'ease-out', d: 380 }); toast('Still offline. Check your connection'); } else dismiss(); }, 900);
+  },
+  dvkyc() { const d = top()._dep; S.sel = { bank: d.b || 'sur', ten: d.ten || '5 Years', yrs: d.yrs || 5, rate: d.r }; S.amt = d.a; vkycCall(); },
+  withdraw(el) {
+    const d = top()._dep, ac = S.accts[S.acc];
+    if (el.classList.contains('done')) return;
+    el.classList.add('done'); el.firstChild.textContent = 'Withdrawal requested';
+    A(el, [{ transform: 'scale(.97)' }, { transform: 'none' }], BOUNCE);
+    toast(`${inr(d.m)} will reach ${ac.s} •••• ${ac.n} in 1–2 working days`);
+  },
   again(el) { const d = top()._dep; S.sel = { bank: 'sur', ten: '5 years', yrs: 5, rate: d.r }; S.planAmt = d.a; openBooking(['amount'], el, { dark: true, r0: 28 }); },
   mi() {
     S.form = S.form || {};
@@ -1580,6 +1699,8 @@ const ACT = {
 };
 stage.addEventListener('click', (e) => {
   const el = e.target.closest('[data-a]'); if (!el || !stage.contains(el)) return;
+  // anything that needs the network shows the error screen when offline
+  if (navigator.onLine === false && ['cat', 'tenure', 'plan', 'bank', 'startfd', 'cta', 'viewplans'].includes(el.dataset.a) && !busy) { errorPage(); return; }
   const f = ACT[el.dataset.a]; if (f) f(el, e);
 });
 // tapping outside the open bank field folds it back
@@ -1617,4 +1738,5 @@ stage.addEventListener('focusin', (e) => {
 const home = homePage();
 pagesEl.appendChild(home); stack.push(home); home._init();
 stagger(home, 120);
+if (new URLSearchParams(location.search).get('err')) setTimeout(errorPage, 900);
 })();

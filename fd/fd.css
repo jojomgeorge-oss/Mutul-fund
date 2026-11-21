@@ -73,7 +73,7 @@ img { display: block; -webkit-user-drag: none; }
 .chev { flex: none; opacity: .35; }
 
 /* FD categories card: 368×228, rows of 76 */
-.cats { margin: 0 11px; padding: 15px; height: 279px; box-shadow: 0 4px 97px rgba(0,0,0,.07); }
+.cats { margin: 0 11px; padding: 15px; height: 363px; box-shadow: 0 4px 97px rgba(0,0,0,.07); }
 .cat { display: flex; align-items: center; width: 338px; height: 75px; padding: 0 17px 0 17px; text-align: left; border: 1px solid #dfdcda; border-radius: 21px; background: #fff; }
 .cat > svg:first-child { flex: none; width: 29px; height: 29px; margin-right: 13px; }
 .cat + .cat { margin-top: 11px; }
@@ -637,3 +637,25 @@ img { display: block; -webkit-user-drag: none; }
 .bhero .img.gen { background: radial-gradient(120% 90% at 30% 20%, #fbf7f1 0%, #efe7dc 55%, #e5dccf 100%); display: grid; place-items: center; }
 .bhero .img.gen .logo { position: static; transform: scale(1.9); box-shadow: 0 10px 40px rgba(77,28,20,.12); }
 .acard .go span { color: #fff; font-size: inherit; }
+/* card deck for steps after the amount */
+.bcardx { transform-origin: 50% 80%; }
+.bcardx.ghost { pointer-events: none; }
+/* quick amounts under the amount card (Figma 1137:3901) */
+.qamt { display: flex; justify-content: center; gap: 7px; margin-top: 15px; }
+.qamt button { height: 30px; padding: 0 15px; border: 1px solid #dfdcda; border-radius: 25px; background: #f5f5f2; font-size: 17px; line-height: 23px; font-weight: 500; color: var(--ink); }
+.qamt + .pad { margin-top: 19px; }
+small.pm { font-size: 13px; font-weight: 400; color: var(--sub); margin-left: 2px; letter-spacing: 0; }
+/* deposit progress states */
+.prog.expired { background: #e2dfdc; }
+/* payment failed sheet + generic error screen */
+.rsheet.fail { height: auto; padding-bottom: 23px; }
+.rsheet.fail h3 { margin-top: 24px; }
+.rsheet.fail .bigbtn { margin-top: 22px; }
+.modal.err { background: #fcfcfa; }
+.errp { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-58%); text-align: center; padding: 0 33px; }
+.errp .img { height: 137px; border-radius: 17px; background: url(img/relax.jpg) center/cover; }
+.errp h3 { margin: 24px 0 10px; font-size: 19px; line-height: 27px; font-weight: 500; color: #000; }
+.errp p { margin: 0 auto; width: 270px; font-size: 15px; line-height: 23px; color: var(--sub); }
+.modal.err .cta { position: absolute; left: 23px; bottom: 31px; }
+
+.rv2.rd { margin-top: 23px; }
