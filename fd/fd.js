@@ -138,6 +138,8 @@ const I = {
   xw: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>',
   del: '<svg width="30" height="22" viewBox="0 0 24 18" fill="none"><path d="M7.5 1.5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-13L1.5 9z" stroke="#645f5f" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 5.5l7 7m0-7l-7 7" stroke="#645f5f" stroke-width="1.6" stroke-linecap="round"/></svg>',
   aaa: '<svg width="11" height="12" viewBox="0 0 11 12" fill="none"><path d="M5.5 1l1.3 2.7 3 .4-2.2 2.1.5 3L5.5 7.8 2.9 9.2l.5-3L1.2 4.1l3-.4L5.5 1z" fill="#787373"/></svg>',
+  pickoff: '<svg class="off" width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="8.5" r="8" stroke="#d6d3d1"/></svg>',
+  pickon: '<svg class="on" width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="8.5" r="7.9" stroke="#282424" stroke-width="1.2"/><path d="M5.2 8.7l2.2 2.2 4.4-4.6" stroke="#282424" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   bell: '<svg width="18" height="19" viewBox="0 0 18 19" fill="none"><path d="M9 1.5a5 5 0 0 0-5 5v3.2L2.4 13h13.2L14 9.7V6.5a5 5 0 0 0-5-5z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M6.8 15.5a2.3 2.3 0 0 0 4.4 0" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>',
   lock: '<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><rect x="1" y="6" width="10" height="7" rx="2" fill="#1a8d1a"/><path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#1a8d1a" stroke-width="1.6"/></svg>',
   bars: (c, s = 39, r = 12) => `<svg width="${s}" height="${s}" viewBox="0 0 39 39" style="flex:none"><rect width="39" height="39" rx="${r * 39 / s}" fill="${c}"/><rect x="10.5" y="21.5" width="3" height="4" rx="1.5" fill="#fff" opacity=".75"/><rect x="15.5" y="19.5" width="3" height="6" rx="1.5" fill="#fff" opacity=".85"/><rect x="20.5" y="16.5" width="3" height="9" rx="1.5" fill="#fff"/><rect x="25.5" y="13.5" width="3" height="12" rx="1.5" fill="#fff"/></svg>`,
@@ -1609,12 +1611,13 @@ const ACT = {
   pick(el) {
     const k = el.dataset.k, [title, opts] = PICK[k], cur = S.form[k];
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    openSheet(`<div class="qsheet"><h3>${title}</h3><div class="pbody"><div class="plist">${opts.map((o) => `<button class="prow2 ${o === cur ? 'on' : ''}" data-a="picksel" data-v="${esc(o)}"><span>${esc(o)}</span><span class="radio"></span></button>`).join('')}</div>
-      <button class="pconf press" data-a="pickset" data-k="${k}">Confirm</button></div></div>`, { cls: 'pks' });
+    openSheet(`<div class="qsheet"><h3>${title}</h3><div class="pbody"><div class="plist">${opts.map((o) => `<button class="prow2 ${o === cur ? 'on' : ''}" data-a="picksel" data-k="${k}" data-v="${esc(o)}"><span>${esc(o)}</span><span class="pick">${I.pickoff}${I.pickon}</span></button>`).join('')}</div></div></div>`, { cls: 'pks' });
   },
-  picksel(el) {
+  picksel(el) { // tapping an option ticks it and closes the sheet: no separate confirm
+    if (el.parentElement.dataset.done) return; el.parentElement.dataset.done = 1;
     $$('.prow2', el.parentElement).forEach((x) => x.classList.toggle('on', x === el));
-    A($('.radio', el), [{ transform: 'scale(.8)' }, { transform: 'none' }], BOUNCE);
+    A($('.pick', el), [{ transform: 'scale(.7)' }, { transform: 'none' }], BOUNCE);
+    setTimeout(() => ACT.pickset(el), 260);
   },
   pickset(el) {
     const k = el.dataset.k, on = $('.prow2.on', el.closest('.qsheet'));
