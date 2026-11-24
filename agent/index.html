@@ -164,7 +164,7 @@ body.embedded .sbar{display:none}
 #home{position:absolute;inset:0;z-index:50;background:#fff;transition:transform .42s var(--ease),opacity .3s ease;will-change:transform}
 #stage.inchat #home{transform:translate3d(-28%,0,0);opacity:0;pointer-events:none}
 #stage:not(.inchat) .sbar{color:#000}
-.hpage{position:absolute;inset:0;overflow-y:auto;padding:108px 0 190px;scrollbar-width:none}
+.hpage{position:absolute;inset:0;overflow-y:auto;padding:108px 0 130px;scrollbar-width:none}
 .hpage::-webkit-scrollbar{display:none}
 .hpage[hidden]{display:none}
 .pfbtn{position:absolute;left:15px;top:50px;width:44px;height:44px;border-radius:50%;border:0;background:#d9d9d9;display:flex;align-items:center;justify-content:center;z-index:4;padding:0}
@@ -186,15 +186,14 @@ body.embedded .sbar{display:none}
 .h-ph .blk{height:120px;border-radius:20px;background:#d9d9d9;display:flex;align-items:center;justify-content:center;font-size:17px;color:#000;border:0;width:100%}
 .h-ph .blk.sm{height:84px}
 .h-ph p{margin:0;font-size:15px;line-height:20px;color:var(--mute)}
-.hbottom{position:absolute;left:0;bottom:0;width:390px;padding:40px 13px 18px;background:linear-gradient(rgba(255,255,255,0),#fff 38%);display:flex;flex-direction:column;gap:9px;z-index:2}
-.hbottom .inp{margin:0;border:0;width:100%;box-shadow:0 2px 30px rgba(0,0,0,.15);cursor:text;font:inherit}
+.hbottom{position:absolute;left:0;bottom:0;width:390px;padding:44px 13px 26px;background:linear-gradient(rgba(255,255,255,0),#fff 45%);z-index:2}
+.dock{height:59px;border-radius:59px;background:#fff;box-shadow:0 2px 30px rgba(0,0,0,.15);display:flex;align-items:center;gap:5px;padding:0 6px 0 9px}
+.dbtn{width:45px;height:45px;flex:none;border:0;border-radius:27px;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;color:#212121;padding:0;transition:background .2s,color .2s}
+.dbtn.on{background:#212121;color:#fff}
+.dask{margin-left:auto;width:197px;height:47px;border-radius:35px;border:1px solid #dfdcda;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.08);display:flex;align-items:center;gap:13px;padding:0 15px;font:inherit;cursor:text}
+.dask span{font-size:18px;color:#8d8888}
 #home::before{content:"";position:absolute;left:0;top:0;width:390px;height:104px;background:linear-gradient(#fff 80%,rgba(255,255,255,0));z-index:3;pointer-events:none}
 .hbottom .inp span{flex:1;font-size:18px;color:#8d8888}
-.bnav{height:64px;border:1px solid #555;border-radius:37px;background:#fff;display:flex;align-items:stretch;padding:0 12px}
-.bnav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;font-size:13px;color:rgba(0,0,0,.87);padding:0}
-.bnav button i{width:19px;height:19px;background:#d9d9d9;display:block}
-.bnav button.on i{background:#212121}
-.bnav button.on{font-weight:500}
 #menu{position:absolute;right:15px;top:100px;z-index:72;background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.18);padding:6px;display:none;min-width:170px}
 #menu.on{display:block}
 #menu button{display:block;width:100%;border:0;background:none;text-align:left;padding:11px 14px;border-radius:12px;font-size:15px;color:var(--ink)}
@@ -245,13 +244,14 @@ body.embedded .sbar{display:none}
       <div class="h-ph" data-segpage="yours" hidden><div class="blk">Holdings</div><div class="blk sm">SIPs</div><div class="blk sm">Fixed deposits</div><p>Not in this prototype yet.</p></div>
     </div>
     <div class="hbottom">
-      <button class="inp" id="homeAsk" type="button" aria-label="Ask Decade: start a new chat">
-        <svg width="19" height="19" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#8d8888"/></svg>
-        <span style="text-align:left">Ask Decade</span>
-        <span class="send" style="flex:none;font-size:0"><svg width="13" height="18" viewBox="0 0 13 18"><path d="M1.78 17.79l10.35-7.07c1.14-.78 1.14-2.68 0-3.46L1.78.19C.84-.45-.3.62.07 1.81L2 8.02l3.71.97L2 9.96.07 16.17c-.37 1.2.76 2.27 1.71 1.62Z" fill="#fff"/></svg></span>
-      </button>
-      <nav class="bnav" aria-label="Main">
-        <button data-tab="home"><i></i>Home</button><button class="on" data-tab="chats"><i></i>Chats</button><button data-tab="invest"><i></i>Invest</button>
+      <nav class="dock" aria-label="Main">
+        <button class="dbtn" data-tab="home" aria-label="Home"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 8.6 10 3l7 5.6V16a1 1 0 0 1-1 1h-3.6v-4.6H7.6V17H4a1 1 0 0 1-1-1V8.6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
+        <button class="dbtn on" data-tab="chats" aria-label="Chats"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3.2c4.1 0 7.2 2.6 7.2 5.9s-3.1 5.9-7.2 5.9c-.8 0-1.6-.1-2.3-.3L4 16.6l.9-3.1C3.6 12.4 2.8 10.8 2.8 9.1 2.8 5.8 5.9 3.2 10 3.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
+        <button class="dbtn" data-tab="invest" aria-label="Invest"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14.5l4.6-4.6 3.2 3.2L17 6.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.6 6.9H17v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="dask" id="homeAsk" type="button" aria-label="Ask Decade: start a new chat">
+          <svg width="19" height="19" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#8d8888"/></svg>
+          <span>Ask Decade</span>
+        </button>
       </nav>
     </div>
   </section>
@@ -669,10 +669,10 @@ function goHome() {
 }
 function enterChat() { stage.classList.add('inchat'); postTop(hasTray); }
 function setTab(tab) {
-  document.querySelectorAll('.bnav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+  document.querySelectorAll('.dock .dbtn').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
   document.querySelectorAll('.hpage').forEach((pg) => { pg.hidden = pg.dataset.page !== tab; });
 }
-document.querySelectorAll('.bnav button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+document.querySelectorAll('.dock .dbtn').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
 document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
   document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b));
   document.querySelectorAll('[data-segpage]').forEach((pg) => { pg.hidden = pg.dataset.segpage !== b.dataset.seg; });
