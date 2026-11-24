@@ -25,8 +25,8 @@ body.embedded .sbar{display:none}
 
 /* top: round buttons + widget tiles */
 .rbtn{position:absolute;top:50px;width:52px;height:43px;border:0;border-radius:27px;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.08);display:inline-flex;align-items:center;justify-content:center;padding:0;z-index:30;transition:opacity .3s}
-#burger{left:15px}#more{left:323px}#wcClose{left:323px;opacity:0;pointer-events:none}
-#tiles{position:absolute;left:0;top:38px;width:390px;height:68px;z-index:20;transition:opacity .25s}
+#burger{left:15px}#more{left:323px}
+#tiles{position:absolute;left:0;top:38px;width:390px;height:68px;z-index:20;transform-origin:195px 34px;will-change:transform}
 .tscroll{display:flex;gap:6.6px;align-items:center;height:100%;overflow-x:auto;scrollbar-width:none;padding:0 153px;scroll-snap-type:x mandatory;touch-action:pan-x}
 .tscroll::-webkit-scrollbar{display:none}
 .tile{flex:none;width:84px;height:50px;border-radius:9px;border:0;background:var(--paper);padding:3px 6px 0;position:relative;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center}
@@ -42,22 +42,8 @@ body.embedded .sbar{display:none}
 .fade.l{left:0;background:linear-gradient(90deg,var(--ink) 38%,rgba(33,33,33,0))}
 .fade.r{right:0;background:linear-gradient(270deg,var(--ink) 38%,rgba(33,33,33,0))}
 
-/* open widget centre */
-#full{position:absolute;inset:0;z-index:10;opacity:0;pointer-events:none}
-#full.on{pointer-events:auto}
-#full h2{position:absolute;left:23px;top:108px;margin:0;color:#fff;font-size:28px;line-height:34px}
-#full .sub{position:absolute;left:23px;top:146px;color:var(--grey);font-size:15px}
-.flist{position:absolute;left:0;top:176px;width:390px;bottom:70px;overflow-y:auto;padding:8px 23px 30px;display:flex;flex-direction:column;gap:12px;touch-action:pan-y;scrollbar-width:none}
-.flist::-webkit-scrollbar{display:none}
-.flist .lnote{color:var(--grey);font-size:13px;margin-top:-4px}
-.goto{align-self:flex-end;border:0;background:none;color:#fff;font-size:13px;text-decoration:underline;padding:2px 0 4px;margin-top:-4px}
-.fempty{margin-top:40px;border:1px dashed rgba(255,255,255,.35);border-radius:23px;padding:34px 24px;color:var(--grey);text-align:center;font-size:15px;line-height:21px}
-.fgrab{position:absolute;left:0;bottom:0;width:390px;height:70px;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--grey);font-size:13px}
-.fgrab::after{content:"";width:45px;height:9px;border-radius:16px;background:rgba(255,255,255,.8)}
-
 /* sheet */
 #sheet{position:absolute;left:0;top:117px;width:390px;height:732px;background:var(--paper);border-radius:23px 23px 0 0;z-index:15;will-change:transform;transition:transform .42s var(--ease)}
-#sheet.drag,#tiles.drag,#full.drag{transition:none}
 .grab{position:absolute;left:0;top:0;width:390px;height:34px;touch-action:none;display:flex;justify-content:center;padding-top:9px;cursor:grab;z-index:3}
 .grab::before{content:"";width:45px;height:9px;border-radius:16px;background:#d9d9d9}
 #chat{position:absolute;left:0;top:30px;width:390px;bottom:0;overflow-y:auto;padding:20px 23px 160px;display:flex;flex-direction:column;gap:16px;scrollbar-width:none}
@@ -182,21 +168,14 @@ body.embedded .sbar{display:none}
 <div id="stage">
   <div class="sbar" aria-hidden="true"><span>9:41</span><i></i></div>
 
-  <section id="full" aria-label="Widget centre">
-    <h2 class="serif">Widget centre</h2>
-    <div class="sub" id="fsub"></div>
-    <div class="flist" id="flist"></div>
-    <div class="fgrab" id="fgrab">Drag up to close</div>
-  </section>
 
   <div id="tiles"><div class="tscroll" id="tscroll"></div></div>
   <div class="fade l"></div><div class="fade r"></div>
   <button class="rbtn" id="burger" aria-label="Previous chats"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 8h14M5 12h14M5 16h14" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
   <button class="rbtn" id="more" aria-label="More"><svg width="17" height="17" viewBox="0 0 17 17" fill="#212121"><circle cx="2.5" cy="8.5" r="2"/><circle cx="8.5" cy="8.5" r="2"/><circle cx="14.5" cy="8.5" r="2"/></svg></button>
-  <button class="rbtn" id="wcClose" aria-label="Close widget centre"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2 2 12" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
 
   <section id="sheet">
-    <div class="grab" id="grab" aria-label="Drag down to open widget centre"></div>
+    <div class="grab" id="grab" aria-label="Drag down to enlarge the widget tray"></div>
     <div id="chat" aria-live="polite"></div>
     <div class="cmp">
       <div class="sugg" id="sugg"></div>
@@ -208,7 +187,7 @@ body.embedded .sbar{display:none}
     </div>
   </section>
 
-  <div id="menu"><button id="mNew">New chat</button><button id="mOpen">Open widget centre</button></div>
+  <div id="menu"><button id="mNew">New chat</button><button id="mOpen">Expand widget tray</button></div>
   <div id="dim"></div>
   <nav id="hist" aria-label="Previous chats">
     <div class="h-top"><b class="serif">Chats</b><button class="rbtn" id="hClose" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2 2 12" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button></div>
@@ -442,12 +421,6 @@ function renderTiles() {
   ts.innerHTML = ws.map((w, i) => tileHTML(w, i === ws.length - 1)).join('');
   requestAnimationFrame(() => { ts.scrollTo({ left: ts.scrollWidth, behavior: 'smooth' }); });
 }
-function renderFull() {
-  const ws = widgets().slice().reverse();
-  $('#fsub').textContent = ws.length ? `${ws.length} widget${ws.length > 1 ? 's' : ''} in this chat · newest first` : 'Nothing here yet';
-  $('#flist').innerHTML = ws.length ? ws.map((w) => widgetHTML(w, 'full') + (w.loading ? '<div class="lnote">Appears here while the answer is generating</div>' : `<button class="goto" data-goto="${w.id}">Show in chat ↗</button>`)).join('')
-    : '<div class="fempty">Ask something. Every widget an answer makes lands here, starting with its loading state.</div>';
-}
 function renderSugg() {
   const used = new Set(cur.msgs.filter((m) => m.role === 'u').map((m) => m.text));
   $('#sugg').innerHTML = cur.msgs.length ? SUGG.filter((s) => !used.has(s.q)).map((s) => `<button class="pill" data-sugg="${esc(s.q)}">${esc(s.q)}</button>`).join('') : '';
@@ -462,7 +435,7 @@ function renderHist() {
   });
   $('#hList').innerHTML = html;
 }
-function renderAll() { renderChat(); renderTiles(); renderFull(); renderSugg(); scrollEnd(); widgets().forEach((w) => { w.fresh = false; }); }
+function renderAll() { renderChat(); renderTiles(); renderSugg(); scrollEnd(); widgets().forEach((w) => { w.fresh = false; }); }
 function scrollEnd() { requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; }); }
 function refreshWidget(w) {
   document.querySelectorAll(`[data-w="${w.id}"]`).forEach((el) => { const t = document.createElement('div'); t.innerHTML = widgetHTML(w, el.dataset.where); el.replaceWith(t.firstElementChild); });
@@ -484,7 +457,7 @@ function send(q, plan) {
   renderAll();
   setTimeout(() => {
     chat.msgs.push(r);
-    if (chat === cur) { renderChat(); renderTiles(); renderFull(); scrollEnd(); }
+    if (chat === cur) { renderChat(); renderTiles(); scrollEnd(); }
     setTimeout(() => {
       r.loading = false; if (r.widget) { r.widget.loading = false; r.widget.fresh = true; }
       busy = false; sendBtn.disabled = !input.value.trim();
@@ -503,8 +476,8 @@ stage.addEventListener('click', (e) => {
   const t = e.target.closest('[data-act],[data-sugg],[data-tile],[data-goto],[data-chat]');
   if (!t) return;
   if (t.dataset.sugg) { if (!busy) send(t.dataset.sugg); return; }
-  if (t.dataset.tile) { const w = widgets().find((x) => x.id === t.dataset.tile); if (w && w.loading) { toast('Still generating…'); return; } goTo(t.dataset.tile); return; }
-  if (t.dataset.goto) { setOpen(false); setTimeout(() => goTo(t.dataset.goto), 300); return; }
+  if (t.dataset.tile) { const w = widgets().find((x) => x.id === t.dataset.tile); if (w && w.loading) { toast('Still generating…'); return; } document.querySelectorAll('.tile.on').forEach((x) => x.classList.remove('on')); t.classList.add('on'); t.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); goTo(t.dataset.tile); return; }
+  
   if (t.dataset.chat) { const c = [cur, ...chats].find((x) => x.id === t.dataset.chat); if (c) { cur = c; setHist(false); renderAll(); } return; }
   const act = t.dataset.act;
   if (act === 'pri') {
@@ -531,30 +504,28 @@ function goTo(id) {
   el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1100);
 }
 
-/* ---------- widget centre: drag the sheet down ---------- */
-const sheet = $('#sheet'), tiles = $('#tiles'), full = $('#full');
-const TRAVEL = 849 - 117;
+/* ---------- widget tray: drag the sheet down a little, tiles grow ---------- */
+const sheet = $('#sheet'), tiles = $('#tiles');
+const DROP = 71, SCALE = 141 / 84, LIFT = 35; // matches the Figma "Widget center expanded" frames
 let open = false, drag = null, suppress = false;
-function paint(p, anim) {
-  [sheet, tiles, full].forEach((n) => n.classList.toggle('drag', !anim));
-  const c = Math.max(0, Math.min(1, p));
-  sheet.style.transform = `translateY(${p * TRAVEL}px)`;
-  tiles.style.opacity = Math.max(0, 1 - c * 3);
-  tiles.style.pointerEvents = c > 0.2 ? 'none' : '';
-  full.style.transition = anim ? 'opacity .35s, transform .42s var(--ease)' : 'none';
-  full.style.opacity = Math.max(0, (c - 0.15) / 0.85);
-  full.style.transform = `translateY(${(1 - c) * -40}px) scale(${0.96 + c * 0.04})`;
-  $('#more').style.opacity = 1 - c; $('#more').style.pointerEvents = c > 0.5 ? 'none' : '';
-  const x = $('#wcClose'); x.style.opacity = c; x.style.pointerEvents = c > 0.5 ? 'auto' : 'none';
+function paint(e, anim) {
+  const c = Math.max(0, Math.min(1, e));
+  const tr = anim ? 'transform .42s var(--ease), opacity .3s' : 'none';
+  sheet.style.transition = tiles.style.transition = tr;
+  sheet.style.transform = `translateY(${e * DROP}px)`;
+  const cmp = $('.cmp'); cmp.style.transition = anim ? 'transform .42s var(--ease)' : 'none'; cmp.style.transform = `translateY(${-Math.max(0, e) * DROP}px)`;
+  chatEl.style.bottom = Math.max(0, e) * DROP + 'px';
+  tiles.style.transform = `translateY(${c * LIFT}px) scale(${1 + c * (SCALE - 1)})`;
+  for (const b of [$('#burger'), $('#more')]) { b.style.transition = anim ? 'opacity .3s' : 'none'; b.style.opacity = 1 - c; b.style.pointerEvents = c > 0.5 ? 'none' : ''; }
+  document.querySelectorAll('.fade').forEach((f) => { f.style.transition = anim ? 'width .42s var(--ease), height .42s var(--ease)' : 'none'; f.style.width = (150 - c * 101) + 'px'; f.style.height = (117 + c * 71) + 'px'; });
+  stage.classList.toggle('tray-open', c > 0.5);
 }
-function setOpen(v) { open = v; full.classList.toggle('on', v); if (v) $('#flist').scrollTop = 0; paint(v ? 1 : 0, true); }
+function setOpen(v) { open = v; paint(v ? 1 : 0, true); centreActive(); }
+function centreActive() { const ts = $('#tscroll'), on = ts.querySelector('.tile.on'); if (on) requestAnimationFrame(() => on.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })); }
 function down(e) {
   if (e.button > 0) return;
-  const g = e.target.closest('#grab,#tiles,#fgrab');
-  if (!g) return;
-  if (open && !e.target.closest('#fgrab')) return;
-  if (!open && e.target.closest('#fgrab')) return;
-  drag = { x0: e.clientX, y0: e.clientY, on: false, id: e.pointerId, ly: e.clientY, lt: performance.now(), v: 0, src: g };
+  const g = e.target.closest('#grab,#tiles'); if (!g) return;
+  drag = { x0: e.clientX, y0: e.clientY, on: false, id: e.pointerId, ly: e.clientY, lt: performance.now(), v: 0 };
 }
 function move(e) {
   if (!drag || e.pointerId !== drag.id) return;
@@ -565,15 +536,15 @@ function move(e) {
     drag.on = true; try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
   }
   const t = performance.now(); drag.v = (e.clientY - drag.ly) / K / Math.max(1, t - drag.lt); drag.ly = e.clientY; drag.lt = t;
-  let p = (open ? 1 : 0) + dy / TRAVEL;
-  if (p < 0) p *= 0.25; if (p > 1) p = 1 + (p - 1) * 0.2;
-  paint(p, false); e.preventDefault();
+  let x = (open ? 1 : 0) + dy / DROP;
+  if (x < 0) x *= 0.2; if (x > 1) x = 1 + (x - 1) * 0.15;
+  paint(x, false); e.preventDefault();
 }
 function up(e) {
   if (!drag || e.pointerId !== drag.id) return;
   if (drag.on) {
-    const p = (open ? 1 : 0) + (e.clientY - drag.y0) / K / TRAVEL;
-    const v = drag.v > 0.5 ? true : drag.v < -0.5 ? false : (open ? p > 0.7 : p > 0.3);
+    const x = (open ? 1 : 0) + (e.clientY - drag.y0) / K / DROP;
+    const v = drag.v > 0.3 ? true : drag.v < -0.3 ? false : x > 0.5;
     suppress = true; setTimeout(() => { suppress = false; }, 60); setOpen(v);
   }
   drag = null;
@@ -581,9 +552,7 @@ function up(e) {
 stage.addEventListener('pointerdown', down);
 addEventListener('pointermove', move, { passive: false });
 addEventListener('pointerup', up); addEventListener('pointercancel', up);
-$('#grab').addEventListener('click', () => { if (!suppress) setOpen(true); });
-$('#fgrab').addEventListener('click', () => { if (!suppress) setOpen(false); });
-$('#wcClose').addEventListener('click', () => setOpen(false));
+$('#grab').addEventListener('click', () => { if (!suppress) setOpen(!open); });
 
 /* ---------- drawer + menu ---------- */
 function setHist(v) { if (v) renderHist(); stage.classList.toggle('hopen', v); }
@@ -594,7 +563,7 @@ $('#hNew').addEventListener('click', () => { setHist(false); if (cur.msgs.length
 $('#hMenu').addEventListener('click', () => { setHist(false); if (EMB) setTimeout(() => parent.postMessage({ decade: 'menu' }, '*'), 200); });
 $('#more').addEventListener('click', () => $('#menu').classList.toggle('on'));
 $('#mNew').addEventListener('click', () => { $('#menu').classList.remove('on'); if (cur.msgs.length) newChat(); toast('New chat'); });
-$('#mOpen').addEventListener('click', () => { $('#menu').classList.remove('on'); setOpen(true); });
+$('#mOpen').addEventListener('click', () => { $('#menu').classList.remove('on'); setOpen(!open); });
 
 newChat();
 window.__agent = { send, setOpen, setHist, get cur() { return cur; } };
