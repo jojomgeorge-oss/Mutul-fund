@@ -20,7 +20,8 @@ button{cursor:pointer}
 .hatch{background:var(--soft) repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0 1px,transparent 1px 6px)}
 .sbar{position:absolute;left:0;top:0;width:390px;height:44px;z-index:60;pointer-events:none;color:#fff}
 .sbar span{position:absolute;left:32px;top:13px;font-size:16px;font-weight:600;font-family:-apple-system,system-ui,sans-serif}
-.sbar i{position:absolute;right:24px;top:17px;width:62px;height:11px;border-radius:3px;background:linear-gradient(90deg,#fff 0 18px,transparent 18px 24px,#fff 24px 38px,transparent 38px 44px,#fff 44px)}
+.sbar i{position:absolute;right:24px;top:17px;width:62px;height:11px;border-radius:3px;background:linear-gradient(90deg,currentColor 0 18px,transparent 18px 24px,currentColor 24px 38px,transparent 38px 44px,currentColor 44px)}
+.sbar{transition:color .4s}.notray .sbar{color:#000}
 body.embedded .sbar{display:none}
 
 /* top: round buttons + widget tiles */
@@ -43,10 +44,15 @@ body.embedded .sbar{display:none}
 .fade.r{right:0;background:linear-gradient(270deg,var(--ink) 38%,rgba(33,33,33,0))}
 
 /* sheet */
-#sheet{position:absolute;left:0;top:117px;width:390px;height:732px;background:var(--paper);border-radius:23px 23px 0 0;z-index:15;will-change:transform;transition:transform .42s var(--ease)}
-.grab{position:absolute;left:0;top:0;width:390px;height:34px;touch-action:none;display:flex;justify-content:center;padding-top:9px;cursor:grab;z-index:3}
+#sheet{position:absolute;left:0;top:117px;width:390px;height:732px;background:var(--paper);border-radius:23px 23px 0 0;z-index:15;will-change:transform;transition:transform .42s var(--ease),top .55s var(--ease),height .55s var(--ease),border-radius .55s}
+.notray #sheet{top:0;height:849px;border-radius:0}
+.notray .grab{opacity:0;pointer-events:none}
+.notray #tiles,.notray .fade{opacity:0;pointer-events:none}
+.fade{transition:opacity .4s}
+.notray #chat{top:105px}
+.grab{position:absolute;left:0;top:0;width:390px;height:34px;touch-action:none;display:flex;justify-content:center;padding-top:9px;cursor:grab;z-index:3;transition:opacity .4s}
 .grab::before{content:"";width:45px;height:9px;border-radius:16px;background:#d9d9d9}
-#chat{position:absolute;left:0;top:30px;width:390px;bottom:0;overflow-y:auto;padding:20px 23px 160px;display:flex;flex-direction:column;gap:16px;scrollbar-width:none}
+#chat{position:absolute;left:0;top:30px;width:390px;bottom:0;overflow-y:auto;transition:top .55s var(--ease);padding:20px 23px 160px;display:flex;flex-direction:column;gap:16px;scrollbar-width:none}
 #chat::-webkit-scrollbar{display:none}
 .hello{margin-top:150px}
 .hello h1{margin:0 0 8px;font-size:26px;line-height:31px;color:var(--ink)}
@@ -169,7 +175,7 @@ body.embedded .sbar{display:none}
 </style>
 </head>
 <body>
-<div id="stage">
+<div id="stage" class="notray">
   <div class="sbar" aria-hidden="true"><span>9:41</span><i></i></div>
 
 
@@ -420,11 +426,35 @@ function renderChat() {
 function widgets() { return cur.msgs.filter((m) => m.widget).map((m) => m.widget); }
 function renderTiles() {
   const ws = widgets(), ts = $('#tscroll');
-  if (!ws.length) { ts.innerHTML = '<span class="tile empty"></span><span class="tile empty"></span><span class="tile empty"></span>'; ts.style.paddingLeft = ts.style.paddingRight = '63px'; return; }
-  ts.style.paddingLeft = ts.style.paddingRight = '';
+  setTray(ws.length > 0);
+  if (!ws.length) { ts.innerHTML = ''; activeId = null; return; }
   ts.innerHTML = ws.map((w, i) => tileHTML(w, i === ws.length - 1)).join('');
+  activeId = ws[ws.length - 1].id;
   requestAnimationFrame(() => { ts.scrollTo({ left: ts.scrollWidth, behavior: 'smooth' }); });
 }
+/* tray appears only once a widget exists; tile highlight follows the chat */
+let hasTray = false, activeId = null, lockSync = 0, syncRaf = 0;
+function setTray(on) {
+  if (on === hasTray) return; hasTray = on;
+  stage.classList.toggle('notray', !on);
+  if (!on && typeof setOpen === 'function' && open) setOpen(false);
+  if (EMB) try { parent.postMessage({ decade: 'agentTop', dark: on }, '*'); } catch (_) {}
+}
+function centreTile(t, smooth = true) { const ts = $('#tscroll'); ts.scrollTo({ left: t.offsetLeft - (ts.clientWidth - t.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'auto' }); }
+function setActive(id, force) {
+  if (!id || (id === activeId && !force)) return; activeId = id;
+  const ts = $('#tscroll'); ts.querySelectorAll('.tile.on').forEach((x) => x.classList.remove('on'));
+  const t = ts.querySelector(`[data-tile="${id}"]`); if (t) { t.classList.add('on'); centreTile(t); }
+}
+function syncFromChat() {
+  syncRaf = 0; if (!hasTray || Date.now() < lockSync) return;
+  const els = [...chatEl.querySelectorAll('[data-where="chat"]')]; if (!els.length) return;
+  const mid = chatEl.scrollTop + chatEl.clientHeight * 0.45; let pick = els[0];
+  for (const el of els) if (el.offsetTop <= mid) pick = el;
+  if (chatEl.scrollTop + chatEl.clientHeight >= chatEl.scrollHeight - 4) pick = els[els.length - 1];
+  setActive(pick.dataset.w);
+}
+chatEl.addEventListener('scroll', () => { if (!syncRaf) syncRaf = requestAnimationFrame(syncFromChat); }, { passive: true });
 function renderSugg() {
   const used = new Set(cur.msgs.filter((m) => m.role === 'u').map((m) => m.text));
   $('#sugg').innerHTML = cur.msgs.length ? SUGG.filter((s) => !used.has(s.q)).map((s) => `<button class="pill" data-sugg="${esc(s.q)}">${esc(s.q)}</button>`).join('') : '';
@@ -480,7 +510,7 @@ stage.addEventListener('click', (e) => {
   const t = e.target.closest('[data-act],[data-sugg],[data-tile],[data-goto],[data-chat]');
   if (!t) return;
   if (t.dataset.sugg) { if (!busy) send(t.dataset.sugg); return; }
-  if (t.dataset.tile) { const w = widgets().find((x) => x.id === t.dataset.tile); if (w && w.loading) { toast('Still generating…'); return; } document.querySelectorAll('.tile.on').forEach((x) => x.classList.remove('on')); t.classList.add('on'); t.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); goTo(t.dataset.tile); return; }
+  if (t.dataset.tile) { const w = widgets().find((x) => x.id === t.dataset.tile); if (w && w.loading) { toast('Still generating…'); return; } lockSync = Date.now() + 900; setActive(t.dataset.tile, true); goTo(t.dataset.tile); return; }
   
   if (t.dataset.chat) { const c = [cur, ...chats].find((x) => x.id === t.dataset.chat); if (c) { cur = c; setHist(false); renderAll(); } return; }
   const act = t.dataset.act;
@@ -515,7 +545,8 @@ let open = false, drag = null, suppress = false;
 function paint(e, anim) {
   const c = Math.max(0, Math.min(1, e));
   const tr = anim ? 'transform .42s var(--ease), opacity .3s' : 'none';
-  sheet.style.transition = tiles.style.transition = tr;
+  tiles.style.transition = tr;
+  sheet.style.transition = anim ? 'transform .42s var(--ease), top .55s var(--ease), height .55s var(--ease), border-radius .55s' : 'none';
   sheet.style.transform = `translateY(${e * DROP}px)`;
   const cmp = $('.cmp'); cmp.style.transition = anim ? 'transform .42s var(--ease)' : 'none'; cmp.style.transform = `translateY(${-Math.max(0, e) * DROP}px)`;
   chatEl.style.bottom = Math.max(0, e) * DROP + 'px';
@@ -525,10 +556,10 @@ function paint(e, anim) {
   stage.classList.toggle('tray-open', c > 0.5);
 }
 function setOpen(v) { open = v; paint(v ? 1 : 0, true); centreActive(); }
-function centreActive() { const ts = $('#tscroll'), on = ts.querySelector('.tile.on'); if (on) requestAnimationFrame(() => on.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })); }
+function centreActive() { const on = $('#tscroll .tile.on'); if (on) requestAnimationFrame(() => centreTile(on)); }
 function down(e) {
   if (e.button > 0) return;
-  const g = e.target.closest('#grab,#tiles'); if (!g) return;
+  const g = e.target.closest('#grab,#tiles'); if (!g || !hasTray) return;
   drag = { x0: e.clientX, y0: e.clientY, on: false, id: e.pointerId, ly: e.clientY, lt: performance.now(), v: 0 };
 }
 function move(e) {
@@ -565,7 +596,7 @@ $('#hClose').addEventListener('click', () => setHist(false));
 $('#dim').addEventListener('click', () => setHist(false));
 $('#hNew').addEventListener('click', () => { setHist(false); if (cur.msgs.length) newChat(); });
 $('#hMenu').addEventListener('click', () => { setHist(false); if (EMB) setTimeout(() => parent.postMessage({ decade: 'menu' }, '*'), 200); });
-$('#more').addEventListener('click', () => $('#menu').classList.toggle('on'));
+$('#more').addEventListener('click', () => { $('#mOpen').style.display = hasTray ? '' : 'none'; $('#menu').classList.toggle('on'); });
 $('#mNew').addEventListener('click', () => { $('#menu').classList.remove('on'); if (cur.msgs.length) newChat(); toast('New chat'); });
 $('#mOpen').addEventListener('click', () => { $('#menu').classList.remove('on'); setOpen(!open); });
 
