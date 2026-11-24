@@ -408,7 +408,7 @@ function renderChat() {
     return;
   }
   chatEl.innerHTML = cur.msgs.map((m) => {
-    if (m.role === 'u') return `<div class="um"><div class="u">${esc(m.text)}${TAIL}</div><time>${m.time}</time></div>`;
+    if (m.role === 'u') return `<div class="um"><div class="u">${esc(m.text)}${TAIL}</div></div>`;
     if (m.loading) {
       let s = `<div class="chip">${DOC}<span>${esc(m.status)}</span>${CHEV}</div>`;
       if (m.widget) s += widgetHTML(m.widget, 'chat');
@@ -464,8 +464,8 @@ function renderHist() {
   let g = '', html = '';
   all.forEach((c) => {
     if (c.when !== g) { g = c.when; html += `<div class="h-grp">${g}</div>`; }
-    const nw = c.msgs.filter((m) => m.widget).length, last = [...c.msgs].reverse().find((m) => m.role === 'u');
-    html += `<button class="h-item${c === cur ? ' on' : ''}" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${nw ? nw + (nw > 1 ? ' widgets' : ' widget') : 'No widgets'}${last ? ' · ' + last.time : ''}</small></button>`;
+    const nw = c.msgs.filter((m) => m.widget).length;
+    html += `<button class="h-item${c === cur ? ' on' : ''}" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${nw ? nw + (nw > 1 ? ' widgets' : ' widget') : 'No widgets'}</small></button>`;
   });
   $('#hList').innerHTML = html;
 }
