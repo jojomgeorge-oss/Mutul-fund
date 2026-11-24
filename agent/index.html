@@ -150,29 +150,11 @@ body.embedded .sbar{display:none}
 .send:disabled{opacity:.35}
 
 /* drawer + menu */
-#dim{position:absolute;inset:0;z-index:70;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s}
-#hist{position:absolute;left:0;top:0;width:326px;height:849px;z-index:71;background:#fff;transform:translateX(-340px);transition:transform .34s var(--ease);overflow-y:auto;scrollbar-width:none;padding-bottom:40px}
-#hist::-webkit-scrollbar{display:none}
-#stage.hopen #dim{opacity:1;pointer-events:auto}#stage.hopen #hist{transform:none}
-#stage.hopen .sbar{color:#000}.sbar{z-index:80}
-.sb-top{position:relative;height:105px}
-.sb-logo{position:absolute;left:22px;top:46px;display:flex;align-items:center;gap:8px;color:#393939;font-size:23.8px;line-height:27px}
-.sb-top .rbtn{position:absolute;left:245px;top:38px}
-.sb-new{display:block;margin:0 22px;width:282px;height:49px;border:0;border-radius:100px;background:#1f1f1f;color:#fff;font-size:17px;font-weight:500;box-shadow:0 4px 100px rgba(0,0,0,.05)}
-.sb-new:active{background:#000}
-.sb-links{padding:24px 0 21px}
-.sb-link{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;padding:12.5px 22px;font-size:19px;line-height:23px;color:#000;text-align:left}
-.sb-link i{width:21px;height:21px;background:#d9d9d9;flex:none}
-.sb-link:active{background:#f5f5f5}
-.sb-rule{height:1px;background:#dedede}
-.sb-h{margin:30px 25px 20px;font-size:19px;line-height:23px;color:#000}
-.sb-grid{display:grid;grid-template-columns:127px 127px;gap:16px 17px;padding:0 26px}
 .sb-card{height:130px;border:0;border-radius:15px;background:#d9d9d9;padding:13px 15px 13px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;color:rgba(0,0,0,.87);position:relative}
 .sb-card b{font-size:17px;line-height:21px;font-weight:500;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .sb-card small{font-size:13px;line-height:21px}
 .sb-card.on{box-shadow:inset 0 0 0 1.5px #212121}
 .sb-card:active{filter:brightness(.96)}
-.sb-list{padding:26px 0 0}
 .sb-item{display:block;width:100%;border:0;background:none;text-align:left;padding:8px 26px 9px}
 .sb-item b{display:block;font-size:19px;line-height:23px;font-weight:400;color:#212121;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sb-item small{display:block;font-size:13px;line-height:21px;color:rgba(0,0,0,.87);margin-top:5px}
@@ -221,7 +203,7 @@ body.embedded .sbar{display:none}
 
   <div id="tiles"><div class="tscroll" id="tscroll"></div></div>
   <div class="fade l"></div><div class="fade r"></div>
-  <button class="rbtn" id="burger" aria-label="Back to home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button class="rbtn" id="burger" aria-label="Close chat"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2l12 12M14 2 2 14" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
   <button class="rbtn" id="more" aria-label="More"><svg width="17" height="17" viewBox="0 0 17 17" fill="#212121"><circle cx="2.5" cy="8.5" r="2"/><circle cx="8.5" cy="8.5" r="2"/><circle cx="14.5" cy="8.5" r="2"/></svg></button>
 
   <section id="sheet">
@@ -259,23 +241,7 @@ body.embedded .sbar{display:none}
       </nav>
     </div>
   </section>
-  <div id="menu"><button id="mSide">Consultations sidebar</button><button id="mNew">New consultation</button><button id="mOpen">Expand widget tray</button></div>
-  <div id="dim"></div>
-  <nav id="hist" aria-label="Menu and consultations">
-    <div class="sb-top">
-      <div class="sb-logo"><svg width="26" height="26" viewBox="0 0 25 26" fill="none" aria-hidden="true"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#212121"/></svg><span class="serif">Decade</span></div>
-      <button class="rbtn" id="sbSearch" aria-label="Search"><svg width="19" height="19" viewBox="0 0 19 19" fill="none"><path d="M18 18l-4.1-4.1m0 0a7.56 7.56 0 1 0-10.69-10.69 7.56 7.56 0 0 0 10.69 10.69Z" stroke="#292929" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    </div>
-    <button class="sb-new" id="hNew">New consultation</button>
-    <div class="sb-links">
-      <button class="sb-link" data-go="funds"><i></i>Mutual funds</button>
-      <button class="sb-link" data-go="fd"><i></i>Fixed deposit</button>
-      <button class="sb-link" data-go="portfolio"><i></i>Portfolio</button>
-    </div>
-    <div class="sb-rule"></div>
-    <div class="sb-h">Consultations</div>
-    <div id="hList"></div>
-  </nav>
+  <div id="menu"><button id="mNew">New consultation</button><button id="mOpen">Expand widget tray</button></div>
   <div id="toast"></div>
 </div>
 
@@ -533,12 +499,6 @@ function renderSugg() {
   const used = new Set(cur.msgs.filter((m) => m.role === 'u').map((m) => m.text));
   $('#sugg').innerHTML = cur.msgs.length ? SUGG.filter((s) => !used.has(s.q)).map((s) => `<button class="pill" data-sugg="${esc(s.q)}">${esc(s.q)}</button>`).join('') : '';
 }
-function renderHist() {
-  const all = (chats.includes(cur) || !cur.msgs.length) ? chats : [cur, ...chats];
-  const card = (c) => `<button class="sb-card${c === cur ? ' on' : ''}" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${c.date}</small></button>`;
-  const item = (c) => `<button class="sb-item${c === cur ? ' on' : ''}" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${c.date}</small></button>`;
-  $('#hList').innerHTML = `<div class="sb-grid">${all.slice(0, 4).map(card).join('')}</div>` + (all.length > 4 ? `<div class="sb-list">${all.slice(4).map(item).join('')}</div>` : '');
-}
 function renderAll() { renderChat(); renderTiles(); renderSugg(); scrollEnd(); widgets().forEach((w) => { w.fresh = false; }); }
 function scrollEnd() { requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; }); }
 function refreshWidget(w) {
@@ -582,7 +542,7 @@ stage.addEventListener('click', (e) => {
   if (t.dataset.sugg) { if (!busy) send(t.dataset.sugg); return; }
   if (t.dataset.tile) { const w = widgets().find((x) => x.id === t.dataset.tile); if (w && w.loading) { toast('Still generating…'); return; } lockSync = Date.now() + 900; setActive(t.dataset.tile, true); goTo(t.dataset.tile); return; }
   
-  if (t.dataset.chat) { const c = [cur, ...chats].find((x) => x.id === t.dataset.chat); if (c) { cur = c; setHist(false); renderAll(); enterChat(); } return; }
+  if (t.dataset.chat) { const c = [cur, ...chats].find((x) => x.id === t.dataset.chat); if (c) { cur = c; renderAll(); enterChat(); } return; }
   const act = t.dataset.act;
   if (act === 'pri') {
     const card = t.closest('[data-m]'); const m = cur.msgs.find((x) => x.id === card.dataset.m); if (!m) return;
@@ -679,7 +639,6 @@ addEventListener('pointerup', up); addEventListener('pointercancel', up);
 $('#grab').addEventListener('click', () => { if (!suppress) setOpen(!open); });
 
 /* ---------- drawer + menu ---------- */
-function setHist(v) { if (v) renderHist(); stage.classList.toggle('hopen', v); postTop(!v && hasTray && stage.classList.contains('inchat')); }
 /* ---------- home / landing ---------- */
 function renderHome() {
   const all = chats.filter((c) => c.msgs.length);
@@ -703,21 +662,18 @@ document.querySelectorAll('.bnav button').forEach((b) => b.addEventListener('cli
 $('#homeAsk').addEventListener('click', () => { newChat(); input.focus(); enterChat(); });
 $('#hActions').addEventListener('click', () => toast('Actions isn’t in this prototype yet'));
 $('#burger').addEventListener('click', () => goHome());
-$('#mSide').addEventListener('click', () => { $('#menu').classList.remove('on'); setHist(true); });
-$('#dim').addEventListener('click', () => setHist(false));
-$('#hNew').addEventListener('click', () => { setHist(false); if (cur.msgs.length) newChat(); enterChat(); });
+
 document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
-  const to = b.dataset.go; setHist(false);
+  const to = b.dataset.go;
   if (to === 'portfolio') { toast('Portfolio isn’t in this prototype yet'); return; }
   if (EMB) setTimeout(() => parent.postMessage({ decade: 'go', to }, '*'), 200); else toast(`Opens ${to === 'fd' ? 'Fixed deposit' : 'Mutual funds'} in the app`);
 }));
-$('#sbSearch').addEventListener('click', () => toast('Search isn’t in this prototype yet'));
 $('#more').addEventListener('click', () => { $('#mOpen').style.display = hasTray ? '' : 'none'; $('#menu').classList.toggle('on'); });
 $('#mNew').addEventListener('click', () => { $('#menu').classList.remove('on'); if (cur.msgs.length) newChat(); toast('New consultation'); });
 $('#mOpen').addEventListener('click', () => { $('#menu').classList.remove('on'); setOpen(!open); });
 
 newChat(); renderHome();
-window.__agent = { send, setOpen, setHist, goHome, get cur() { return cur; } };
+window.__agent = { send, setOpen, goHome, get cur() { return cur; } };
 })();
 </script>
 </body>
