@@ -539,48 +539,67 @@ function goTo(id) {
 }
 
 /* ---------- widget tray: drag the sheet down a little, tiles grow ---------- */
-const sheet = $('#sheet'), tiles = $('#tiles');
+const sheet = $('#sheet'), tiles = $('#tiles'), cmpEl = $('.cmp'), fades = [...document.querySelectorAll('.fade')];
 const DROP = 71, SCALE = 141 / 84, LIFT = 35; // matches the Figma "Widget center expanded" frames
-let open = false, drag = null, suppress = false;
+let open = false, drag = null, suppress = false, cur_e = 0, rafP = 0, settleT = 0;
+// spring easing, sampled into CSS linear() where supported
+const EASE = (() => {
+  const ok = window.CSS && CSS.supports && CSS.supports('transition-timing-function', 'linear(0, 1)');
+  if (!ok) return 'cubic-bezier(.2,.9,.25,1)';
+  const k = 190, c = 23, pts = []; let x = 0, v = 0; const dt = 1 / 600;
+  for (let i = 0; i <= 60; i++) { pts.push(x.toFixed(4)); for (let j = 0; j < 10; j++) { const a = -k * (x - 1) - c * v; v += a * dt; x += v * dt; } }
+  pts[pts.length - 1] = '1'; return `linear(${pts.join(',')})`;
+})();
+const DUR = 560;
+[sheet, tiles, cmpEl, ...fades].forEach((n) => { n.style.willChange = 'transform'; });
+fades.forEach((f) => { f.style.transformOrigin = f.classList.contains('l') ? '0 0' : '100% 0'; });
 function paint(e, anim) {
-  const c = Math.max(0, Math.min(1, e));
-  const tr = anim ? 'transform .42s var(--ease), opacity .3s' : 'none';
-  tiles.style.transition = tr;
-  sheet.style.transition = anim ? 'transform .42s var(--ease), top .55s var(--ease), height .55s var(--ease), border-radius .55s' : 'none';
-  sheet.style.transform = `translateY(${e * DROP}px)`;
-  const cmp = $('.cmp'); cmp.style.transition = anim ? 'transform .42s var(--ease)' : 'none'; cmp.style.transform = `translateY(${-Math.max(0, e) * DROP}px)`;
-  chatEl.style.bottom = Math.max(0, e) * DROP + 'px';
-  tiles.style.transform = `translateY(${c * LIFT}px) scale(${1 + c * (SCALE - 1)})`;
+  cur_e = e; const c = Math.max(0, Math.min(1, e));
+  const t = anim ? `transform ${DUR}ms ${EASE}, opacity 300ms ease` : 'none';
+  sheet.style.transition = anim ? `transform ${DUR}ms ${EASE}, top .55s var(--ease), height .55s var(--ease), border-radius .55s` : 'none';
+  sheet.style.transform = `translate3d(0,${e * DROP}px,0)`;
+  tiles.style.transition = t; tiles.style.transform = `translate3d(0,${e * LIFT}px,0) scale(${1 + e * (SCALE - 1)})`;
+  cmpEl.style.transition = t; cmpEl.style.transform = `translate3d(0,${-Math.max(0, e) * DROP}px,0)`;
+  fades.forEach((f) => { f.style.transition = t + ', opacity .4s'; f.style.transform = `scale(${(150 - c * 101) / 150},${(117 + c * 71) / 117})`; });
   for (const b of [$('#burger'), $('#more')]) { b.style.transition = anim ? 'opacity .3s' : 'none'; b.style.opacity = 1 - c; b.style.pointerEvents = c > 0.5 ? 'none' : ''; }
-  document.querySelectorAll('.fade').forEach((f) => { f.style.transition = anim ? 'width .42s var(--ease), height .42s var(--ease)' : 'none'; f.style.width = (150 - c * 101) + 'px'; f.style.height = (117 + c * 71) + 'px'; });
   stage.classList.toggle('tray-open', c > 0.5);
 }
-function setOpen(v) { open = v; paint(v ? 1 : 0, true); centreActive(); }
+// the chat's bottom inset is a layout change, so only set it once the motion has settled
+function settleChat(v) { clearTimeout(settleT); if (!v) { chatEl.style.bottom = '0px'; return; } settleT = setTimeout(() => { chatEl.style.bottom = DROP + 'px'; }, DUR); }
+function setOpen(v) { open = v; paint(v ? 1 : 0, true); settleChat(v); centreActive(); }
 function centreActive() { const on = $('#tscroll .tile.on'); if (on) requestAnimationFrame(() => centreTile(on)); }
 function down(e) {
   if (e.button > 0) return;
   const g = e.target.closest('#grab,#tiles'); if (!g || !hasTray) return;
-  drag = { x0: e.clientX, y0: e.clientY, on: false, id: e.pointerId, ly: e.clientY, lt: performance.now(), v: 0 };
+  drag = { x0: e.clientX, y0: e.clientY, on: false, id: e.pointerId, hist: [[performance.now(), e.clientY]], base: cur_e };
 }
 function move(e) {
   if (!drag || e.pointerId !== drag.id) return;
   const dy = (e.clientY - drag.y0) / K, dx = (e.clientX - drag.x0) / K;
   if (!drag.on) {
     if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { drag = null; return; }
-    if (Math.abs(dy) < 6) return;
-    drag.on = true; try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+    if (Math.abs(dy) < 4) return;
+    drag.on = true; drag.y0 = e.clientY; drag.base = cur_e; try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+    // pick up from wherever an in-flight animation currently is
+    const m = new DOMMatrix(getComputedStyle(sheet).transform); drag.base = m.m42 / DROP; paint(drag.base, false);
   }
-  const t = performance.now(); drag.v = (e.clientY - drag.ly) / K / Math.max(1, t - drag.lt); drag.ly = e.clientY; drag.lt = t;
-  let x = (open ? 1 : 0) + dy / DROP;
-  if (x < 0) x *= 0.2; if (x > 1) x = 1 + (x - 1) * 0.15;
-  paint(x, false); e.preventDefault();
+  drag.hist.push([performance.now(), e.clientY]); if (drag.hist.length > 6) drag.hist.shift();
+  let x = drag.base + (e.clientY - drag.y0) / K / DROP;
+  if (x < 0) x = -(1 - 1 / (1 - x * 0.6)) / 0.6 * 0.35; // soft rubber band above
+  if (x > 1) x = 1 + (1 - 1 / (1 + (x - 1) * 0.8)) * 0.35; // and below
+  drag.x = x;
+  if (!rafP) rafP = requestAnimationFrame(() => { rafP = 0; if (drag) paint(drag.x, false); });
+  e.preventDefault();
 }
 function up(e) {
   if (!drag || e.pointerId !== drag.id) return;
   if (drag.on) {
-    const x = (open ? 1 : 0) + (e.clientY - drag.y0) / K / DROP;
-    const v = drag.v > 0.3 ? true : drag.v < -0.3 ? false : x > 0.5;
-    suppress = true; setTimeout(() => { suppress = false; }, 60); setOpen(v);
+    cancelAnimationFrame(rafP); rafP = 0;
+    const hst = drag.hist, a = hst[0], b = hst[hst.length - 1];
+    const v = (b[1] - a[1]) / K / Math.max(16, b[0] - a[0]); // px per ms
+    const projected = (drag.x == null ? cur_e : drag.x) + (v * 120) / DROP; // where a flick would carry it
+    suppress = true; setTimeout(() => { suppress = false; }, 60);
+    setOpen(projected > 0.5);
   }
   drag = null;
 }

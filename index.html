@@ -1246,6 +1246,8 @@ PP.comp = new Component();
 PP.compile(stage);
 PP.render();
 document.body.classList.add('ready');
+// #agent opens straight on the agent experience (for QR links)
+if (location.hash === '#agent') requestAnimationFrame(() => { const f = PP.vals && PP.vals.openAgent; if (typeof f === 'function') f(); });
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => { reg.update(); }).catch(() => {});
   let reloaded = false;
