@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decade · Agent experience (phone preview)</title>
+<style>
+html,body{margin:0;height:100%;background:#e9e8e6;overflow:hidden;font-family:-apple-system,system-ui,sans-serif}
+.wrap{position:absolute;left:50%;top:50%;transform-origin:50% 50%}
+.phone{position:relative;width:414px;height:873px;border-radius:56px;background:#111;padding:12px;box-shadow:0 0 0 2px #2a2a2a,0 30px 80px rgba(0,0,0,.28),inset 0 0 0 1.5px #3a3a3a}
+.screen{position:relative;width:390px;height:849px;border-radius:44px;overflow:hidden;background:#000}
+.screen iframe{display:block;width:390px;height:849px;border:0}
+.cam{position:absolute;left:50%;top:21px;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:#050505;box-shadow:inset 0 0 0 2px #1c1c1c;z-index:5;pointer-events:none}
+.btn{position:absolute;right:-4px;width:4px;border-radius:0 3px 3px 0;background:#2a2a2a}
+.b1{top:170px;height:62px}.b2{top:262px;height:120px}
+</style></head><body>
+<div class="wrap" id="wrap"><div class="phone"><span class="btn b1"></span><span class="btn b2"></span><div class="screen"><span class="cam"></span>
+<iframe title="Agent experience" src="index.html?mock"></iframe></div></div></div>
+<script>
+function fit(){const w=document.getElementById('wrap');const s=Math.min(innerWidth/450,innerHeight/905,1.15);w.style.transform=`translate(-50%,-50%) scale(${s})`;}
+fit();addEventListener('resize',fit);
+</script></body></html>

@@ -234,7 +234,7 @@ body.embedded .sbar{display:none}
 'use strict';
 const $ = (s, r = document) => r.querySelector(s);
 const stage = $('#stage');
-const EMB = window.parent !== window;
+const EMB = window.parent !== window && !/[?&]mock\b/.test(location.search); // ?mock = shown inside the phone-frame page
 if (EMB) document.body.classList.add('embedded');
 if (EMB) document.addEventListener('pointerup', () => { try { parent.postMessage({ decade: 'tap' }, '*'); } catch (_) {} }, { once: true, capture: true });
 document.addEventListener('touchstart', () => {}, { passive: true });
