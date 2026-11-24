@@ -1268,6 +1268,8 @@ if (!standalone && (el.requestFullscreen || el.webkitRequestFullscreen)) {
 }
 // The agent frame says whether its dark widget tray is showing, so the status bar can switch colour.
 window.addEventListener('message', (e) => { if (e.data && e.data.decade === 'agentTop' && PP.comp) PP.comp.setState({ agentDark: !!e.data.dark }); });
+// The agent's sidebar links to other sections of the app.
+window.addEventListener('message', (e) => { if (!e.data || e.data.decade !== 'go') return; const f = PP.vals && (e.data.to === 'fd' ? PP.vals.openFd : e.data.to === 'funds' ? PP.vals.openFunds : null); if (typeof f === 'function') f(); });
 // The fixed deposit flow runs in its own frame; its back button opens the app menu.
 window.addEventListener('message', (e) => {
   if (!e.data || e.data.decade !== 'menu') return;
