@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Decade · Agent experience</title>
+<meta name="theme-color" content="#212121">
+<style>
+@font-face{font-family:"GT Walsheim";src:url("../fonts/GT-Walsheim-Regular-Trial.otf") format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"GT Walsheim";src:url("../fonts/GT-Walsheim-Medium-Trial.otf") format("opentype");font-weight:500;font-display:swap}
+@font-face{font-family:"Reckless";src:url("../fonts/RecklessStandardS-TRIAL-Medium.woff2") format("woff2");font-weight:500;font-display:swap}
+:root{--ink:#212121;--paper:#fcfcfa;--line:#dfdcda;--mute:#645f5f;--grey:#9e9999;--soft:#f5f5f2;--sans:"GT Walsheim","DM Sans",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;--serif:"Reckless","Source Serif 4",Georgia,serif;--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#7a7a7a;overscroll-behavior:none}
+body.embedded{background:#212121}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+#stage{position:absolute;left:0;top:0;width:390px;height:849px;overflow:hidden;transform-origin:0 0;background:var(--ink);font-family:var(--sans);color:#000;contain:strict;-webkit-user-select:none;user-select:none}
+.serif{font-family:var(--serif);font-weight:500}
+.hatch{background:var(--soft) repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0 1px,transparent 1px 6px)}
+.sbar{position:absolute;left:0;top:0;width:390px;height:44px;z-index:60;pointer-events:none;color:#fff}
+.sbar span{position:absolute;left:32px;top:13px;font-size:16px;font-weight:600;font-family:-apple-system,system-ui,sans-serif}
+.sbar i{position:absolute;right:24px;top:17px;width:62px;height:11px;border-radius:3px;background:linear-gradient(90deg,#fff 0 18px,transparent 18px 24px,#fff 24px 38px,transparent 38px 44px,#fff 44px)}
+body.embedded .sbar{display:none}
+
+/* top: round buttons + widget tiles */
+.rbtn{position:absolute;top:50px;width:52px;height:43px;border:0;border-radius:27px;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.08);display:inline-flex;align-items:center;justify-content:center;padding:0;z-index:30;transition:opacity .3s}
+#burger{left:15px}#more{left:323px}#wcClose{left:323px;opacity:0;pointer-events:none}
+#tiles{position:absolute;left:0;top:38px;width:390px;height:68px;z-index:20;transition:opacity .25s}
+.tscroll{display:flex;gap:6.6px;align-items:center;height:100%;overflow-x:auto;scrollbar-width:none;padding:0 153px;scroll-snap-type:x mandatory;touch-action:pan-x}
+.tscroll::-webkit-scrollbar{display:none}
+.tile{flex:none;width:84px;height:50px;border-radius:9px;border:0;background:var(--paper);padding:3px 6px 0;position:relative;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center}
+.tile small{font-size:7px;letter-spacing:.06em;color:#787373;line-height:9px}
+.tile svg{margin-top:2px}
+.tile.on::after{content:"";position:absolute;inset:-3px;border:1.2px solid #fff;border-radius:11.5px}
+.tile.load{background:linear-gradient(100deg,#f4f4f4 20%,#c9c9c9 50%,#f4f4f4 80%);background-size:250% 100%;animation:sh 1.3s linear infinite;justify-content:center}
+.tile.load small{color:#6b6b6b}
+.tile.empty{background:none;border:1px dashed rgba(255,255,255,.35)}
+.tile.new{animation:pop .5s var(--ease)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.fade{position:absolute;top:0;height:117px;width:150px;pointer-events:none;z-index:25}
+.fade.l{left:0;background:linear-gradient(90deg,var(--ink) 38%,rgba(33,33,33,0))}
+.fade.r{right:0;background:linear-gradient(270deg,var(--ink) 38%,rgba(33,33,33,0))}
+
+/* open widget centre */
+#full{position:absolute;inset:0;z-index:10;opacity:0;pointer-events:none}
+#full.on{pointer-events:auto}
+#full h2{position:absolute;left:23px;top:108px;margin:0;color:#fff;font-size:28px;line-height:34px}
+#full .sub{position:absolute;left:23px;top:146px;color:var(--grey);font-size:15px}
+.flist{position:absolute;left:0;top:176px;width:390px;bottom:70px;overflow-y:auto;padding:8px 23px 30px;display:flex;flex-direction:column;gap:12px;touch-action:pan-y;scrollbar-width:none}
+.flist::-webkit-scrollbar{display:none}
+.flist .lnote{color:var(--grey);font-size:13px;margin-top:-4px}
+.goto{align-self:flex-end;border:0;background:none;color:#fff;font-size:13px;text-decoration:underline;padding:2px 0 4px;margin-top:-4px}
+.fempty{margin-top:40px;border:1px dashed rgba(255,255,255,.35);border-radius:23px;padding:34px 24px;color:var(--grey);text-align:center;font-size:15px;line-height:21px}
+.fgrab{position:absolute;left:0;bottom:0;width:390px;height:70px;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--grey);font-size:13px}
+.fgrab::after{content:"";width:45px;height:9px;border-radius:16px;background:rgba(255,255,255,.8)}
+
+/* sheet */
+#sheet{position:absolute;left:0;top:117px;width:390px;height:732px;background:var(--paper);border-radius:23px 23px 0 0;z-index:15;will-change:transform;transition:transform .42s var(--ease)}
+#sheet.drag,#tiles.drag,#full.drag{transition:none}
+.grab{position:absolute;left:0;top:0;width:390px;height:34px;touch-action:none;display:flex;justify-content:center;padding-top:9px;cursor:grab;z-index:3}
+.grab::before{content:"";width:45px;height:9px;border-radius:16px;background:#d9d9d9}
+#chat{position:absolute;left:0;top:30px;width:390px;bottom:0;overflow-y:auto;padding:20px 23px 160px;display:flex;flex-direction:column;gap:16px;scrollbar-width:none}
+#chat::-webkit-scrollbar{display:none}
+.hello{margin-top:150px}
+.hello h1{margin:0 0 8px;font-size:26px;line-height:31px;color:var(--ink)}
+.hello p{margin:0 0 16px;font-size:15px;line-height:20px;color:var(--mute)}
+.hello .qs{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.pill{border:1px solid var(--line);background:#fff;border-radius:100px;padding:10px 16px;font-size:15px;color:var(--ink);text-align:left}
+.pill:active{background:#f3f3f3}
+.um{align-self:flex-end;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:299px;animation:rise .3s var(--ease)}
+.u{position:relative;background:var(--ink);color:#fff;border-radius:25px;padding:16px 17px;font-size:17px;line-height:22px;box-shadow:0 3px 30px rgba(0,0,0,.03)}
+.u svg{position:absolute;right:-6px;bottom:-1px}
+.um time{font-size:13px;color:#9e9999;margin-right:23px}
+.a{display:flex;flex-direction:column;gap:16px;animation:rise .3s var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.chip{align-self:flex-start;display:inline-flex;align-items:center;gap:10px;border:2px solid #000;background:#fff;border-radius:100px;padding:13px 17px;font-size:17px;color:var(--ink);box-shadow:0 3px 30px rgba(0,0,0,.03)}
+.lcard{height:134px;border-radius:23px;background:linear-gradient(100deg,#f4f4f4 15%,#cfcfcf 45%,#cfcfcf 55%,#f4f4f4 85%);background-size:250% 100%;animation:sh 1.6s linear infinite;display:flex;align-items:center;justify-content:center;color:#999;font-size:17px}
+@keyframes sh{from{background-position:120% 0}to{background-position:-120% 0}}
+.desc{margin:0;font-size:17px;line-height:23px;color:#000;padding-right:12px}
+.desc.sk{display:flex;flex-direction:column;gap:9px}
+.desc.sk i{display:block;height:12px;border-radius:6px;background:#e6e6e6}
+
+/* widget card */
+.wg{background:#fff;border-radius:23px;box-shadow:0 4px 100px rgba(0,0,0,.05),0 1px 3px rgba(0,0,0,.04);overflow:hidden;transition:box-shadow .3s}
+#full .wg{box-shadow:none}
+.wg.flash{box-shadow:0 0 0 3px #212121}
+.ch{display:flex;align-items:center;gap:16px;padding:16px 20px 15px 17px}
+.logo{width:45px;height:45px;border-radius:11px;flex:none}
+.logo.sm{width:27px;height:27px;border-radius:7px}
+.ch b{flex:1;font-size:19px;line-height:23px;color:var(--ink)}
+.cb{border-top:1px solid var(--line);padding:16px 20px 18px 23px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.num{font-size:21px;font-weight:500;color:var(--ink);line-height:26px}
+.num.big{font-size:26px}
+.lab{font-size:15px;color:var(--mute);line-height:19px}
+.r{text-align:right}
+.tabs{display:inline-flex;background:#f3f3f1;border-radius:100px;padding:3px}
+.tabs button{border:0;background:none;border-radius:100px;padding:5px 11px;font-size:13px;color:var(--mute)}
+.tabs button.on{background:var(--ink);color:#fff}
+.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--grey);margin-top:4px}
+.bars{display:flex;align-items:flex-end;gap:10px;height:110px;margin:22px 0 6px;border-bottom:1px solid var(--line)}
+.bars button{flex:1;border:1.4px solid var(--ink);border-bottom:0;border-radius:8px 8px 0 0;padding:0;position:relative}
+.bars button.on{background:var(--ink)}
+.bars button span{position:absolute;left:0;right:0;top:-18px;font-size:12px;font-weight:500;color:var(--ink)}
+.blab{display:flex;gap:10px}.blab span{flex:1;text-align:center;font-size:11px;color:var(--grey)}
+.rng{width:100%;margin:14px 0 10px;accent-color:#212121}
+.yr{display:flex;gap:6px}
+.yr button{border:1px solid var(--line);background:#fff;border-radius:100px;padding:5px 11px;font-size:13px;color:var(--ink)}
+.yr button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.split{display:flex;height:10px;border-radius:5px;overflow:hidden;background:#eee;margin-bottom:12px}
+.split i{display:block;background:var(--ink)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{padding:8px 4px;text-align:center;border-bottom:1px solid #eeeceb}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child,.tbl th:first-child{text-align:left;color:var(--mute);font-size:13px}
+.tbl th button{border:0;background:none;font-size:13px;font-weight:500;padding:4px 8px;border-radius:100px;color:var(--ink)}
+.tbl th.on button{background:var(--ink);color:#fff}
+.tbl td.on{font-weight:500;background:#f5f5f3}
+.donut{display:flex;align-items:center;gap:16px}
+.legend{flex:1;display:flex;flex-direction:column;gap:2px}
+.legend button{display:flex;align-items:center;gap:9px;border:0;border-radius:10px;background:none;padding:6px 8px;font-size:14px;text-align:left;color:var(--ink)}
+.legend button.on{background:#f3f3f1}
+.legend i{width:11px;height:11px;border-radius:3px;flex:none;border:1px solid var(--ink)}
+.legend b{margin-left:auto;font-weight:500}
+.chk{display:flex;flex-direction:column;gap:2px}
+.chk button{display:flex;align-items:center;gap:12px;border:0;background:none;padding:8px 0;font-size:15px;text-align:left;color:var(--ink)}
+.chk button i{width:20px;height:20px;border:1.5px solid var(--ink);border-radius:6px;flex:none;display:inline-flex;align-items:center;justify-content:center}
+.chk button.on i{background:var(--ink)}
+.chk button.on i::after{content:"";width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.chk button.on span{text-decoration:line-through;color:var(--grey)}
+.prog{height:4px;border-radius:2px;background:#eee;margin:8px 0 6px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ink);transition:width .3s}
+
+/* action card */
+.act{background:#fff;border:1px solid var(--line);border-radius:23px;box-shadow:0 4px 100px rgba(0,0,0,.05)}
+.act .ah{display:flex;align-items:center;gap:11px;padding:14px 17px 12px}
+.act .ah b{font-size:15px;color:var(--ink)}
+.act .ab{border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:16px 16px 18px 21px}
+.act small{display:block;font-size:13px;color:var(--mute);margin-bottom:3px}
+.act .val b{font-size:19px;font-weight:500;color:var(--ink)}.act .val span{font-size:15px;color:var(--ink);margin-left:1px}
+.inv{height:38px;min-width:107px;padding:0 18px;border:0;border-radius:33px;background:var(--ink);color:#fff;font-size:15px;font-weight:500}
+.act.done .inv{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.act.sk{border-style:dashed;box-shadow:none}
+
+/* composer */
+.cmp{position:absolute;left:0;bottom:0;width:390px;padding:0 0 22px;z-index:4;background:linear-gradient(rgba(252,252,250,0),var(--paper) 30%)}
+.sugg{display:flex;gap:6px;overflow-x:auto;padding:14px 13px 10px;scrollbar-width:none}
+.sugg::-webkit-scrollbar{display:none}
+.sugg .pill{flex:none;padding:7px 13px;font-size:13.5px;white-space:nowrap}
+.inp{margin:0 13px;height:69px;border-radius:59px;background:#fff;box-shadow:0 2px 30px rgba(0,0,0,.15);display:flex;align-items:center;padding:0 12px 0 27px;gap:10px}
+.inp input{flex:1;border:0;outline:0;background:none;font-size:18px;color:var(--ink);min-width:0;-webkit-user-select:text;user-select:text}
+.inp input::placeholder{color:#8d8888}
+.send{width:52px;height:45px;border-radius:27px;border:0;background:var(--ink);display:inline-flex;align-items:center;justify-content:center;padding:0 0 0 3px;flex:none}
+.send:disabled{opacity:.35}
+
+/* drawer + menu */
+#dim{position:absolute;inset:0;z-index:70;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s}
+#hist{position:absolute;left:0;top:0;width:317px;height:849px;z-index:71;background:#fff;transform:translateX(-330px);transition:transform .34s var(--ease);display:flex;flex-direction:column}
+#stage.hopen #dim{opacity:1;pointer-events:auto}#stage.hopen #hist{transform:none}
+.h-top{display:flex;align-items:center;justify-content:space-between;padding:52px 15px 14px 19px;border-bottom:1px solid #eee}
+.h-top b{font-size:24px;color:var(--ink)}
+.h-top .rbtn{position:static}
+.h-srch{margin:14px 15px 0;height:44px;border:1px solid var(--line);border-radius:100px;display:flex;align-items:center;gap:8px;padding:0 14px;color:var(--grey);font-size:15px}
+.h-new{margin:10px 15px 0;height:46px;border:0;border-radius:100px;background:var(--ink);color:#fff;font-size:15px;font-weight:500}
+.h-list{flex:1;overflow-y:auto;padding:6px 9px 12px}
+.h-grp{font-size:13px;color:var(--grey);padding:16px 10px 6px}
+.h-item{display:block;width:100%;border:0;background:none;text-align:left;padding:10px;border-radius:14px}
+.h-item b{display:block;font-size:17px;font-weight:400;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-item small{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.h-item.on{background:#f3f3f3}
+.h-foot{padding:12px 15px 34px}
+.h-foot button{width:100%;height:46px;border:1.5px solid var(--ink);border-radius:100px;background:#fff;font-size:15px;font-weight:500;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px}
+#menu{position:absolute;right:15px;top:100px;z-index:72;background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.18);padding:6px;display:none;min-width:170px}
+#menu.on{display:block}
+#menu button{display:block;width:100%;border:0;background:none;text-align:left;padding:11px 14px;border-radius:12px;font-size:15px;color:var(--ink)}
+#menu button:active{background:#f3f3f3}
+#toast{position:absolute;left:50%;bottom:120px;transform:translate(-50%,10px);background:var(--ink);color:#fff;font-size:14px;padding:10px 16px;border-radius:100px;opacity:0;pointer-events:none;transition:all .25s;z-index:90;white-space:nowrap}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="sbar" aria-hidden="true"><span>9:41</span><i></i></div>
+
+  <section id="full" aria-label="Widget centre">
+    <h2 class="serif">Widget centre</h2>
+    <div class="sub" id="fsub"></div>
+    <div class="flist" id="flist"></div>
+    <div class="fgrab" id="fgrab">Drag up to close</div>
+  </section>
+
+  <div id="tiles"><div class="tscroll" id="tscroll"></div></div>
+  <div class="fade l"></div><div class="fade r"></div>
+  <button class="rbtn" id="burger" aria-label="Previous chats"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 8h14M5 12h14M5 16h14" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <button class="rbtn" id="more" aria-label="More"><svg width="17" height="17" viewBox="0 0 17 17" fill="#212121"><circle cx="2.5" cy="8.5" r="2"/><circle cx="8.5" cy="8.5" r="2"/><circle cx="14.5" cy="8.5" r="2"/></svg></button>
+  <button class="rbtn" id="wcClose" aria-label="Close widget centre"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2 2 12" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
+
+  <section id="sheet">
+    <div class="grab" id="grab" aria-label="Drag down to open widget centre"></div>
+    <div id="chat" aria-live="polite"></div>
+    <div class="cmp">
+      <div class="sugg" id="sugg"></div>
+      <form class="inp" id="form" autocomplete="off">
+        <svg width="19" height="19" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#8d8888"/></svg>
+        <input id="q" type="text" placeholder="Ask Decade" aria-label="Message">
+        <button class="send" id="sendBtn" type="submit" aria-label="Send" disabled><svg width="13" height="18" viewBox="0 0 13 18"><path d="M1.78 17.79l10.35-7.07c1.14-.78 1.14-2.68 0-3.46L1.78.19C.84-.45-.3.62.07 1.81L2 8.02l3.71.97L2 9.96.07 16.17c-.37 1.2.76 2.27 1.71 1.62Z" fill="#fff"/></svg></button>
+      </form>
+    </div>
+  </section>
+
+  <div id="menu"><button id="mNew">New chat</button><button id="mOpen">Open widget centre</button></div>
+  <div id="dim"></div>
+  <nav id="hist" aria-label="Previous chats">
+    <div class="h-top"><b class="serif">Chats</b><button class="rbtn" id="hClose" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2 2 12" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+    <div class="h-srch"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#9e9999" stroke-width="1.6"/><path d="m11 11 3.5 3.5" stroke="#9e9999" stroke-width="1.6" stroke-linecap="round"/></svg>Search chats</div>
+    <button class="h-new" id="hNew">+ New chat</button>
+    <div class="h-list" id="hList"></div>
+    <div class="h-foot"><button id="hMenu"><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M6 1 1 6l5 5M1 6h14" stroke="#212121" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="hMenuTxt">Decade menu</span></button></div>
+  </nav>
+  <div id="toast"></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const stage = $('#stage');
+const EMB = window.parent !== window;
+if (EMB) document.body.classList.add('embedded');
+if (EMB) document.addEventListener('pointerup', () => { try { parent.postMessage({ decade: 'tap' }, '*'); } catch (_) {} }, { once: true, capture: true });
+document.addEventListener('touchstart', () => {}, { passive: true });
+let K = 1;
+function fit() {
+  if (EMB) { K = 1; stage.style.transform = ''; return; }
+  const w = innerWidth, h = innerHeight; K = Math.min(w / 390, h / 849);
+  stage.style.transform = `translate(${(w - 390 * K) / 2}px, ${(h - 849 * K) / 2}px) scale(${K})`;
+}
+fit(); addEventListener('resize', fit);
+if (!EMB) $('#hMenuTxt').textContent = 'Close';
+
+const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+const rnd = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
+const lakh = (n) => n >= 1e7 ? '₹' + (n / 1e7).toFixed(2) + ' Cr' : n >= 1e5 ? '₹' + (n / 1e5).toFixed(1) + ' L' : inr(n);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const now = () => { const d = new Date(); let h = d.getHours(), m = d.getMinutes(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${String(m).padStart(2, '0')} ${ap}`; };
+const CHEV = '<svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1l6 6-6 6" stroke="#212121" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const DOC = '<svg width="15" height="18" viewBox="0 0 15 18" fill="none"><path d="M9 1H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V6L9 1Z" stroke="#212121" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 1v5h5" stroke="#212121" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+const TAIL = '<svg width="18" height="14" viewBox="0 0 18 14" fill="none"><path d="M0 0h14c0 5 1.5 10 4 14-6-1-11-4-14-8L0 0Z" fill="#212121"/></svg>';
+let uid = 0;
+
+/* ---------- replies ---------- */
+const KINDS = ['fund', 'line', 'bars', 'calc', 'table', 'donut', 'list'];
+const META = {
+  fund: { title: 'HSBC midcap direct growth', tile: 'FUND' },
+  line: { title: 'Your SIP vs Nifty 50', tile: 'COMPARE' },
+  bars: { title: 'FD rates · 1 year', tile: 'FD RATES' },
+  calc: { title: 'SIP calculator', tile: 'SIP CALC' },
+  table: { title: 'Flexi-cap funds compared', tile: 'COMPARE' },
+  donut: { title: 'Your portfolio split', tile: 'PORTFOLIO' },
+  list: { title: 'Emergency fund plan', tile: 'PLAN' },
+};
+const DESC = {
+  fund: 'With a 35.34% return over the past year, HSBC Midcap Direct Growth has demonstrated strong recent performance. Ranked 2nd among 221 midcap funds, it stands out as a strong performer in its category.\n\nA compelling option if you’re looking to explore growth opportunities in midcap companies.',
+  line: 'Over the last year your SIP returned 14.2%, about 2% ahead of the Nifty 50. Most of that came in the last two quarters. Switch the range to see the longer trend.',
+  bars: 'Shivalik SFB pays the most right now at 8.30% for a year. Small finance banks pay more, and deposits are DICGC insured up to ₹5 lakh per bank.',
+  calc: 'At 12% a year, a steady SIP compounds quickly after year 7. Drag the slider to see how the amount changes the final value.',
+  table: 'All three have similar 5-year returns. Fund B charges the lowest fee and has had the smallest falls, so it is the steadier pick.',
+  donut: 'You are 68% in equity. That is a bit high for a goal that is 3 years away. Moving some into debt would make the ride smoother.',
+  list: 'Aim for 6 months of expenses, kept somewhere you can reach in a day. Tick steps off as you go.',
+  none: 'An expense ratio is the yearly fee a fund takes from your money. 1% on ₹1 lakh is ₹1,000 a year. Direct plans charge less than regular ones.',
+};
+// [title, label, value, unit, button]
+const ACTS = {
+  fund: ['HSBC midcap direct growth', 'Start SIP', '₹5000', '/month', 'Invest'],
+  line: ['Your monthly SIP', 'Top up by', '₹1000', '/month', 'Top up'],
+  bars: ['Shivalik SFB · 1 year FD', 'Book FD at', '8.30%', ' a year', 'Book FD'],
+  calc: ['Start a monthly SIP', 'Start SIP', '₹5000', '/month', 'Invest'],
+  table: ['Flexi-cap shortlist', 'Add', '3 funds', ' to shortlist', 'Add'],
+  donut: ['Rebalance portfolio', 'Move to debt', '₹40,000', '', 'Rebalance'],
+  list: ['Emergency fund', 'Auto-transfer', '₹10,000', '/month', 'Set up'],
+  none: ['Talk to an advisor', 'Free call', '15', ' minutes', 'Book'],
+  remind: ['Review your SIP', 'Reminder', 'Mon, 1 Dec', ' · 9:00 AM', 'Set'],
+};
+const STATUS = { fund: 'Looking for the plans…', line: 'Pulling your returns…', bars: 'Checking FD rates…', calc: 'Running the numbers…', table: 'Comparing funds…', donut: 'Reading your portfolio…', list: 'Drafting a plan…', none: 'Thinking…', remind: 'Setting it up…' };
+function detect(q) {
+  const s = q.toLowerCase();
+  if (/remind|notify|alert me/.test(s)) return { kind: null, text: false, action: true, actKey: 'remind' };
+  if (/^(what|why|explain|define)\b|what is|what's|meaning/.test(s) && !/best|show|chart|compare|split|plan|fund for/.test(s)) return { kind: null, text: true, action: hash(s) % 2 === 0 };
+  let kind = null;
+  if (/best|top|which fund|fund for me|recommend/.test(s)) kind = 'fund';
+  else if (/sip|calculat|grow|how much|goal|retire/.test(s)) kind = 'calc';
+  else if (/compar|\bvs\b|versus|better/.test(s)) kind = 'table';
+  else if (/\bfd\b|fixed|rate|bank|deposit/.test(s)) kind = 'bars';
+  else if (/portfolio|allocat|split|diversif|holding/.test(s)) kind = 'donut';
+  else if (/plan|step|checklist|emergency|start/.test(s)) kind = 'list';
+  else if (/return|perform|chart|trend|did|nifty|market/.test(s)) kind = 'line';
+  const h = hash(s);
+  if (!kind) kind = KINDS[h % KINDS.length];
+  return { kind, text: (h >> 3) % 10 < 7, action: (h >> 7) % 10 < 5 };
+}
+const SUGG = [
+  { q: 'What is the best performing mutual fund for me?', p: { kind: 'fund', text: true, action: true } },
+  { q: 'Best FD rates right now', p: { kind: 'bars', text: false, action: true } },
+  { q: 'How much will a ₹5,000 SIP grow?', p: { kind: 'calc', text: true, action: false } },
+  { q: 'What is an expense ratio?', p: { kind: null, text: true, action: false } },
+  { q: 'Remind me to review my SIP', p: { kind: null, text: false, action: true, actKey: 'remind' } },
+  { q: 'Show my portfolio split', p: { kind: 'donut', text: true, action: true } },
+  { q: 'How did my SIP do vs Nifty?', p: { kind: 'line', text: false, action: false } },
+  { q: 'Compare 3 flexi-cap funds', p: { kind: 'table', text: true, action: false } },
+  { q: 'Plan an emergency fund', p: { kind: 'list', text: true, action: true } },
+];
+function makeWidget(kind, q) {
+  const w = { id: 'w' + (++uid), kind, title: META[kind].title, seed: hash(q + kind), loading: false, fresh: true };
+  if (kind === 'line') w.tab = 0; if (kind === 'bars') w.sel = 0; if (kind === 'calc') { w.amt = 5000; w.yrs = 10; }
+  if (kind === 'table') w.pick = 1; if (kind === 'donut') w.sel = 0; if (kind === 'list') w.done = [true, false, false, false];
+  return w;
+}
+function makeReply(q, p) {
+  const r = { role: 'a', id: 'm' + (++uid), q, loading: true, status: STATUS[p.actKey || p.kind || 'none'] };
+  if (p.kind) r.widget = makeWidget(p.kind, q);
+  if (p.text) r.text = DESC[p.kind || 'none'];
+  if (p.action) r.action = { key: p.actKey || p.kind || 'none', done: false };
+  return r;
+}
+
+/* ---------- render pieces ---------- */
+function tileGlyph(kind) {
+  const G = {
+    fund: '<rect x="2" y="3" width="14" height="14" rx="3" fill="#e8e8e6"/><path d="M22 7h42M22 13h30" stroke="#b5b5b5" stroke-width="2.5"/><path d="M2 24h70" stroke="#e6e6e6"/>',
+    line: '<path d="M0 12H72M0 20H72" stroke="#e6e6e6" stroke-width=".6"/><path d="M2 26 C10 14 14 22 22 16 S34 22 42 12 S56 6 70 2" stroke="#8a8a8a" stroke-width="1.4"/>',
+    bars: '<rect x="6" y="6" width="12" height="22" fill="#212121"/><rect x="24.5" y="11.5" width="11" height="16" stroke="#212121"/><rect x="42.5" y="15.5" width="11" height="12" stroke="#212121"/><rect x="60.5" y="19.5" width="9" height="8" stroke="#212121"/>',
+    calc: '<path d="M4 15h64" stroke="#212121" stroke-width="1.2"/><circle cx="40" cy="15" r="5" fill="#212121"/><path d="M4 25h26M4 5h16" stroke="#b5b5b5" stroke-width="2.5"/>',
+    table: '<rect x="1.5" y="1.5" width="69" height="27" rx="3" stroke="#212121"/><path d="M1 11h70M1 20h70M24 1v28M47 1v28" stroke="#212121" stroke-width=".7"/><rect x="24" y="2" width="23" height="26" fill="#212121" opacity=".2"/>',
+    donut: '<circle cx="14" cy="15" r="10" stroke="#e4e4e4" stroke-width="5"/><path d="M14 5 A10 10 0 1 1 5.3 20" stroke="#212121" stroke-width="5"/><path d="M32 8h30M32 15h36M32 22h20" stroke="#b5b5b5" stroke-width="2.5"/>',
+    list: '<rect x="3" y="3" width="8" height="8" rx="2" fill="#212121"/><rect x="3.75" y="18.75" width="6.5" height="6.5" rx="2" stroke="#212121" stroke-width="1.3"/><path d="M17 7h48M17 22h38" stroke="#b5b5b5" stroke-width="2.5"/>',
+  };
+  return `<svg width="72" height="32" viewBox="0 0 72 32" fill="none">${G[kind]}</svg>`;
+}
+function series(w, n) { const r = rnd(w.seed + w.tab * 97), pts = []; let v = 50; for (let i = 0; i < n; i++) { v += (r() - 0.38) * 14; v = Math.max(8, Math.min(92, v)); pts.push(v); } return pts; }
+function calcVals(w) { const n = w.yrs * 12, i = 0.12 / 12, fv = w.amt * ((Math.pow(1 + i, n) - 1) / i) * (1 + i), inv = w.amt * n; return { fv, inv }; }
+function body(w) {
+  switch (w.kind) {
+    case 'fund': return `<div class="row"><div><div class="num">35.34%</div><div class="lab">1Y return</div></div><div class="r"><div class="num big">2<span style="font-size:15px">/221</span></div><div class="lab">ranked in<br>Midcap</div></div></div>`;
+    case 'line': {
+      const tabs = ['1Y', '3Y', '5Y'], ret = ['+14.2%', '+41.8%', '+96.5%'][w.tab], pts = series(w, [12, 18, 24][w.tab]);
+      const d = pts.map((v, i) => `${i ? 'L' : 'M'}${(i / (pts.length - 1) * 300).toFixed(1)} ${(100 - v).toFixed(1)}`).join(' ');
+      const lbl = [['Dec', 'Apr', 'Aug', 'Nov'], ['2023', '2024', '2025', '2026'], ['2021', '2023', '2025', '2026']][w.tab];
+      return `<div class="row"><div><div class="num">${ret}</div><div class="lab">Return over ${tabs[w.tab]}</div></div><div class="tabs">${tabs.map((t, i) => `<button data-act="tab" data-v="${i}" class="${i === w.tab ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+        <svg viewBox="0 0 300 100" preserveAspectRatio="none" style="width:100%;height:96px;margin-top:12px;display:block;overflow:visible"><path d="M0 33H300M0 66H300" stroke="#eeeceb" vector-effect="non-scaling-stroke"/><path d="M0 70 L300 45" stroke="#c9c9c9" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><path d="${d}" stroke="#212121" stroke-width="2" fill="none" vector-effect="non-scaling-stroke"/></svg>
+        <div class="axis">${lbl.map((x) => `<span>${x}</span>`).join('')}</div>`;
+    }
+    case 'bars': {
+      const it = [['Shivalik', 8.30], ['Jana', 8.25], ['Shriram', 7.85], ['SBI', 6.80]];
+      return `<div class="row"><div><div class="num">${it[w.sel][1].toFixed(2)}%</div><div class="lab">${it[w.sel][0]} · 1 year · tap a bar</div></div></div>
+        <div class="bars">${it.map((x, i) => `<button data-act="bar" data-v="${i}" class="${i === w.sel ? 'on' : 'hatch'}" style="height:${((x[1] - 5.5) / 3) * 100}%"><span>${x[1].toFixed(2)}</span></button>`).join('')}</div>
+        <div class="blab">${it.map((x) => `<span>${x[0]}</span>`).join('')}</div>`;
+    }
+    case 'calc': {
+      const { fv, inv } = calcVals(w);
+      return `<div class="row"><div><div class="lab">Monthly SIP</div><div class="num big" data-o="amt">${inr(w.amt)}</div></div><div class="yr">${[5, 10, 15].map((y) => `<button data-act="yrs" data-v="${y}" class="${y === w.yrs ? 'on' : ''}">${y}Y</button>`).join('')}</div></div>
+        <input class="rng" type="range" min="500" max="50000" step="500" value="${w.amt}" data-act="amt" aria-label="Monthly amount">
+        <div class="split"><i data-o="bi" style="width:${(inv / fv * 100).toFixed(1)}%"></i></div>
+        <div class="row"><div><div class="lab">Invested</div><div class="num" data-o="inv" style="font-size:17px">${lakh(inv)}</div></div><div class="r"><div class="lab">Est. value at 12%</div><div class="num" data-o="fv">${lakh(fv)}</div></div></div>`;
+    }
+    case 'table': {
+      const cols = ['Fund A', 'Fund B', 'Fund C'], rows = [['5Y return', '16.1%', '15.8%', '17.0%'], ['Fee', '0.9%', '0.5%', '1.1%'], ['Risk', 'High', 'Med', 'High'], ['Min. SIP', '₹500', '₹100', '₹1,000']];
+      const on = (j) => j - 1 === w.pick ? 'on' : '';
+      return `<table class="tbl"><tr><th></th>${cols.map((x, j) => `<th class="${on(j + 1)}"><button data-act="pick" data-v="${j}">${x}</button></th>`).join('')}</tr>${rows.map((r) => `<tr>${r.map((x, j) => `<td class="${j ? on(j) : ''}">${x}</td>`).join('')}</tr>`).join('')}</table>`;
+    }
+    case 'donut': {
+      const seg = [['Equity', 68, '#212121'], ['Debt', 18, '#645f5f'], ['Gold', 9, '#b5b2b2'], ['Cash', 5, '#eeeceb']];
+      let off = 0; const C = 2 * Math.PI * 40;
+      const arcs = seg.map((s, i) => { const len = s[1] / 100 * C; const a = `<circle cx="55" cy="55" r="40" fill="none" stroke="${s[2]}" stroke-width="${i === w.sel ? 20 : 14}" stroke-dasharray="${len - 2} ${C - len + 2}" stroke-dashoffset="${-off}" transform="rotate(-90 55 55)"/>`; off += len; return a; }).join('');
+      return `<div class="donut"><svg width="110" height="110" viewBox="0 0 110 110">${arcs}<text x="55" y="55" text-anchor="middle" font-size="17" font-weight="500" fill="#212121">${seg[w.sel][1]}%</text><text x="55" y="70" text-anchor="middle" font-size="10" fill="#645f5f">${seg[w.sel][0]}</text></svg>
+        <div class="legend">${seg.map((s, i) => `<button data-act="seg" data-v="${i}" class="${i === w.sel ? 'on' : ''}"><i style="background:${s[2]}"></i>${s[0]}<b>${s[1]}%</b></button>`).join('')}</div></div>`;
+    }
+    case 'list': {
+      const it = ['Work out 6 months of expenses', 'Open a liquid fund or sweep FD', 'Set up an auto-transfer', 'Review every 6 months'], dn = w.done.filter(Boolean).length;
+      return `<div class="lab">${dn} of 4 done</div><div class="prog"><i style="width:${dn / 4 * 100}%"></i></div><div class="chk">${it.map((x, i) => `<button data-act="chk" data-v="${i}" class="${w.done[i] ? 'on' : ''}"><i></i><span>${x}</span></button>`).join('')}</div>`;
+    }
+  }
+  return '';
+}
+function widgetHTML(w, where) {
+  if (w.loading) return `<div class="lcard" data-w="${w.id}" data-where="${where}">Loading</div>`;
+  return `<div class="wg" data-w="${w.id}" data-where="${where}"><div class="ch"><span class="logo hatch"></span><b class="serif">${esc(w.title)}</b>${CHEV}</div><div class="cb">${body(w)}</div></div>`;
+}
+function actionHTML(m) {
+  const a = ACTS[m.action.key], d = m.action.done;
+  return `<div class="act${d ? ' done' : ''}" data-m="${m.id}"><div class="ah"><span class="logo sm hatch"></span><b class="serif">${esc(a[0])}</b></div>
+    <div class="ab"><div><small>${esc(a[1])}</small><div class="val"><b>${esc(a[2])}</b><span>${esc(a[3])}</span></div></div><button class="inv" data-act="pri">${d ? 'Done ✓' : esc(a[4])}</button></div></div>`;
+}
+function tileHTML(w, on) {
+  if (w.loading) return `<button class="tile load${on ? ' on' : ''}" data-tile="${w.id}"><small>LOADING</small></button>`;
+  return `<button class="tile${on ? ' on' : ''}${w.fresh ? ' new' : ''}" data-tile="${w.id}"><small>${META[w.kind].tile}</small>${tileGlyph(w.kind)}</button>`;
+}
+
+/* ---------- state ---------- */
+const chats = [];
+let cur = null;
+function seedChat(title, when, qs) {
+  const c = { id: 'c' + (++uid), title, when, msgs: [] };
+  qs.forEach(([q, p, t]) => { c.msgs.push({ role: 'u', text: q, time: t }); const r = makeReply(q, p); r.loading = false; if (r.widget) r.widget.fresh = false; c.msgs.push(r); });
+  return c;
+}
+chats.push(seedChat('Emergency fund plan', 'Yesterday', [['Help me plan an emergency fund', { kind: 'list', text: true, action: false }, '6:12 PM'], ['Where should I keep it?', { kind: 'bars', text: true, action: true }, '6:14 PM']]));
+chats.push(seedChat('FD vs debt fund', 'Yesterday', [['Compare an FD with a debt fund', { kind: 'table', text: true, action: true }, '11:02 AM']]));
+chats.push(seedChat('Retirement SIP maths', 'Last 7 days', [['How much SIP do I need to retire at 50?', { kind: 'calc', text: false, action: true }, '8:30 PM'], ['Show my portfolio split', { kind: 'donut', text: true, action: false }, '8:33 PM']]));
+chats.push(seedChat('Why did markets fall?', 'Last 7 days', [['Why did markets fall this week?', { kind: null, text: true, action: false }, '9:15 AM']]));
+chats.push(seedChat('Nifty vs my SIP', 'Earlier', [['How did my SIP do vs Nifty?', { kind: 'line', text: true, action: false }, '4:40 PM']]));
+function newChat() { cur = { id: 'c' + (++uid), title: 'New chat', when: 'Today', msgs: [] }; renderAll(); }
+
+const chatEl = $('#chat');
+function renderChat() {
+  if (!cur.msgs.length) {
+    chatEl.innerHTML = `<div class="hello"><h1 class="serif">What do you want your money to do?</h1><p>Every answer can come with a widget, a short explanation and something you can act on. Widgets collect at the top.</p>
+      <div class="qs">${SUGG.slice(0, 3).map((s) => `<button class="pill" data-sugg="${esc(s.q)}">${esc(s.q)}</button>`).join('')}</div></div>`;
+    return;
+  }
+  chatEl.innerHTML = cur.msgs.map((m) => {
+    if (m.role === 'u') return `<div class="um"><div class="u">${esc(m.text)}${TAIL}</div><time>${m.time}</time></div>`;
+    if (m.loading) {
+      let s = `<div class="chip">${DOC}<span>${esc(m.status)}</span>${CHEV}</div>`;
+      if (m.widget) s += widgetHTML(m.widget, 'chat');
+      if (m.text) s += `<div class="desc sk"><i style="width:94%"></i><i style="width:86%"></i><i style="width:60%"></i></div>`;
+      if (m.action) s += `<div class="act sk"><div class="ah"><span class="logo sm hatch"></span><div class="desc sk" style="flex:1"><i style="width:60%"></i></div></div><div class="ab"><div class="desc sk" style="flex:1"><i style="width:50%"></i></div><button class="inv" disabled style="opacity:.25">&nbsp;</button></div></div>`;
+      return `<div class="a" data-m="${m.id}">${s}</div>`;
+    }
+    let s = '';
+    if (m.widget) s += widgetHTML(m.widget, 'chat');
+    if (m.text) s += m.text.split('\n\n').map((p) => `<p class="desc">${esc(p)}</p>`).join('');
+    if (m.action) s += actionHTML(m);
+    return `<div class="a" data-m="${m.id}">${s}</div>`;
+  }).join('');
+}
+function widgets() { return cur.msgs.filter((m) => m.widget).map((m) => m.widget); }
+function renderTiles() {
+  const ws = widgets(), ts = $('#tscroll');
+  if (!ws.length) { ts.innerHTML = '<span class="tile empty"></span><span class="tile empty"></span><span class="tile empty"></span>'; ts.style.paddingLeft = ts.style.paddingRight = '63px'; return; }
+  ts.style.paddingLeft = ts.style.paddingRight = '';
+  ts.innerHTML = ws.map((w, i) => tileHTML(w, i === ws.length - 1)).join('');
+  requestAnimationFrame(() => { ts.scrollTo({ left: ts.scrollWidth, behavior: 'smooth' }); });
+}
+function renderFull() {
+  const ws = widgets().slice().reverse();
+  $('#fsub').textContent = ws.length ? `${ws.length} widget${ws.length > 1 ? 's' : ''} in this chat · newest first` : 'Nothing here yet';
+  $('#flist').innerHTML = ws.length ? ws.map((w) => widgetHTML(w, 'full') + (w.loading ? '<div class="lnote">Appears here while the answer is generating</div>' : `<button class="goto" data-goto="${w.id}">Show in chat ↗</button>`)).join('')
+    : '<div class="fempty">Ask something. Every widget an answer makes lands here, starting with its loading state.</div>';
+}
+function renderSugg() {
+  const used = new Set(cur.msgs.filter((m) => m.role === 'u').map((m) => m.text));
+  $('#sugg').innerHTML = cur.msgs.length ? SUGG.filter((s) => !used.has(s.q)).map((s) => `<button class="pill" data-sugg="${esc(s.q)}">${esc(s.q)}</button>`).join('') : '';
+}
+function renderHist() {
+  const all = chats.includes(cur) ? chats : [cur, ...chats];
+  let g = '', html = '';
+  all.forEach((c) => {
+    if (c.when !== g) { g = c.when; html += `<div class="h-grp">${g}</div>`; }
+    const nw = c.msgs.filter((m) => m.widget).length, last = [...c.msgs].reverse().find((m) => m.role === 'u');
+    html += `<button class="h-item${c === cur ? ' on' : ''}" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${nw ? nw + (nw > 1 ? ' widgets' : ' widget') : 'No widgets'}${last ? ' · ' + last.time : ''}</small></button>`;
+  });
+  $('#hList').innerHTML = html;
+}
+function renderAll() { renderChat(); renderTiles(); renderFull(); renderSugg(); scrollEnd(); widgets().forEach((w) => { w.fresh = false; }); }
+function scrollEnd() { requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; }); }
+function refreshWidget(w) {
+  document.querySelectorAll(`[data-w="${w.id}"]`).forEach((el) => { const t = document.createElement('div'); t.innerHTML = widgetHTML(w, el.dataset.where); el.replaceWith(t.firstElementChild); });
+}
+
+/* ---------- sending ---------- */
+const input = $('#q'), sendBtn = $('#sendBtn');
+let busy = false;
+input.addEventListener('input', () => { sendBtn.disabled = !input.value.trim() || busy; });
+$('#form').addEventListener('submit', (e) => { e.preventDefault(); const q = input.value.trim(); if (q && !busy) { input.value = ''; sendBtn.disabled = true; input.blur(); send(q); } });
+function send(q, plan) {
+  busy = true;
+  if (!chats.includes(cur)) chats.unshift(cur);
+  if (cur.title === 'New chat') cur.title = q.length > 30 ? q.slice(0, 29) + '…' : q;
+  cur.msgs.push({ role: 'u', text: q, time: now() });
+  const p = plan || (SUGG.find((s) => s.q === q) || {}).p || detect(q);
+  const r = makeReply(q, p); if (r.widget) r.widget.loading = true;
+  const chat = cur;
+  renderAll();
+  setTimeout(() => {
+    chat.msgs.push(r);
+    if (chat === cur) { renderChat(); renderTiles(); renderFull(); scrollEnd(); }
+    setTimeout(() => {
+      r.loading = false; if (r.widget) { r.widget.loading = false; r.widget.fresh = true; }
+      busy = false; sendBtn.disabled = !input.value.trim();
+      if (chat === cur) renderAll();
+    }, 1700 + (hash(q) % 700));
+  }, 350);
+}
+
+/* ---------- interactions ---------- */
+function findWidget(el) { const host = el.closest('[data-w]'); if (!host) return null; for (const c of [cur, ...chats]) for (const m of c.msgs) if (m.widget && m.widget.id === host.dataset.w) return m.widget; return null; }
+let toastT;
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 1600); }
+stage.addEventListener('click', (e) => {
+  if (suppress) { e.preventDefault(); e.stopPropagation(); return; }
+  if (!e.target.closest('#menu,#more')) $('#menu').classList.remove('on');
+  const t = e.target.closest('[data-act],[data-sugg],[data-tile],[data-goto],[data-chat]');
+  if (!t) return;
+  if (t.dataset.sugg) { if (!busy) send(t.dataset.sugg); return; }
+  if (t.dataset.tile) { const w = widgets().find((x) => x.id === t.dataset.tile); if (w && w.loading) { toast('Still generating…'); return; } goTo(t.dataset.tile); return; }
+  if (t.dataset.goto) { setOpen(false); setTimeout(() => goTo(t.dataset.goto), 300); return; }
+  if (t.dataset.chat) { const c = [cur, ...chats].find((x) => x.id === t.dataset.chat); if (c) { cur = c; setHist(false); renderAll(); } return; }
+  const act = t.dataset.act;
+  if (act === 'pri') {
+    const card = t.closest('[data-m]'); const m = cur.msgs.find((x) => x.id === card.dataset.m); if (!m) return;
+    m.action.done = !m.action.done; const d = document.createElement('div'); d.innerHTML = actionHTML(m); card.replaceWith(d.firstElementChild);
+    if (m.action.done) toast(`${ACTS[m.action.key][4]} → opens that flow`); return;
+  }
+  const w = findWidget(t); if (!w) return; const v = +t.dataset.v;
+  if (act === 'tab') w.tab = v; else if (act === 'bar' || act === 'seg') w.sel = v; else if (act === 'yrs') w.yrs = v; else if (act === 'pick') w.pick = v; else if (act === 'chk') w.done[v] = !w.done[v]; else return;
+  refreshWidget(w);
+});
+stage.addEventListener('input', (e) => {
+  if (e.target.dataset.act !== 'amt') return;
+  const w = findWidget(e.target); if (!w) return; w.amt = +e.target.value; const { fv, inv } = calcVals(w);
+  document.querySelectorAll(`[data-w="${w.id}"]`).forEach((el) => {
+    el.querySelector('[data-o="amt"]').textContent = inr(w.amt); el.querySelector('[data-o="inv"]').textContent = lakh(inv);
+    el.querySelector('[data-o="fv"]').textContent = lakh(fv); el.querySelector('[data-o="bi"]').style.width = (inv / fv * 100).toFixed(1) + '%';
+    const r = el.querySelector('.rng'); if (r !== e.target) r.value = w.amt;
+  });
+});
+function goTo(id) {
+  const el = chatEl.querySelector(`[data-w="${id}"]`); if (!el) return;
+  chatEl.scrollTo({ top: el.offsetTop - 30, behavior: 'smooth' });
+  el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1100);
+}
+
+/* ---------- widget centre: drag the sheet down ---------- */
+const sheet = $('#sheet'), tiles = $('#tiles'), full = $('#full');
+const TRAVEL = 849 - 117;
+let open = false, drag = null, suppress = false;
+function paint(p, anim) {
+  [sheet, tiles, full].forEach((n) => n.classList.toggle('drag', !anim));
+  const c = Math.max(0, Math.min(1, p));
+  sheet.style.transform = `translateY(${p * TRAVEL}px)`;
+  tiles.style.opacity = Math.max(0, 1 - c * 3);
+  tiles.style.pointerEvents = c > 0.2 ? 'none' : '';
+  full.style.transition = anim ? 'opacity .35s, transform .42s var(--ease)' : 'none';
+  full.style.opacity = Math.max(0, (c - 0.15) / 0.85);
+  full.style.transform = `translateY(${(1 - c) * -40}px) scale(${0.96 + c * 0.04})`;
+  $('#more').style.opacity = 1 - c; $('#more').style.pointerEvents = c > 0.5 ? 'none' : '';
+  const x = $('#wcClose'); x.style.opacity = c; x.style.pointerEvents = c > 0.5 ? 'auto' : 'none';
+}
+function setOpen(v) { open = v; full.classList.toggle('on', v); if (v) $('#flist').scrollTop = 0; paint(v ? 1 : 0, true); }
+function down(e) {
+  if (e.button > 0) return;
+  const g = e.target.closest('#grab,#tiles,#fgrab');
+  if (!g) return;
+  if (open && !e.target.closest('#fgrab')) return;
+  if (!open && e.target.closest('#fgrab')) return;
+  drag = { x0: e.clientX, y0: e.clientY, on: false, id: e.pointerId, ly: e.clientY, lt: performance.now(), v: 0, src: g };
+}
+function move(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const dy = (e.clientY - drag.y0) / K, dx = (e.clientX - drag.x0) / K;
+  if (!drag.on) {
+    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { drag = null; return; }
+    if (Math.abs(dy) < 6) return;
+    drag.on = true; try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+  }
+  const t = performance.now(); drag.v = (e.clientY - drag.ly) / K / Math.max(1, t - drag.lt); drag.ly = e.clientY; drag.lt = t;
+  let p = (open ? 1 : 0) + dy / TRAVEL;
+  if (p < 0) p *= 0.25; if (p > 1) p = 1 + (p - 1) * 0.2;
+  paint(p, false); e.preventDefault();
+}
+function up(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (drag.on) {
+    const p = (open ? 1 : 0) + (e.clientY - drag.y0) / K / TRAVEL;
+    const v = drag.v > 0.5 ? true : drag.v < -0.5 ? false : (open ? p > 0.7 : p > 0.3);
+    suppress = true; setTimeout(() => { suppress = false; }, 60); setOpen(v);
+  }
+  drag = null;
+}
+stage.addEventListener('pointerdown', down);
+addEventListener('pointermove', move, { passive: false });
+addEventListener('pointerup', up); addEventListener('pointercancel', up);
+$('#grab').addEventListener('click', () => { if (!suppress) setOpen(true); });
+$('#fgrab').addEventListener('click', () => { if (!suppress) setOpen(false); });
+$('#wcClose').addEventListener('click', () => setOpen(false));
+
+/* ---------- drawer + menu ---------- */
+function setHist(v) { if (v) renderHist(); stage.classList.toggle('hopen', v); }
+$('#burger').addEventListener('click', () => setHist(true));
+$('#hClose').addEventListener('click', () => setHist(false));
+$('#dim').addEventListener('click', () => setHist(false));
+$('#hNew').addEventListener('click', () => { setHist(false); if (cur.msgs.length) newChat(); });
+$('#hMenu').addEventListener('click', () => { setHist(false); if (EMB) setTimeout(() => parent.postMessage({ decade: 'menu' }, '*'), 200); });
+$('#more').addEventListener('click', () => $('#menu').classList.toggle('on'));
+$('#mNew').addEventListener('click', () => { $('#menu').classList.remove('on'); if (cur.msgs.length) newChat(); toast('New chat'); });
+$('#mOpen').addEventListener('click', () => { $('#menu').classList.remove('on'); setOpen(true); });
+
+newChat();
+window.__agent = { send, setOpen, setHist, get cur() { return cur; } };
+})();
+</script>
+</body>
+</html>
