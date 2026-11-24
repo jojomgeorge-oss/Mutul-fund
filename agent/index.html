@@ -164,9 +164,16 @@ body.embedded .sbar{display:none}
 #home{position:absolute;inset:0;z-index:50;background:#fff;transition:transform .42s var(--ease),opacity .3s ease;will-change:transform}
 #stage.inchat #home{transform:translate3d(-28%,0,0);opacity:0;pointer-events:none}
 #stage:not(.inchat) .sbar{color:#000}
-.hpage{position:absolute;inset:0;overflow-y:auto;padding:52px 0 190px;scrollbar-width:none}
+.hpage{position:absolute;inset:0;overflow-y:auto;padding:108px 0 190px;scrollbar-width:none}
 .hpage::-webkit-scrollbar{display:none}
 .hpage[hidden]{display:none}
+.pfbtn{position:absolute;left:15px;top:50px;width:44px;height:44px;border-radius:50%;border:0;background:#d9d9d9;display:flex;align-items:center;justify-content:center;z-index:4;padding:0}
+#profile{position:absolute;inset:0;z-index:6;background:#fff;transform:translate3d(-100%,0,0);transition:transform .4s var(--ease)}
+#home.pf #profile{transform:none}
+.seg{display:flex;margin:0 28px 22px;background:#f3f3f3;border-radius:100px;padding:4px}
+.seg button{flex:1;height:44px;border:0;border-radius:100px;background:none;font-size:16px;color:#5c5c5c}
+.seg button.on{background:#212121;color:#fff}
+.h-ph[hidden]{display:none}
 .h-actions{display:flex;align-items:center;justify-content:center;margin:0 27px 0 28px;width:335px;height:150px;border:0;border-radius:20px;background:#d9d9d9;font-size:19px;color:#000}
 .h-h{margin:20px 28px 20px 27px;font-size:19px;line-height:23px;color:#000}
 .h-grid{display:grid;grid-template-columns:159px 159px;gap:19px 17px;padding:0 27px 0 28px}
@@ -181,7 +188,7 @@ body.embedded .sbar{display:none}
 .h-ph p{margin:0;font-size:15px;line-height:20px;color:var(--mute)}
 .hbottom{position:absolute;left:0;bottom:0;width:390px;padding:40px 13px 18px;background:linear-gradient(rgba(255,255,255,0),#fff 38%);display:flex;flex-direction:column;gap:9px;z-index:2}
 .hbottom .inp{margin:0;border:0;width:100%;box-shadow:0 2px 30px rgba(0,0,0,.15);cursor:text;font:inherit}
-#home::before{content:"";position:absolute;left:0;top:0;width:390px;height:48px;background:linear-gradient(#fff 80%,rgba(255,255,255,0));z-index:3;pointer-events:none}
+#home::before{content:"";position:absolute;left:0;top:0;width:390px;height:104px;background:linear-gradient(#fff 80%,rgba(255,255,255,0));z-index:3;pointer-events:none}
 .hbottom .inp span{flex:1;font-size:18px;color:#8d8888}
 .bnav{height:64px;border:1px solid #555;border-radius:37px;background:#fff;display:flex;align-items:stretch;padding:0 12px}
 .bnav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;font-size:13px;color:rgba(0,0,0,.87);padding:0}
@@ -220,16 +227,23 @@ body.embedded .sbar{display:none}
   </section>
 
   <section id="home" aria-label="Agent home">
+    <button class="pfbtn" id="pfBtn" aria-label="Profile"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.6" stroke="#212121" stroke-width="1.8"/><path d="M3.5 17.5c1.2-3 3.6-4.5 6.5-4.5s5.3 1.5 6.5 4.5" stroke="#212121" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    <section id="profile" aria-label="Profile">
+      <button class="rbtn" id="pfClose" aria-label="Close profile" style="position:absolute;left:15px;top:50px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2l12 12M14 2 2 14" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <div class="h-ph" style="padding-top:118px"><h2 class="serif">Profile</h2><div class="blk sm">Account</div><div class="blk sm">KYC &amp; bank</div><div class="blk sm">Settings</div><p>Not in this prototype yet.</p></div>
+    </section>
     <div class="hpage" data-page="chats">
       <button class="h-actions" id="hActions">Actions</button>
       <div class="h-h">Consultations</div>
       <div class="h-grid" id="homeGrid"></div>
       <div class="h-list" id="homeList"></div>
     </div>
-    <div class="hpage" data-page="invest" hidden><div class="h-ph"><h2 class="serif">Invest</h2>
-      <button class="blk" data-go="funds">Mutual funds</button><button class="blk" data-go="fd">Fixed deposit</button><p>Opens those sections of the app.</p></div></div>
-    <div class="hpage" data-page="portfolio" hidden><div class="h-ph"><h2 class="serif">Portfolio</h2><div class="blk">Holdings</div><div class="blk sm">Goals</div><p>Not in this prototype yet.</p></div></div>
-    <div class="hpage" data-page="profile" hidden><div class="h-ph"><h2 class="serif">Profile</h2><div class="blk sm">Account</div><div class="blk sm">Settings</div><p>Not in this prototype yet.</p></div></div>
+    <div class="hpage" data-page="home" hidden></div>
+    <div class="hpage" data-page="invest" hidden>
+      <div class="seg" role="tablist"><button class="on" data-seg="start">Start investing</button><button data-seg="yours">Your investments</button></div>
+      <div class="h-ph" data-segpage="start"><button class="blk" data-go="funds">Mutual funds</button><button class="blk" data-go="fd">Fixed deposit</button><p>Opens those sections of the app.</p></div>
+      <div class="h-ph" data-segpage="yours" hidden><div class="blk">Holdings</div><div class="blk sm">SIPs</div><div class="blk sm">Fixed deposits</div><p>Not in this prototype yet.</p></div>
+    </div>
     <div class="hbottom">
       <button class="inp" id="homeAsk" type="button" aria-label="Ask Decade: start a new chat">
         <svg width="19" height="19" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#8d8888"/></svg>
@@ -237,7 +251,7 @@ body.embedded .sbar{display:none}
         <span class="send" style="flex:none;font-size:0"><svg width="13" height="18" viewBox="0 0 13 18"><path d="M1.78 17.79l10.35-7.07c1.14-.78 1.14-2.68 0-3.46L1.78.19C.84-.45-.3.62.07 1.81L2 8.02l3.71.97L2 9.96.07 16.17c-.37 1.2.76 2.27 1.71 1.62Z" fill="#fff"/></svg></span>
       </button>
       <nav class="bnav" aria-label="Main">
-        <button class="on" data-tab="chats"><i></i>Chats</button><button data-tab="invest"><i></i>Invest</button><button data-tab="portfolio"><i></i>portfolio</button><button data-tab="profile"><i></i>Profile</button>
+        <button data-tab="home"><i></i>Home</button><button class="on" data-tab="chats"><i></i>Chats</button><button data-tab="invest"><i></i>Invest</button>
       </nav>
     </div>
   </section>
@@ -659,6 +673,12 @@ function setTab(tab) {
   document.querySelectorAll('.hpage').forEach((pg) => { pg.hidden = pg.dataset.page !== tab; });
 }
 document.querySelectorAll('.bnav button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b));
+  document.querySelectorAll('[data-segpage]').forEach((pg) => { pg.hidden = pg.dataset.segpage !== b.dataset.seg; });
+}));
+$('#pfBtn').addEventListener('click', () => $('#home').classList.add('pf'));
+$('#pfClose').addEventListener('click', () => $('#home').classList.remove('pf'));
 $('#homeAsk').addEventListener('click', () => { newChat(); input.focus(); enterChat(); });
 $('#hActions').addEventListener('click', () => toast('Actions isn’t in this prototype yet'));
 $('#burger').addEventListener('click', () => goHome());
