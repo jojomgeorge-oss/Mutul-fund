@@ -178,6 +178,34 @@ body.embedded .sbar{display:none}
 .sb-item small{display:block;font-size:13px;line-height:21px;color:rgba(0,0,0,.87);margin-top:5px}
 .sb-item.on b{text-decoration:underline;text-underline-offset:4px}
 .sb-item+.sb-item{margin-top:16px}
+/* landing (Chats tab) */
+#home{position:absolute;inset:0;z-index:50;background:#fff;transition:transform .42s var(--ease),opacity .3s ease;will-change:transform}
+#stage.inchat #home{transform:translate3d(-28%,0,0);opacity:0;pointer-events:none}
+#stage:not(.inchat) .sbar{color:#000}
+.hpage{position:absolute;inset:0;overflow-y:auto;padding:52px 0 190px;scrollbar-width:none}
+.hpage::-webkit-scrollbar{display:none}
+.hpage[hidden]{display:none}
+.h-actions{display:flex;align-items:center;justify-content:center;margin:0 27px 0 28px;width:335px;height:150px;border:0;border-radius:20px;background:#d9d9d9;font-size:19px;color:#000}
+.h-h{margin:20px 28px 20px 27px;font-size:19px;line-height:23px;color:#000}
+.h-grid{display:grid;grid-template-columns:159px 159px;gap:19px 17px;padding:0 27px 0 28px}
+.h-grid .sb-card{width:159px}
+.h-list{padding:42px 0 0}
+.h-list .sb-item{padding:8px 28px 9px}
+.h-list .sb-item+.sb-item{margin-top:28px}
+.h-ph{margin:0 28px;display:flex;flex-direction:column;gap:14px}
+.h-ph h2{margin:0 0 6px;font-size:26px;line-height:31px;color:var(--ink)}
+.h-ph .blk{height:120px;border-radius:20px;background:#d9d9d9;display:flex;align-items:center;justify-content:center;font-size:17px;color:#000;border:0;width:100%}
+.h-ph .blk.sm{height:84px}
+.h-ph p{margin:0;font-size:15px;line-height:20px;color:var(--mute)}
+.hbottom{position:absolute;left:0;bottom:0;width:390px;padding:40px 13px 18px;background:linear-gradient(rgba(255,255,255,0),#fff 38%);display:flex;flex-direction:column;gap:9px;z-index:2}
+.hbottom .inp{margin:0;border:0;width:100%;box-shadow:0 2px 30px rgba(0,0,0,.15);cursor:text;font:inherit}
+#home::before{content:"";position:absolute;left:0;top:0;width:390px;height:48px;background:linear-gradient(#fff 80%,rgba(255,255,255,0));z-index:3;pointer-events:none}
+.hbottom .inp span{flex:1;font-size:18px;color:#8d8888}
+.bnav{height:64px;border:1px solid #555;border-radius:37px;background:#fff;display:flex;align-items:stretch;padding:0 12px}
+.bnav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;font-size:13px;color:rgba(0,0,0,.87);padding:0}
+.bnav button i{width:19px;height:19px;background:#d9d9d9;display:block}
+.bnav button.on i{background:#212121}
+.bnav button.on{font-weight:500}
 #menu{position:absolute;right:15px;top:100px;z-index:72;background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.18);padding:6px;display:none;min-width:170px}
 #menu.on{display:block}
 #menu button{display:block;width:100%;border:0;background:none;text-align:left;padding:11px 14px;border-radius:12px;font-size:15px;color:var(--ink)}
@@ -193,7 +221,7 @@ body.embedded .sbar{display:none}
 
   <div id="tiles"><div class="tscroll" id="tscroll"></div></div>
   <div class="fade l"></div><div class="fade r"></div>
-  <button class="rbtn" id="burger" aria-label="Previous chats"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 8h14M5 12h14M5 16h14" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <button class="rbtn" id="burger" aria-label="Back to home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   <button class="rbtn" id="more" aria-label="More"><svg width="17" height="17" viewBox="0 0 17 17" fill="#212121"><circle cx="2.5" cy="8.5" r="2"/><circle cx="8.5" cy="8.5" r="2"/><circle cx="14.5" cy="8.5" r="2"/></svg></button>
 
   <section id="sheet">
@@ -209,7 +237,29 @@ body.embedded .sbar{display:none}
     </div>
   </section>
 
-  <div id="menu"><button id="mNew">New consultation</button><button id="mOpen">Expand widget tray</button></div>
+  <section id="home" aria-label="Agent home">
+    <div class="hpage" data-page="chats">
+      <button class="h-actions" id="hActions">Actions</button>
+      <div class="h-h">Consultations</div>
+      <div class="h-grid" id="homeGrid"></div>
+      <div class="h-list" id="homeList"></div>
+    </div>
+    <div class="hpage" data-page="invest" hidden><div class="h-ph"><h2 class="serif">Invest</h2>
+      <button class="blk" data-go="funds">Mutual funds</button><button class="blk" data-go="fd">Fixed deposit</button><p>Opens those sections of the app.</p></div></div>
+    <div class="hpage" data-page="portfolio" hidden><div class="h-ph"><h2 class="serif">Portfolio</h2><div class="blk">Holdings</div><div class="blk sm">Goals</div><p>Not in this prototype yet.</p></div></div>
+    <div class="hpage" data-page="profile" hidden><div class="h-ph"><h2 class="serif">Profile</h2><div class="blk sm">Account</div><div class="blk sm">Settings</div><p>Not in this prototype yet.</p></div></div>
+    <div class="hbottom">
+      <button class="inp" id="homeAsk" type="button" aria-label="Ask Decade: start a new chat">
+        <svg width="19" height="19" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#8d8888"/></svg>
+        <span style="text-align:left">Ask Decade</span>
+        <span class="send" style="flex:none;font-size:0"><svg width="13" height="18" viewBox="0 0 13 18"><path d="M1.78 17.79l10.35-7.07c1.14-.78 1.14-2.68 0-3.46L1.78.19C.84-.45-.3.62.07 1.81L2 8.02l3.71.97L2 9.96.07 16.17c-.37 1.2.76 2.27 1.71 1.62Z" fill="#fff"/></svg></span>
+      </button>
+      <nav class="bnav" aria-label="Main">
+        <button class="on" data-tab="chats"><i></i>Chats</button><button data-tab="invest"><i></i>Invest</button><button data-tab="portfolio"><i></i>portfolio</button><button data-tab="profile"><i></i>Profile</button>
+      </nav>
+    </div>
+  </section>
+  <div id="menu"><button id="mSide">Consultations sidebar</button><button id="mNew">New consultation</button><button id="mOpen">Expand widget tray</button></div>
   <div id="dim"></div>
   <nav id="hist" aria-label="Menu and consultations">
     <div class="sb-top">
@@ -418,6 +468,9 @@ chats.push(seedChat('Retirement SIP maths', '13 Nov 2026', [['How much SIP do I 
 chats.push(seedChat('FD vs debt fund', '9 Nov 2026', [['Compare an FD with a debt fund', { kind: 'table', text: true, action: true }, '']]));
 chats.push(seedChat('Emergency fund plan', '2 Nov 2026', [['Help me plan an emergency fund', { kind: 'list', text: true, action: false }, '']]));
 chats.push(seedChat('Why did markets fall?', '28 Oct 2026', [['Why did markets fall this week?', { kind: null, text: true, action: false }, '']]));
+chats.push(seedChat('Tax saving with ELSS', '21 Oct 2026', [['Should I use ELSS to save tax?', { kind: null, text: true, action: true }, '']]));
+chats.push(seedChat('Gold vs FD', '14 Oct 2026', [['Is gold better than an FD right now?', { kind: 'bars', text: true, action: false }, '']]));
+chats.push(seedChat('Home loan prepayment', '3 Oct 2026', [['Should I prepay my home loan or start a SIP?', { kind: 'calc', text: true, action: true }, '']]));
 const TODAY = (() => { const d = new Date(), m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']; return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`; })();
 function newChat() { cur = { id: 'c' + (++uid), title: 'New consultation', date: TODAY, msgs: [] }; renderAll(); }
 
@@ -459,7 +512,7 @@ function setTray(on) {
   if (on === hasTray) return; hasTray = on;
   stage.classList.toggle('notray', !on);
   if (!on && typeof setOpen === 'function' && open) setOpen(false);
-  if (EMB) try { parent.postMessage({ decade: 'agentTop', dark: on }, '*'); } catch (_) {}
+  if (stage.classList.contains('inchat')) postTop(on);
 }
 function centreTile(t, smooth = true) { const ts = $('#tscroll'); ts.scrollTo({ left: t.offsetLeft - (ts.clientWidth - t.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'auto' }); }
 function setActive(id, force) {
@@ -529,7 +582,7 @@ stage.addEventListener('click', (e) => {
   if (t.dataset.sugg) { if (!busy) send(t.dataset.sugg); return; }
   if (t.dataset.tile) { const w = widgets().find((x) => x.id === t.dataset.tile); if (w && w.loading) { toast('Still generating…'); return; } lockSync = Date.now() + 900; setActive(t.dataset.tile, true); goTo(t.dataset.tile); return; }
   
-  if (t.dataset.chat) { const c = [cur, ...chats].find((x) => x.id === t.dataset.chat); if (c) { cur = c; setHist(false); renderAll(); } return; }
+  if (t.dataset.chat) { const c = [cur, ...chats].find((x) => x.id === t.dataset.chat); if (c) { cur = c; setHist(false); renderAll(); enterChat(); } return; }
   const act = t.dataset.act;
   if (act === 'pri') {
     const card = t.closest('[data-m]'); const m = cur.msgs.find((x) => x.id === card.dataset.m); if (!m) return;
@@ -626,10 +679,33 @@ addEventListener('pointerup', up); addEventListener('pointercancel', up);
 $('#grab').addEventListener('click', () => { if (!suppress) setOpen(!open); });
 
 /* ---------- drawer + menu ---------- */
-function setHist(v) { if (v) renderHist(); stage.classList.toggle('hopen', v); if (EMB) try { parent.postMessage({ decade: 'agentTop', dark: !v && hasTray }, '*'); } catch (_) {} }
-$('#burger').addEventListener('click', () => setHist(true));
+function setHist(v) { if (v) renderHist(); stage.classList.toggle('hopen', v); postTop(!v && hasTray && stage.classList.contains('inchat')); }
+/* ---------- home / landing ---------- */
+function renderHome() {
+  const all = chats.filter((c) => c.msgs.length);
+  const card = (c) => `<button class="sb-card" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${c.date}</small></button>`;
+  const item = (c) => `<button class="sb-item" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${c.date}</small></button>`;
+  $('#homeGrid').innerHTML = all.slice(0, 4).map(card).join('');
+  $('#homeList').innerHTML = all.slice(4).map(item).join('');
+}
+function postTop(dark) { if (EMB) try { parent.postMessage({ decade: 'agentTop', dark }, '*'); } catch (_) {} }
+function goHome() {
+  if (open) setOpen(false);
+  $('#menu').classList.remove('on'); input.blur();
+  stage.classList.remove('inchat'); renderHome(); postTop(false);
+}
+function enterChat() { stage.classList.add('inchat'); postTop(hasTray); }
+function setTab(tab) {
+  document.querySelectorAll('.bnav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+  document.querySelectorAll('.hpage').forEach((pg) => { pg.hidden = pg.dataset.page !== tab; });
+}
+document.querySelectorAll('.bnav button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+$('#homeAsk').addEventListener('click', () => { newChat(); input.focus(); enterChat(); });
+$('#hActions').addEventListener('click', () => toast('Actions isn’t in this prototype yet'));
+$('#burger').addEventListener('click', () => goHome());
+$('#mSide').addEventListener('click', () => { $('#menu').classList.remove('on'); setHist(true); });
 $('#dim').addEventListener('click', () => setHist(false));
-$('#hNew').addEventListener('click', () => { setHist(false); if (cur.msgs.length) newChat(); });
+$('#hNew').addEventListener('click', () => { setHist(false); if (cur.msgs.length) newChat(); enterChat(); });
 document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
   const to = b.dataset.go; setHist(false);
   if (to === 'portfolio') { toast('Portfolio isn’t in this prototype yet'); return; }
@@ -640,8 +716,8 @@ $('#more').addEventListener('click', () => { $('#mOpen').style.display = hasTray
 $('#mNew').addEventListener('click', () => { $('#menu').classList.remove('on'); if (cur.msgs.length) newChat(); toast('New consultation'); });
 $('#mOpen').addEventListener('click', () => { $('#menu').classList.remove('on'); setOpen(!open); });
 
-newChat();
-window.__agent = { send, setOpen, setHist, get cur() { return cur; } };
+newChat(); renderHome();
+window.__agent = { send, setOpen, setHist, goHome, get cur() { return cur; } };
 })();
 </script>
 </body>
