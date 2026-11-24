@@ -117,17 +117,21 @@ body.embedded .sbar{display:none}
 .chk button.on span{text-decoration:line-through;color:var(--grey)}
 .prog{height:4px;border-radius:2px;background:#eee;margin:8px 0 6px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ink);transition:width .3s}
 
-/* action card */
-.act{background:#fff;border:1px solid var(--line);border-radius:23px;box-shadow:0 4px 100px rgba(0,0,0,.05)}
+/* action card: outline only, nothing filled */
+.act{background:transparent;border:1.5px solid var(--ink);border-radius:23px}
 .act .ah{display:flex;align-items:center;gap:11px;padding:14px 17px 12px}
 .act .ah b{font-size:15px;color:var(--ink)}
-.act .ab{border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:16px 16px 18px 21px}
+.act .logo{background:transparent;border:1.2px solid var(--ink)}
+.act .ab{border-top:1px solid var(--ink);display:flex;align-items:center;justify-content:space-between;padding:16px 16px 18px 21px}
 .act small{display:block;font-size:13px;color:var(--mute);margin-bottom:3px}
 .act .val b{font-size:19px;font-weight:500;color:var(--ink)}.act .val span{font-size:15px;color:var(--ink);margin-left:1px}
-.inv{height:38px;min-width:107px;padding:0 18px;border:0;border-radius:33px;background:var(--ink);color:#fff;font-size:15px;font-weight:500}
-.act.done .inv{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
-.act.sk{border-style:dashed;box-shadow:none}
-
+.inv{height:38px;min-width:107px;padding:0 18px;border:1.5px solid var(--ink);border-radius:33px;background:transparent;color:var(--ink);font-size:15px;font-weight:500}
+.inv:active{background:rgba(33,33,33,.06)}
+.act.done{border-style:dashed}
+.act.done .inv{border-style:dashed}
+.act.sk{border:1.5px dashed #c9c6c4}
+.act.sk .ab{border-top-color:#e6e4e2}
+.act.sk .logo{border-color:#c9c6c4}
 /* composer */
 .cmp{position:absolute;left:0;bottom:0;width:390px;padding:0 0 22px;z-index:4;background:linear-gradient(rgba(252,252,250,0),var(--paper) 30%)}
 .sugg{display:flex;gap:6px;overflow-x:auto;padding:14px 13px 10px;scrollbar-width:none}
@@ -367,7 +371,7 @@ function widgetHTML(w, where) {
 }
 function actionHTML(m) {
   const a = ACTS[m.action.key], d = m.action.done;
-  return `<div class="act${d ? ' done' : ''}" data-m="${m.id}"><div class="ah"><span class="logo sm hatch"></span><b class="serif">${esc(a[0])}</b></div>
+  return `<div class="act${d ? ' done' : ''}" data-m="${m.id}"><div class="ah"><span class="logo sm"></span><b class="serif">${esc(a[0])}</b></div>
     <div class="ab"><div><small>${esc(a[1])}</small><div class="val"><b>${esc(a[2])}</b><span>${esc(a[3])}</span></div></div><button class="inv" data-act="pri">${d ? 'Done ✓' : esc(a[4])}</button></div></div>`;
 }
 function tileHTML(w, on) {
@@ -403,7 +407,7 @@ function renderChat() {
       let s = `<div class="chip">${DOC}<span>${esc(m.status)}</span>${CHEV}</div>`;
       if (m.widget) s += widgetHTML(m.widget, 'chat');
       if (m.text) s += `<div class="desc sk"><i style="width:94%"></i><i style="width:86%"></i><i style="width:60%"></i></div>`;
-      if (m.action) s += `<div class="act sk"><div class="ah"><span class="logo sm hatch"></span><div class="desc sk" style="flex:1"><i style="width:60%"></i></div></div><div class="ab"><div class="desc sk" style="flex:1"><i style="width:50%"></i></div><button class="inv" disabled style="opacity:.25">&nbsp;</button></div></div>`;
+      if (m.action) s += `<div class="act sk"><div class="ah"><span class="logo sm"></span><div class="desc sk" style="flex:1"><i style="width:60%"></i></div></div><div class="ab"><div class="desc sk" style="flex:1"><i style="width:50%"></i></div><button class="inv" disabled style="border-color:#d8d6d4">&nbsp;</button></div></div>`;
       return `<div class="a" data-m="${m.id}">${s}</div>`;
     }
     let s = '';
