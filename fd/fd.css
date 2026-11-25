@@ -686,3 +686,10 @@ small.pm { font-size: 13px; font-weight: 400; color: var(--sub); margin-left: 2p
 .tflip .bk { transform: rotateY(180deg); }
 .tflip .bk b { position: absolute; left: 27px; top: 44px; width: 175px; font-weight: 500; font-size: 23px; line-height: 29px; color: var(--ink); }
 .tile { text-align: left; }
+
+/* FD details: tap the deposit card to turn it over to a quote */
+.dslot { position: relative; perspective: 1200px; cursor: pointer; transition: height .55s cubic-bezier(.3,.7,.25,1); }
+.din { position: relative; height: 100%; transform-style: preserve-3d; transition: transform .62s cubic-bezier(.3,.7,.25,1.06); }
+.dslot.flip .din { transform: rotateY(180deg); }
+.din > .dep { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.dq { position: absolute; left: 0; top: 0; width: 322px; height: 284px; border-radius: 20px; background-size: cover; background-position: center; background-color: #c9cfe0; box-shadow: 0 4px 100px 12px rgba(0,0,0,.05); transform: rotateY(180deg); backface-visibility: hidden; -webkit-backface-visibility: hidden; }

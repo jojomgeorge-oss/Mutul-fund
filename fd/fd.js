@@ -396,7 +396,7 @@ function detailsPage(d) {
     <div class="scroll">
       <div class="dband">
         <svg class="ovals" viewBox="0 0 429 512" fill="none" stroke="#d2cecc" stroke-width=".45" aria-hidden="true"><ellipse cx="86" cy="128" rx="85.8" ry="127.8"/><ellipse cx="86" cy="256" rx="85.8" ry="127.8"/><ellipse cx="86" cy="384" rx="85.8" ry="127.8"/><ellipse cx="172" cy="128" rx="85.8" ry="127.8"/><ellipse cx="172" cy="256" rx="85.8" ry="127.8"/><ellipse cx="172" cy="384" rx="85.8" ry="127.8"/><ellipse cx="258" cy="128" rx="85.8" ry="127.8"/><ellipse cx="258" cy="256" rx="85.8" ry="127.8"/><ellipse cx="258" cy="384" rx="85.8" ry="127.8"/><ellipse cx="343" cy="128" rx="85.8" ry="127.8"/><ellipse cx="343" cy="256" rx="85.8" ry="127.8"/><ellipse cx="343" cy="384" rx="85.8" ry="127.8"/></svg>
-        <div class="dslot">${depCard(d, 0).replace('data-a="depopen"', '')}</div>
+        <div class="dslot" data-a="dflip"><div class="din">${depCard(d, 0).replace('data-a="depopen"', '')}<div class="dq" style="background-image:url(img/qcard${1 + Math.floor(Math.random() * 5)}.jpg)" aria-hidden="true"></div></div></div>
         <button class="again press" data-a="${{ pending: 'dvkyc', matured: 'withdraw' }[d.s] || 'again'}">${{ pending: 'Complete VKYC', matured: 'Withdraw' }[d.s] || 'Invest again'}${I.chevs('#fff')}</button>
       </div>
       <div class="dtable rv" data-st>
@@ -850,7 +850,7 @@ function tileCard(el) {
   if (busy || sheet) return;
   // each card's back is one of five quote cards, shuffled every time the sheet opens
   const q = [1, 2, 3, 4, 5].sort(() => Math.random() - .5);
-  const i = +el.dataset.i, faces = TILES.map(([c, t], j) => `<div class="tcard" data-a="tturn" data-j="${j}"><div class="tin"><div class="tf" style="background-image:url(img/${c}.jpg)"><b>${t}</b></div><div class="tq" style="background-image:url(img/quote${q[j]}.jpg)"></div></div></div>`).join('');
+  const i = +el.dataset.i, faces = TILES.map(([c, t], j) => `<div class="tcard" data-j="${j}"><div class="tin"><div class="tf" style="background-image:url(img/${c}.jpg)"><b>${t}</b></div><div class="tq" style="background-image:url(img/quote${q[j]}.jpg)"></div></div></div>`).join('');
   const s = openSheet(`<div class="tsheet"><div class="tstack"><i class="tpeek"></i>${faces}</div>
       <div class="tdots">${TILES.map((_, j) => `<button data-a="tdot" data-j="${j}" aria-label="Card ${j + 1}"></button>`).join('')}</div>
       <p class="tdesc" id="tdesc"></p></div>`, { cls: 'tsh' });
@@ -1629,7 +1629,11 @@ const ACT = {
   key(el) { key(el.dataset.k); },
   tilecard(el) { tileCard(el); },
   tdot(el) { tileShow(+el.dataset.j); },
-  tturn(el) { if (sheet && sheet.moved) { sheet.moved = false; return; } el.classList.toggle('flip'); },
+  dflip(el) { // the deposit card turns over to a quote, and back
+    const f = !el.classList.contains('flip'), dep = $('.dep', el), h = dep.offsetHeight;
+    el.style.height = (f ? h : 284) + 'px'; el.offsetHeight; el.classList.toggle('flip', f); el.style.height = (f ? 284 : h) + 'px';
+    clearTimeout(el._t); el._t = setTimeout(() => { if (!f) el.style.height = ''; }, 650);
+  },
   qamt(el) { setAmt(+el.dataset.v); A(el, [{ transform: 'scale(.92)' }, { transform: 'none' }], BOUNCE); },
   cta(el) {
     if (busy) return;
