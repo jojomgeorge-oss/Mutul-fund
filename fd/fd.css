@@ -663,3 +663,26 @@ small.pm { font-size: 13px; font-weight: 400; color: var(--sub); margin-left: 2p
 .prow2 .pick { position: absolute; right: 17px; top: 50%; width: 17px; height: 17px; margin-top: -8.5px; }
 .prow2 .pick svg { position: absolute; inset: 0; transition: opacity .2s; }
 .prow2 .pick .on { opacity: 0; } .prow2.on .pick .on { opacity: 1; } .prow2.on .pick .off { opacity: 0; }
+/* about-the-bank card sheet — Figma 1275:8097 */
+.tsh .handle { width: 41px; height: 7px; border-radius: 23px; background: #fff; margin: 0 auto 5px; }
+.tsheet { position: relative; margin: 0 11px 25px; height: 361px; background: #fff; border-radius: 27px; box-shadow: 0 4px 50px rgba(0,0,0,.05); touch-action: none; }
+.tstack { position: absolute; left: 21px; top: 21px; width: 326px; height: 192px; }
+.tpeek { position: absolute; left: 19px; top: 0; width: 288px; height: 192px; border-radius: 15px; background: rgba(0,0,0,.1); transition: opacity .3s; }
+.tstack { perspective: 1100px; }
+.tcard { position: absolute; left: 0; top: 0; width: 326px; height: 175px; opacity: 0; pointer-events: none; cursor: pointer; }
+.tcard.on { opacity: 1; pointer-events: auto; transition: transform .25s; }
+.tin { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .62s cubic-bezier(.3,.7,.25,1.08); }
+.tcard.flip .tin { transform: rotateY(180deg); }
+.tin > div { position: absolute; inset: 0; border-radius: 15px; overflow: hidden; background-color: #ffd77c; background-size: cover; background-position: center; box-shadow: 0 4px 100px 12px rgba(0,0,0,.05); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.tin .tq { transform: rotateY(180deg); background-color: #c9cfe0; }
+.tcard b { position: absolute; left: 27px; top: 44px; width: 175px; font-weight: 500; font-size: 23px; line-height: 29px; color: var(--ink); }
+.tdots { position: absolute; left: 330px; top: 86px; width: 7px; display: flex; flex-direction: column; gap: 3px; }
+.tdots button { width: 7px; height: 7px; padding: 0; border-radius: 16px; background: #8c8886; border: 1px solid #8d8888; transition: height .35s cubic-bezier(.2,1.3,.35,1), background-color .3s, border-color .3s; }
+.tdots button.on { height: 15px; background: #00a800; border-color: #008f00; }
+.tdesc { position: absolute; left: 21px; top: 238px; width: 320px; margin: 0; font-family: 'DM Sans', var(--font-sans, sans-serif); font-optical-sizing: auto; font-size: 17px; line-height: 23px; color: #000; }
+.tflip { position: absolute; z-index: 60; transform-style: preserve-3d; transform-origin: 50% 50%; pointer-events: none; }
+.tflip > div { position: absolute; inset: 0; border-radius: 15px; backface-visibility: hidden; -webkit-backface-visibility: hidden; background-size: cover; background-position: center; }
+.tflip .fr { display: flex; align-items: flex-end; padding: 0 21px 21px; font-size: 17px; line-height: 23px; font-weight: 500; color: #000; border-radius: 17px; }
+.tflip .bk { transform: rotateY(180deg); }
+.tflip .bk b { position: absolute; left: 27px; top: 44px; width: 175px; font-weight: 500; font-size: 23px; line-height: 29px; color: var(--ink); }
+.tile { text-align: left; }

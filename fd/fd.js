@@ -818,7 +818,7 @@ function closeSheet(o = {}) {
 function dragSheet(el) {
   let d = null;
   el.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('button, input, .fbody, [data-a]:not(.ptop)')) return;
+    if (e.target.closest('button, input, .fbody, .tsheet, [data-a]:not(.ptop)')) return;
     d = { y0: e.clientY, t0: performance.now(), dy: 0, id: e.pointerId };
   });
   el.addEventListener('pointermove', (e) => {
@@ -839,6 +839,62 @@ function dragSheet(el) {
   el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
 }
 
+/* about-the-bank tiles: tap one and it flips into a card you can scroll through */
+const TILES = [
+  ['btile1', 'Partial withdrawals available', 'Take out part of your deposit when you need it. The rest stays in the FD and keeps earning the same rate.'],
+  ['btile2', 'No withdrawal penalty for 1Y tenure', 'Close a 1 year FD early and you still get the full interest for the time it ran, with no 1% cut on the rate.'],
+  ['btile3', 'Withdraw instantly in 7 days', 'After the first 7 days, money you withdraw reaches your savings account in minutes, even on weekends.'],
+  ['btile4', 'Flexible interest payouts', 'Get interest monthly, quarterly or at maturity. Monthly suits regular expenses; at maturity grows the most.'],
+];
+function tileCard(el) {
+  if (busy || sheet) return;
+  // each card's back is one of five quote cards, shuffled every time the sheet opens
+  const q = [1, 2, 3, 4, 5].sort(() => Math.random() - .5);
+  const i = +el.dataset.i, faces = TILES.map(([c, t], j) => `<div class="tcard" data-a="tturn" data-j="${j}"><div class="tin"><div class="tf" style="background-image:url(img/${c}.jpg)"><b>${t}</b></div><div class="tq" style="background-image:url(img/quote${q[j]}.jpg)"></div></div></div>`).join('');
+  const s = openSheet(`<div class="tsheet"><div class="tstack"><i class="tpeek"></i>${faces}</div>
+      <div class="tdots">${TILES.map((_, j) => `<button data-a="tdot" data-j="${j}" aria-label="Card ${j + 1}"></button>`).join('')}</div>
+      <p class="tdesc" id="tdesc"></p></div>`, { cls: 'tsh' });
+  if (!s) return;
+  s.ti = i; tileShow(i, 0);
+  // the tapped tile flips over and lands where the card sits in the sheet
+  const st = stage.getBoundingClientRect(), a = el.getBoundingClientRect(), card = $(`.tcard[data-j="${i}"]`, s.el);
+  card.style.opacity = 0; el.style.visibility = 'hidden';
+  setTimeout(() => {
+    const b = card.getBoundingClientRect();
+    const f = document.createElement('div'); f.className = 'tflip';
+    f.innerHTML = `<div class="fr" style="background-image:${el.style.backgroundImage}">${el.innerHTML}</div><div class="bk" style="background-image:url(img/${TILES[i][0]}.jpg)"><b>${TILES[i][1]}</b></div>`;
+    const x0 = (a.left - st.left) / K, y0 = (a.top - st.top) / K, x1 = (b.left - st.left) / K, y1 = (b.top - st.top) / K;
+    Object.assign(f.style, { left: x1 + 'px', top: y1 + 'px', width: b.width / K + 'px', height: b.height / K + 'px' });
+    layer.appendChild(f);
+    const sx = a.width / b.width, sy = a.height / b.height;
+    A(f, [{ transform: `translate(${x0 - x1}px,${y0 - y1}px) scale(${sx},${sy}) rotateY(0deg)` }, { offset: .5, transform: `translate(${(x0 - x1) * .4}px,${(y0 - y1) * .4 - 24}px) scale(${(sx + 1) / 2},${(sy + 1) / 2}) rotateY(95deg)` }, { transform: 'rotateY(180deg)' }], { e: 'cubic-bezier(.3,.7,.25,1)', d: 640 })
+      .then(() => { card.style.opacity = ''; f.remove(); el.style.visibility = ''; });
+  }, 30);
+  // scroll (wheel or vertical swipe) moves through the cards
+  const area = $('.tsheet', s.el); let y0 = null, t0 = 0, moved = false;
+  area.addEventListener('wheel', (e) => { e.preventDefault(); if (Math.abs(e.deltaY) < 8 || performance.now() - t0 < 450) return; t0 = performance.now(); tileShow(sheet.ti + (e.deltaY > 0 ? 1 : -1)); }, { passive: false });
+  area.addEventListener('pointerdown', (e) => { y0 = e.clientY; moved = false; s.moved = false; });
+  area.addEventListener('pointermove', (e) => { if (y0 === null) return; const dy = (e.clientY - y0) / K; if (Math.abs(dy) > 8) moved = s.moved = true; const c = $('.tcard.on', area); if (c) c.style.transform = `translateY(${Math.max(-60, Math.min(60, dy * .5))}px)`; });
+  const end = (e) => { if (y0 === null) return; const dy = (e.clientY - y0) / K; y0 = null; const c = $('.tcard.on', area); if (c) c.style.transform = ''; if (moved && Math.abs(dy) > 40) tileShow(sheet.ti + (dy < 0 ? 1 : -1)); };
+  area.addEventListener('pointerup', end); area.addEventListener('pointercancel', end);
+}
+function tileShow(j, anim = 1) {
+  const s = sheet; if (!s || s.ti === undefined) return;
+  const n = TILES.length;
+  if (j < 0 || j >= n) { const c = $('.tcard.on', s.el); if (c && anim) A(c, [{ transform: 'none' }, { transform: `translateY(${j < 0 ? 10 : -10}px)` }, { transform: 'none' }], { e: 'ease-out', d: 300 }); return; }
+  const dir = j > s.ti ? 1 : -1, prev = $('.tcard.on', s.el), next = $(`.tcard[data-j="${j}"]`, s.el);
+  $$('.tcard', s.el).forEach((c) => { c.classList.toggle('on', c === next); if (c !== next) c.classList.remove('flip'); });
+  $$('.tdots button', s.el).forEach((d, k) => d.classList.toggle('on', k === j));
+  $('.tpeek', s.el).style.opacity = j === n - 1 ? 0 : 1;
+  const d = $('#tdesc', s.el);
+  if (anim && prev && prev !== next) {
+    // the current card lifts away and the next one rises from the stack beneath
+    A(prev, [{ transform: 'none', opacity: 1 }, { transform: dir > 0 ? 'translateY(-38px) scale(1.02)' : 'translateY(22px) scale(.88)', opacity: 0 }], { e: 'cubic-bezier(.4,0,.2,1)', d: 340 });
+    A(next, [{ transform: dir > 0 ? 'translateY(17px) scale(.885)' : 'translateY(-38px) scale(1.02)', opacity: dir > 0 ? .6 : 0 }, { transform: 'none', opacity: 1 }], SOFT);
+    A(d, [{ opacity: 1 }, { opacity: 0, transform: `translateY(${-8 * dir}px)` }], QUICK).then(() => { d.textContent = TILES[j][2]; A(d, [{ opacity: 0, transform: `translateY(${8 * dir}px)` }, { opacity: 1, transform: 'none' }], SOFT); });
+  } else d.textContent = TILES[j][2];
+  s.ti = j;
+}
 /* what this particular deposit offers: withdrawal, payouts and safety */
 function planFeats(plan) {
   if (plan.rd) return `<div>${I.bolt}Save a fixed amount every month</div><div>${I.sun}Start from ₹500 a month</div>
@@ -899,7 +955,7 @@ function bankPage(k) {
   const b = B[k];
   const plans = [['5 years', 5], ['4y 6m 11d', 4.53], ['3y 4m', 3.33], ['1 year', 1]].map(([t, y]) => [t, y, fdRate(k, y)]).map(([t, y, r]) => `<button class="dplan press" data-a="dplan" data-t="${t}" data-y="${y}" data-r="${r}">${I.bars('#c43960', 39, 15)}<span>${t}</span><b>${r.toFixed(2)}%</b>${I.chev('#9a9a9a')}</button>`).join('');
   const bars = [['6.30%', 78, '#d9dee6', 60], ['7.56%', 121, '#d9dee6', 160], [pct(maxRate(k)), Math.round(176 * maxRate(k) / 8.32), '#7ce469', 265]].map(([v, h, c, x]) => `<div class="bar" style="left:${x}px"><span>${v}</span><i style="height:${h}px;background:${c}"></i></div>`).join('');
-  const tiles = [['btile1', 'Partial<br>withdrawals<br>available'], ['btile2', 'No withdrawal<br>penalty for 1Y<br>tenure'], ['btile3', 'Withdraw<br>instantly in 7<br>days'], ['btile4', 'Flexible<br>interest<br>payouts']].map(([c, t]) => `<div class="tile" style="background-image:url(img/${c}.jpg)">${t}</div>`).join('');
+  const tiles = [['btile1', 'Partial<br>withdrawals<br>available'], ['btile2', 'No withdrawal<br>penalty for 1Y<br>tenure'], ['btile3', 'Withdraw<br>instantly in 7<br>days'], ['btile4', 'Flexible<br>interest<br>payouts']].map(([c, t], i) => `<button class="tile press" data-a="tilecard" data-i="${i}" style="background-image:url(img/${c}.jpg)">${t}</button>`).join('');
   const p = mkPage('bank', `
     <div class="scroll">
       <div style="height:137px"></div>
@@ -1571,6 +1627,9 @@ const ACT = {
     goStep('amount', { morphFrom: from, icon });
   },
   key(el) { key(el.dataset.k); },
+  tilecard(el) { tileCard(el); },
+  tdot(el) { tileShow(+el.dataset.j); },
+  tturn(el) { if (sheet && sheet.moved) { sheet.moved = false; return; } el.classList.toggle('flip'); },
   qamt(el) { setAmt(+el.dataset.v); A(el, [{ transform: 'scale(.92)' }, { transform: 'none' }], BOUNCE); },
   cta(el) {
     if (busy) return;
