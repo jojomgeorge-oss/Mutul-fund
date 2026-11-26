@@ -297,6 +297,12 @@ chat.addEventListener('wheel', (e) => {
   else if (e.deltaY > 4 && P > 0) { e.preventDefault(); if (now - wl > 500) { wl = now; animateTo(0); } }
 }, { passive: false });
 rail.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); rail.scrollLeft += e.deltaY; } }, { passive: false });
+// scrolling the chat yourself puts an expanded drawer back to its default size
+let userScroll = 0;
+const markUser = () => { userScroll = performance.now(); };
+chat.addEventListener('touchmove', markUser, { passive: true });
+chat.addEventListener('wheel', markUser, { passive: true });
+chat.addEventListener('scroll', () => { if (P > 0.02 && !(drag && drag.on) && performance.now() - userScroll < 250) animateTo(0); }, { passive: true });
 
 /* ---------- widgets ---------- */
 function series(seed, n, drift) { // deterministic, bumpy NAV path
@@ -445,6 +451,7 @@ const nowT = () => { const d = new Date(); return d.getHours() + ':' + String(d.
 function toBottom() { chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' }); }
 async function ask(text) {
   text = text.trim(); if (!text || busy) return; busy = true;
+  if (P > 0.02) animateTo(0); // a new question puts the drawer back to its default size
   const h = $('#hello'); if (h) h.remove();
   q.value = ''; send.classList.remove('go'); q.blur();
   const u = document.createElement('div');
