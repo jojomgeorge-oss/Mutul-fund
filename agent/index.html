@@ -1,273 +1,164 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#4d1c14">
 <title>Decade · Agent experience</title>
-<meta name="theme-color" content="#212121">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500&family=Inter:wght@400;500&display=swap">
 <style>
-@font-face{font-family:"GT Walsheim";src:url("../fonts/GT-Walsheim-Regular-Trial.otf") format("opentype");font-weight:400;font-display:swap}
-@font-face{font-family:"GT Walsheim";src:url("../fonts/GT-Walsheim-Medium-Trial.otf") format("opentype");font-weight:500;font-display:swap}
 @font-face{font-family:"Reckless";src:url("../fonts/RecklessStandardS-TRIAL-Medium.woff2") format("woff2");font-weight:500;font-display:swap}
-:root{--ink:#212121;--paper:#fcfcfa;--line:#dfdcda;--mute:#645f5f;--grey:#9e9999;--soft:#f5f5f2;--sans:"GT Walsheim","DM Sans",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;--serif:"Reckless","Source Serif 4",Georgia,serif;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:#7a7a7a;overscroll-behavior:none}
-body.embedded{background:#212121}
-button,input{font:inherit;color:inherit}
-button{cursor:pointer}
-#stage{position:absolute;left:0;top:0;width:390px;height:849px;overflow:hidden;transform-origin:0 0;background:var(--ink);font-family:var(--sans);color:#000;contain:strict;-webkit-user-select:none;user-select:none}
-.serif{font-family:var(--serif);font-weight:500}
-.hatch{background:var(--soft) repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0 1px,transparent 1px 6px)}
-.sbar{position:absolute;left:0;top:0;width:390px;height:44px;z-index:60;pointer-events:none;color:#fff}
-.sbar span{position:absolute;left:32px;top:13px;font-size:16px;font-weight:600;font-family:-apple-system,system-ui,sans-serif}
-.sbar i{position:absolute;right:24px;top:17px;width:62px;height:11px;border-radius:3px;background:linear-gradient(90deg,currentColor 0 18px,transparent 18px 24px,currentColor 24px 38px,transparent 38px 44px,currentColor 44px)}
-.sbar{transition:color .4s}.notray .sbar{color:#000}
-body.embedded .sbar{display:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#4d1c14;font-family:Outfit,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+#stage{position:absolute;left:0;top:0;width:390px;height:849px;overflow:hidden;background:#4d1c14;transform-origin:0 0}
+.press{transition:transform .18s cubic-bezier(.3,.7,.3,1)}.press:active{transform:scale(.94)}
 
-/* top: round buttons + widget tiles */
-.rbtn{position:absolute;top:50px;width:52px;height:43px;border:0;border-radius:27px;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.08);display:inline-flex;align-items:center;justify-content:center;padding:0;z-index:30;transition:opacity .3s}
-#burger{left:15px}#more{left:323px}
-#tiles{position:absolute;left:0;top:38px;width:390px;height:68px;z-index:20;transform-origin:195px 34px;will-change:transform}
-.tscroll{display:flex;gap:6.6px;align-items:center;height:100%;overflow-x:auto;scrollbar-width:none;padding:0 153px;scroll-snap-type:x mandatory;touch-action:pan-x}
-.tscroll::-webkit-scrollbar{display:none}
-.tile{flex:none;width:84px;height:50px;border-radius:9px;border:0;background:var(--paper);padding:3px 6px 0;position:relative;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center}
-.tile small{font-size:7px;letter-spacing:.06em;color:#787373;line-height:9px}
-.tile svg{margin-top:2px}
-.tile.on::after{content:"";position:absolute;inset:-3px;border:1.2px solid #fff;border-radius:11.5px}
-.tile.load{background:linear-gradient(100deg,#f4f4f4 20%,#c9c9c9 50%,#f4f4f4 80%);background-size:250% 100%;animation:sh 1.3s linear infinite;justify-content:center}
-.tile.load small{color:#6b6b6b}
-.tile.empty{background:none;border:1px dashed rgba(255,255,255,.35)}
-.tile.new{animation:pop .5s var(--ease)}
-@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
-.fade{position:absolute;top:0;height:117px;width:150px;pointer-events:none;z-index:25}
-.fade.l{left:0;background:linear-gradient(90deg,var(--ink) 38%,rgba(33,33,33,0))}
-.fade.r{right:0;background:linear-gradient(270deg,var(--ink) 38%,rgba(33,33,33,0))}
+/* status bar (the parent prototype draws its own when embedded) */
+.sb{position:absolute;left:0;top:0;width:390px;height:44px;z-index:9;pointer-events:none;color:#fff}
+.sb b{position:absolute;left:33px;top:14px;font:600 15px/18px -apple-system,system-ui,sans-serif;letter-spacing:-.2px}
+.sb svg{position:absolute;right:15px;top:17px}
+.embedded .sb{display:none}
 
-/* sheet */
-#sheet{position:absolute;left:0;top:117px;width:390px;height:732px;background:var(--paper);border-radius:23px 23px 0 0;z-index:15;will-change:transform;transition:transform .42s var(--ease),top .55s var(--ease),height .55s var(--ease),border-radius .55s}
-.notray #sheet{top:0;height:849px;border-radius:0}
-.notray .grab{opacity:0;pointer-events:none}
-.notray #tiles,.notray .fade{opacity:0;pointer-events:none}
-.fade{transition:opacity .4s}
-.notray #chat{top:105px}
-.grab{position:absolute;left:0;top:0;width:390px;height:34px;touch-action:none;display:flex;justify-content:center;padding-top:9px;cursor:grab;z-index:3;transition:opacity .4s}
-.grab::before{content:"";width:45px;height:9px;border-radius:16px;background:#d9d9d9}
-#chat{position:absolute;left:0;top:30px;width:390px;bottom:0;overflow-y:auto;transition:top .55s var(--ease);padding:20px 23px 160px;display:flex;flex-direction:column;gap:16px;scrollbar-width:none}
+/* top drawer */
+.hbtn{position:absolute;top:54px;z-index:6;width:52px;height:43px;border-radius:27px;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center}
+#back{left:15px}#more{left:324px}
+#title{position:absolute;left:0;right:0;top:54px;height:43px;z-index:5;display:flex;align-items:center;justify-content:center;gap:7px;color:#fff;font:500 19px/23px Outfit,sans-serif;pointer-events:none;transition:opacity .35s ease}
+#title .t{font-family:"Reckless",Georgia,serif;font-weight:500;font-size:19px}
+#title .t2{position:absolute;left:0;right:0;top:0;height:43px;display:flex;align-items:center;justify-content:center;opacity:0}
+.fade{position:absolute;top:0;width:92px;height:220px;z-index:4;pointer-events:none}
+.fade.l{left:0;background:linear-gradient(90deg,#4d1c14 50%,rgba(77,28,20,0))}
+.fade.r{right:0;background:linear-gradient(270deg,#4d1c14 50%,rgba(77,28,20,0))}
+#rail{position:absolute;left:0;width:390px;z-index:3;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#rail::-webkit-scrollbar{display:none}
+#rail .in{display:flex;align-items:flex-start;justify-content:center;min-width:100%;width:max-content;padding:0 75px}
+.th{position:relative;flex:none;border-radius:15px;background:rgba(255,255,255,.4);overflow:hidden;cursor:pointer}
+.th .lb{position:absolute;left:0;right:0;top:9px;text-align:center;color:#f7f2f2;font:500 17px/23px Outfit,sans-serif;white-space:nowrap}
+.th .g{position:absolute;left:50%;top:50%;width:95px;height:63px;margin:-31.5px 0 0 -47.5px}
+.th .g svg{position:absolute;left:0;top:0;overflow:visible}
+.th .dia{position:absolute;width:13px;height:18px;transform:scale(0);transition:transform .45s cubic-bezier(.3,1.6,.5,1) .15s}
+.th.done .dia{transform:scale(1)}
+.th .g{opacity:0;transition:opacity .4s ease}
+.th.done .g{opacity:1}
+.th.gen::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,0) 20%,rgba(255,255,255,.35) 50%,rgba(255,255,255,0) 80%);background-size:220% 100%;animation:shim 1.15s linear infinite}
+.th.gen{background:rgba(255,255,255,.2)}
+.th.gen .lb{opacity:0!important}
+@keyframes shim{from{background-position:120% 0}to{background-position:-120% 0}}
+.th.born{animation:born .5s cubic-bezier(.3,1.3,.5,1) both}
+@keyframes born{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+
+/* chat sheet */
+#sheet{position:absolute;left:0;width:390px;height:849px;z-index:7;background:#f5f5f2;border-radius:23px 23px 0 0;will-change:top}
+#sheet::after{content:"";position:absolute;left:0;top:0;width:390px;height:34px;border-radius:23px 23px 0 0;background:linear-gradient(#f5f5f2 55%,rgba(245,245,242,0));z-index:1;pointer-events:none}
+#stage{-webkit-user-select:none;user-select:none}#q{-webkit-user-select:text;user-select:text}
+#sheet .handle{position:absolute;left:150px;top:0;width:90px;height:28px;z-index:2;cursor:grab;touch-action:none}
+#sheet .handle i{position:absolute;left:22px;top:9px;width:45px;height:9px;border-radius:16px;background:#d9d9d9}
+#chat{position:absolute;left:0;top:0;width:390px;overflow-y:auto;overflow-x:hidden;padding:53px 0 150px;scrollbar-width:none;overscroll-behavior:contain}
 #chat::-webkit-scrollbar{display:none}
-.hello{margin-top:150px}
-.hello h1{margin:0 0 8px;font-size:26px;line-height:31px;color:var(--ink)}
-.hello p{margin:0 0 16px;font-size:15px;line-height:20px;color:var(--mute)}
-.hello .qs{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
-.pill{border:1px solid var(--line);background:#fff;border-radius:100px;padding:10px 16px;font-size:15px;color:var(--ink);text-align:left}
-.pill:active{background:#f3f3f3}
-.um{align-self:flex-end;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:299px;animation:rise .3s var(--ease)}
-.u{position:relative;background:var(--ink);color:#fff;border-radius:25px;padding:16px 17px;font-size:17px;line-height:22px;box-shadow:0 3px 30px rgba(0,0,0,.03)}
-.u svg{position:absolute;right:-6px;bottom:-1px}
-.um time{font-size:13px;color:#9e9999;margin-right:23px}
-.a{display:flex;flex-direction:column;gap:16px;animation:rise .3s var(--ease)}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.chip{align-self:flex-start;display:inline-flex;align-items:center;gap:10px;border:2px solid #000;background:#fff;border-radius:100px;padding:13px 17px;font-size:17px;color:var(--ink);box-shadow:0 3px 30px rgba(0,0,0,.03)}
-.lcard{height:134px;border-radius:23px;background:linear-gradient(100deg,#f4f4f4 15%,#cfcfcf 45%,#cfcfcf 55%,#f4f4f4 85%);background-size:250% 100%;animation:sh 1.6s linear infinite;display:flex;align-items:center;justify-content:center;color:#999;font-size:17px}
-@keyframes sh{from{background-position:120% 0}to{background-position:-120% 0}}
-.desc{margin:0;font-size:17px;line-height:23px;color:#000;padding-right:12px}
-.desc.sk{display:flex;flex-direction:column;gap:9px}
-.desc.sk i{display:block;height:12px;border-radius:6px;background:#e6e6e6}
 
-/* widget card */
-.wg{background:#fff;border-radius:23px;box-shadow:0 4px 100px rgba(0,0,0,.05),0 1px 3px rgba(0,0,0,.04);overflow:hidden;transition:box-shadow .3s}
-#full .wg{box-shadow:none}
-.wg.flash{box-shadow:0 0 0 3px #212121}
-.ch{display:flex;align-items:center;gap:16px;padding:16px 20px 15px 17px}
-.logo{width:45px;height:45px;border-radius:11px;flex:none}
-.logo.sm{width:27px;height:27px;border-radius:7px}
-.ch b{flex:1;font-size:19px;line-height:23px;color:var(--ink)}
-.cb{border-top:1px solid var(--line);padding:16px 20px 18px 23px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.num{font-size:21px;font-weight:500;color:var(--ink);line-height:26px}
-.num.big{font-size:26px}
-.lab{font-size:15px;color:var(--mute);line-height:19px}
-.r{text-align:right}
-.tabs{display:inline-flex;background:#f3f3f1;border-radius:100px;padding:3px}
-.tabs button{border:0;background:none;border-radius:100px;padding:5px 11px;font-size:13px;color:var(--mute)}
-.tabs button.on{background:var(--ink);color:#fff}
-.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--grey);margin-top:4px}
-.bars{display:flex;align-items:flex-end;gap:10px;height:110px;margin:22px 0 6px;border-bottom:1px solid var(--line)}
-.bars button{flex:1;border:1.4px solid var(--ink);border-bottom:0;border-radius:8px 8px 0 0;padding:0;position:relative}
-.bars button.on{background:var(--ink)}
-.bars button span{position:absolute;left:0;right:0;top:-18px;font-size:12px;font-weight:500;color:var(--ink)}
-.blab{display:flex;gap:10px}.blab span{flex:1;text-align:center;font-size:11px;color:var(--grey)}
-.rng{width:100%;margin:14px 0 10px;accent-color:#212121}
-.yr{display:flex;gap:6px}
-.yr button{border:1px solid var(--line);background:#fff;border-radius:100px;padding:5px 11px;font-size:13px;color:var(--ink)}
-.yr button.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.split{display:flex;height:10px;border-radius:5px;overflow:hidden;background:#eee;margin-bottom:12px}
-.split i{display:block;background:var(--ink)}
-.tbl{width:100%;border-collapse:collapse;font-size:14px}
-.tbl th,.tbl td{padding:8px 4px;text-align:center;border-bottom:1px solid #eeeceb}
-.tbl tr:last-child td{border-bottom:0}
-.tbl td:first-child,.tbl th:first-child{text-align:left;color:var(--mute);font-size:13px}
-.tbl th button{border:0;background:none;font-size:13px;font-weight:500;padding:4px 8px;border-radius:100px;color:var(--ink)}
-.tbl th.on button{background:var(--ink);color:#fff}
-.tbl td.on{font-weight:500;background:#f5f5f3}
-.donut{display:flex;align-items:center;gap:16px}
-.legend{flex:1;display:flex;flex-direction:column;gap:2px}
-.legend button{display:flex;align-items:center;gap:9px;border:0;border-radius:10px;background:none;padding:6px 8px;font-size:14px;text-align:left;color:var(--ink)}
-.legend button.on{background:#f3f3f1}
-.legend i{width:11px;height:11px;border-radius:3px;flex:none;border:1px solid var(--ink)}
-.legend b{margin-left:auto;font-weight:500}
-.chk{display:flex;flex-direction:column;gap:2px}
-.chk button{display:flex;align-items:center;gap:12px;border:0;background:none;padding:8px 0;font-size:15px;text-align:left;color:var(--ink)}
-.chk button i{width:20px;height:20px;border:1.5px solid var(--ink);border-radius:6px;flex:none;display:inline-flex;align-items:center;justify-content:center}
-.chk button.on i{background:var(--ink)}
-.chk button.on i::after{content:"";width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
-.chk button.on span{text-decoration:line-through;color:var(--grey)}
-.prog{height:4px;border-radius:2px;background:#eee;margin:8px 0 6px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ink);transition:width .3s}
+.msg{position:relative;width:299px;border-radius:25px;font:500 17px/23px Outfit,sans-serif;padding:14px 17px 15px;margin-bottom:0;animation:rise .45s cubic-bezier(.22,1,.36,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.msg.u{margin-left:76px;background:#212121;color:rgba(255,255,255,.87);box-shadow:0 3px 15px rgba(0,0,0,.03)}
+.msg.u .tail{position:absolute;right:0;bottom:-6px}
+.read{margin:7px 30px 22px 0;text-align:right;font:400 13px/19px Outfit,sans-serif;color:#89898d}
+.read b{font-weight:500}
+.msg.a{margin:0 0 26px 17px;background:#fcfcfa;color:rgba(0,0,0,.71);box-shadow:0 3px 15px rgba(0,0,0,.03);padding:17px 17px 20px}
+.msg.a .tail{position:absolute;left:3px;bottom:-8px;transform:rotate(7deg) scaleX(-1)}
+.think{display:flex;align-items:center;gap:8px;margin:0 0 24px 17px;height:25px;font:400 13px/19px Outfit,sans-serif;color:#8d8888}
+.think .lg{width:25px;height:25px;border-radius:7px;background:#fbe9e5;display:flex;align-items:center;justify-content:center;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(.86);opacity:.7}}
+.think span{background:linear-gradient(90deg,#8d8888 30%,#d6d2d0 50%,#8d8888 70%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 1.6s linear infinite}
 
-/* action card: outline only, nothing filled */
-.act{background:transparent;border:1.5px solid var(--ink);border-radius:23px}
-.act .ah{display:flex;align-items:center;gap:11px;padding:14px 17px 12px}
-.act .ah b{font-size:15px;color:var(--ink)}
-.act .logo{background:transparent;border:1.2px solid var(--ink)}
-.act .ab{border-top:1px solid var(--ink);display:flex;align-items:center;justify-content:space-between;padding:16px 16px 18px 21px}
-.act small{display:block;font-size:13px;color:var(--mute);margin-bottom:3px}
-.act .val b{font-size:19px;font-weight:500;color:var(--ink)}.act .val span{font-size:15px;color:var(--ink);margin-left:1px}
-.inv{height:38px;min-width:107px;padding:0 18px;border:1.5px solid var(--ink);border-radius:33px;background:transparent;color:var(--ink);font-size:15px;font-weight:500}
-.inv:active{background:rgba(33,33,33,.06)}
-.act.done{border-style:dashed}
-.act.done .inv{border-style:dashed}
-.act.sk{border:1.5px dashed #c9c6c4}
-.act.sk .ab{border-top-color:#e6e4e2}
-.act.sk .logo{border-color:#c9c6c4}
-/* composer */
-.cmp{position:absolute;left:0;bottom:0;width:390px;padding:0 0 22px;z-index:4;background:linear-gradient(rgba(252,252,250,0),var(--paper) 30%)}
-.sugg{display:flex;gap:6px;overflow-x:auto;padding:14px 13px 10px;scrollbar-width:none}
-.sugg::-webkit-scrollbar{display:none}
-.sugg .pill{flex:none;padding:7px 13px;font-size:13.5px;white-space:nowrap}
-.inp{margin:0 13px;height:69px;border-radius:59px;background:#fff;box-shadow:0 2px 30px rgba(0,0,0,.15);display:flex;align-items:center;padding:0 12px 0 27px;gap:10px}
-.inp input{flex:1;border:0;outline:0;background:none;font-size:18px;color:var(--ink);min-width:0;-webkit-user-select:text;user-select:text}
-.inp input::placeholder{color:#8d8888}
-.send{width:52px;height:45px;border-radius:27px;border:0;background:var(--ink);display:inline-flex;align-items:center;justify-content:center;padding:0 0 0 3px;flex:none}
-.send:disabled{opacity:.35}
+/* widgets */
+.wg{position:relative;width:299px;margin:0 0 26px 17px;border-radius:17px;background:#fcfcfa;box-shadow:0 2px 100px 12px rgba(0,0,0,.03);padding:17px;font-family:Inter,system-ui,sans-serif;color:#282424;animation:rise .55s cubic-bezier(.22,1,.36,1) both;transition:box-shadow .3s}
+.wg.hl{box-shadow:0 0 0 3px rgba(240,71,107,.35),0 2px 100px 12px rgba(0,0,0,.03)}
+.wg .hd{display:flex;gap:15px;align-items:flex-start}
+.wg .lo{flex:none;width:51px;height:51px;border-radius:12px;border:1px solid #ececea;background:#fff;display:flex;align-items:center;justify-content:center;margin-top:8px}
+.wg .nm{font-size:17px;line-height:23px}
+.wg .mt{margin-top:4px;font-size:13px;line-height:16px;color:#787373}
+.wg .rt{display:flex;align-items:center;gap:8px;margin-top:22px;font:500 23px/28px Inter,sans-serif}
+.wg .rt .p{color:#3fd519}.wg .rt .p.neg{color:#e5484d}.wg .rt .tf{color:#aba6a6;margin-left:3px}
+.wg .ch{position:relative;height:197px;margin-top:18px}
+.wg .ch svg{position:absolute;left:0;top:0}
+.wg .yl{position:absolute;right:0;font-size:12px;line-height:15px;color:#8d8888}
+.wg .tfs{display:flex;justify-content:space-between;margin-top:22px;padding:0 2px}
+.wg .tfs button{width:38px;height:31px;border-radius:16px;font:400 15px/18px Inter,sans-serif;color:#645f5f;transition:background .25s,color .25s}
+.wg .tfs button.on{background:#000;color:#fff}
+.wg .act{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:49px;margin-top:20px;border-radius:25px;background:#212121;color:#fff;font:500 16px/20px Outfit,sans-serif}
+.wg .act.ok{background:#e9f7e4;color:#0b7a20}
+.wg h5{margin:0;font:500 17px/23px Outfit,sans-serif;color:#282424}
+.wg .sub{margin-top:3px;font-size:13px;line-height:16px;color:#787373}
+.bars{display:flex;align-items:flex-end;justify-content:space-around;height:170px;margin-top:20px;border-bottom:1px solid #ececea}
+.bars .b{display:flex;flex-direction:column;align-items:center;gap:6px;width:70px}
+.bars .b i{display:block;width:44px;border-radius:7px 7px 0 0;background:#e4e1df;height:0;transition:height .8s cubic-bezier(.22,1,.36,1)}
+.bars .b.me i{background:#3fd519}
+.bars .b em{font:500 14px/17px Inter,sans-serif;font-style:normal}
+.bars .b.me em{color:#2a9d12}
+.bl{display:flex;justify-content:space-around;margin-top:8px;font-size:12px;line-height:15px;color:#787373;text-align:center}
+.bl span{width:80px}
+.calc .row{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px;font-size:14px;color:#787373}
+.calc .row b{font:500 19px/23px Inter,sans-serif;color:#282424}
+.calc input[type=range]{width:100%;margin:12px 0 0;accent-color:#212121}
+.calc .yrs{display:flex;gap:8px;margin-top:14px}
+.calc .yrs button{flex:1;height:34px;border-radius:17px;background:#f0efec;font:400 14px/17px Inter,sans-serif;color:#645f5f}
+.calc .yrs button.on{background:#000;color:#fff}
+.calc .res{margin-top:18px;padding:15px;border-radius:13px;background:#f3f8f1}
+.calc .res small{display:block;font-size:13px;color:#5d7a55}
+.calc .res b{display:block;margin-top:4px;font:500 27px/32px Inter,sans-serif;color:#1b7a0e;letter-spacing:.02em}
+.calc .res p{margin:6px 0 0;font-size:12px;line-height:16px;color:#6f8a68}
 
-/* drawer + menu */
-.sb-card{height:130px;border:0;border-radius:15px;background:#d9d9d9;padding:13px 15px 13px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;color:rgba(0,0,0,.87);position:relative}
-.sb-card b{font-size:17px;line-height:21px;font-weight:500;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.sb-card small{font-size:13px;line-height:21px}
-.sb-card.on{box-shadow:inset 0 0 0 1.5px #212121}
-.sb-card:active{filter:brightness(.96)}
-.sb-item{display:block;width:100%;border:0;background:none;text-align:left;padding:8px 26px 9px}
-.sb-item b{display:block;font-size:19px;line-height:23px;font-weight:400;color:#212121;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sb-item small{display:block;font-size:13px;line-height:21px;color:rgba(0,0,0,.87);margin-top:5px}
-.sb-item.on b{text-decoration:underline;text-underline-offset:4px}
-.sb-item+.sb-item{margin-top:16px}
-/* landing (Chats tab) */
-#home{position:absolute;inset:0;z-index:50;background:#fff;transition:transform .42s var(--ease),opacity .3s ease;will-change:transform}
-#stage.inchat #home{transform:translate3d(-28%,0,0);opacity:0;pointer-events:none}
-#stage:not(.inchat) .sbar{color:#000}
-.hpage{position:absolute;inset:0;overflow-y:auto;padding:108px 0 130px;scrollbar-width:none}
-.hpage::-webkit-scrollbar{display:none}
-.hpage[hidden]{display:none}
-.pfbtn{position:absolute;left:15px;top:50px;width:44px;height:44px;border-radius:50%;border:0;background:#d9d9d9;display:flex;align-items:center;justify-content:center;z-index:4;padding:0}
-#profile{position:absolute;inset:0;z-index:6;background:#fff;transform:translate3d(-100%,0,0);transition:transform .4s var(--ease)}
-#home.pf #profile{transform:none}
-.seg{display:flex;margin:0 28px 22px;background:#f3f3f3;border-radius:100px;padding:4px}
-.seg button{flex:1;height:44px;border:0;border-radius:100px;background:none;font-size:16px;color:#5c5c5c}
-.seg button.on{background:#212121;color:#fff}
-.h-ph[hidden]{display:none}
-.h-actions{display:flex;align-items:center;justify-content:center;margin:0 27px 0 28px;width:335px;height:150px;border:0;border-radius:20px;background:#d9d9d9;font-size:19px;color:#000}
-.h-h{margin:20px 28px 20px 27px;font-size:19px;line-height:23px;color:#000}
-.h-grid{display:grid;grid-template-columns:159px 159px;gap:19px 17px;padding:0 27px 0 28px}
-.h-grid .sb-card{width:159px}
-.h-list{padding:42px 0 0}
-.h-list .sb-item{padding:8px 28px 9px}
-.h-list .sb-item+.sb-item{margin-top:28px}
-.h-ph{margin:0 28px;display:flex;flex-direction:column;gap:14px}
-.h-ph h2{margin:0 0 6px;font-size:26px;line-height:31px;color:var(--ink)}
-.h-ph .blk{height:120px;border-radius:20px;background:#d9d9d9;display:flex;align-items:center;justify-content:center;font-size:17px;color:#000;border:0;width:100%}
-.h-ph .blk.sm{height:84px}
-.h-ph p{margin:0;font-size:15px;line-height:20px;color:var(--mute)}
-.hbottom{position:absolute;left:0;bottom:0;width:390px;padding:44px 13px 26px;background:linear-gradient(rgba(255,255,255,0),#fff 45%);z-index:2}
-.dock{height:59px;border-radius:59px;background:#fff;box-shadow:0 2px 30px rgba(0,0,0,.15);display:flex;align-items:center;gap:5px;padding:0 6px 0 9px}
-.dbtn{width:45px;height:45px;flex:none;border:0;border-radius:27px;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;color:#212121;padding:0;transition:background .2s,color .2s}
-.dbtn.on{background:#212121;color:#fff}
-.dask{margin-left:auto;width:197px;height:47px;border-radius:35px;border:1px solid #dfdcda;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.08);display:flex;align-items:center;gap:13px;padding:0 15px;font:inherit;cursor:text}
-.dask span{font-size:18px;color:#8d8888}
-#home::before{content:"";position:absolute;left:0;top:0;width:390px;height:104px;background:linear-gradient(#fff 80%,rgba(255,255,255,0));z-index:3;pointer-events:none}
-.hbottom .inp span{flex:1;font-size:18px;color:#8d8888}
-#menu{position:absolute;right:15px;top:100px;z-index:72;background:#fff;border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.18);padding:6px;display:none;min-width:170px}
-#menu.on{display:block}
-#menu button{display:block;width:100%;border:0;background:none;text-align:left;padding:11px 14px;border-radius:12px;font-size:15px;color:var(--ink)}
-#menu button:active{background:#f3f3f3}
-#toast{position:absolute;left:50%;bottom:120px;transform:translate(-50%,10px);background:var(--ink);color:#fff;font-size:14px;padding:10px 16px;border-radius:100px;opacity:0;pointer-events:none;transition:all .25s;z-index:90;white-space:nowrap}
-#toast.on{opacity:1;transform:translate(-50%,0)}
-</style>
-</head>
+/* empty state */
+.hello{position:absolute;left:17px;right:17px;bottom:0;display:flex;flex-direction:column;align-items:flex-start;gap:9px;transition:opacity .3s}
+.hello p{margin:0 0 6px 3px;font:400 15px/21px Outfit,sans-serif;color:#8d8888}
+.chip{padding:10px 16px;border-radius:21px;border:1px solid #dedad6;background:#fcfcfa;font:400 15px/20px Outfit,sans-serif;color:#3a3535;text-align:left}
+
+/* input */
+#bar{position:absolute;left:12.5px;top:752px;z-index:8;width:365px;height:69px;border-radius:130px;background:#f9f9f9;border:.9px solid #8d8888;box-shadow:0 4px 20px rgba(0,0,0,.03);display:flex;align-items:center}
+#bar::before{content:"";position:absolute;inset:0;border-radius:48px;border-top:6.5px solid rgba(255,255,255,.63);border-bottom:6.5px solid rgba(255,255,255,.63);pointer-events:none}
+#bar .plus{width:44px;height:44px;margin-left:5px;display:flex;align-items:center;justify-content:center}
+#bar .av{flex:none;width:39px;height:39px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#ffd9c7 0 23%,transparent 24%),radial-gradient(circle at 50% 100%,#212121 0 46%,transparent 47%),#7fd3d6;border:2px solid #fff;box-shadow:0 0 0 1px #e6e3e0}
+#q{flex:1;min-width:0;height:44px;margin-left:11px;border:0;outline:0;background:none;font:400 18px/22px Outfit,sans-serif;color:#212121}
+#q::placeholder{color:#8d8888}
+#send{flex:none;width:44px;height:44px;margin-right:12px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s}
+#send.go{background:#4d1c14}
+#send .mic,#send .arr{position:absolute;transition:opacity .2s,transform .25s}
+#send .arr{opacity:0;transform:scale(.6)}
+#send.go .mic{opacity:0;transform:scale(.6)}#send.go .arr{opacity:1;transform:none}
+
+.toast{position:absolute;left:50%;top:700px;z-index:20;transform:translateX(-50%);padding:10px 16px;border-radius:20px;background:#212121;color:#fff;font:400 14px/18px Outfit,sans-serif;white-space:nowrap;animation:rise .35s ease both}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style></head>
 <body>
-<div id="stage" class="notray">
-  <div class="sbar" aria-hidden="true"><span>9:41</span><i></i></div>
+<div id="stage">
+  <div class="sb"><b>9:41</b><svg width="67" height="12" viewBox="0 0 67 12" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/><path d="M29 2.6c2.2 0 4.2.8 5.7 2.2l1-1A9.6 9.6 0 0 0 29 1.1c-2.6 0-5 1-6.7 2.7l1 1C24.8 3.4 26.8 2.6 29 2.6Zm0 3c1.4 0 2.6.5 3.6 1.4l1-1A6.6 6.6 0 0 0 29 4.1c-1.8 0-3.4.7-4.6 1.9l1 1c1-.9 2.2-1.4 3.6-1.4Zm0 3c.6 0 1.1.2 1.5.6L29 10.7l-1.5-1.5c.4-.4.9-.6 1.5-.6Z"/><rect x="42.5" y=".5" width="21" height="10.3" rx="2.7" fill="none" stroke="#fff" opacity=".4"/><rect x="44.3" y="2.3" width="17.4" height="6.7" rx="1.4"/><path d="M65 4v3.3c.7-.3 1.2-1 1.2-1.7S65.7 4.3 65 4Z" opacity=".5"/></svg></div>
 
-
-  <div id="tiles"><div class="tscroll" id="tscroll"></div></div>
   <div class="fade l"></div><div class="fade r"></div>
-  <button class="rbtn" id="burger" aria-label="Close chat"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2l12 12M14 2 2 14" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
-  <button class="rbtn" id="more" aria-label="More"><svg width="17" height="17" viewBox="0 0 17 17" fill="#212121"><circle cx="2.5" cy="8.5" r="2"/><circle cx="8.5" cy="8.5" r="2"/><circle cx="14.5" cy="8.5" r="2"/></svg></button>
+  <div id="title"><span class="t1" style="display:flex;align-items:center;gap:7px"><svg width="19" height="19" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#fff"/></svg><span class="t">Ask Decade</span></span><span class="t2" id="t2">Portfolio review</span></div>
+  <div id="rail"><div class="in" id="rin"></div></div>
+  <button class="hbtn press" id="back" aria-label="Back"><svg width="9" height="16" viewBox="0 0 9 16" fill="none"><path d="M7.5 1.5 1.5 8l6 6.5" stroke="#212121" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button class="hbtn press" id="more" aria-label="New chat"><svg width="17" height="17" viewBox="0 0 17 17" fill="#212121"><circle cx="2.5" cy="8.5" r="2"/><circle cx="8.5" cy="8.5" r="2"/><circle cx="14.5" cy="8.5" r="2"/></svg></button>
 
-  <section id="sheet">
-    <div class="grab" id="grab" aria-label="Drag down to enlarge the widget tray"></div>
-    <div id="chat" aria-live="polite"></div>
-    <div class="cmp">
-      <div class="sugg" id="sugg"></div>
-      <form class="inp" id="form" autocomplete="off">
-        <svg width="19" height="19" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#8d8888"/></svg>
-        <input id="q" type="text" placeholder="Ask Decade" aria-label="Message">
-        <button class="send" id="sendBtn" type="submit" aria-label="Send" disabled><svg width="13" height="18" viewBox="0 0 13 18"><path d="M1.78 17.79l10.35-7.07c1.14-.78 1.14-2.68 0-3.46L1.78.19C.84-.45-.3.62.07 1.81L2 8.02l3.71.97L2 9.96.07 16.17c-.37 1.2.76 2.27 1.71 1.62Z" fill="#fff"/></svg></button>
-      </form>
-    </div>
-  </section>
+  <div id="sheet">
+    <div class="handle" id="handle" role="button" aria-label="Pull down to see all widgets"><i></i></div>
+    <div id="chat"></div>
+  </div>
 
-  <section id="home" aria-label="Agent home">
-    <button class="pfbtn" id="pfBtn" aria-label="Profile"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.6" stroke="#212121" stroke-width="1.8"/><path d="M3.5 17.5c1.2-3 3.6-4.5 6.5-4.5s5.3 1.5 6.5 4.5" stroke="#212121" stroke-width="1.8" stroke-linecap="round"/></svg></button>
-    <section id="profile" aria-label="Profile">
-      <button class="rbtn" id="pfClose" aria-label="Close profile" style="position:absolute;left:15px;top:50px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2l12 12M14 2 2 14" stroke="#212121" stroke-width="2" stroke-linecap="round"/></svg></button>
-      <div class="h-ph" style="padding-top:118px"><h2 class="serif">Profile</h2><div class="blk sm">Account</div><div class="blk sm">KYC &amp; bank</div><div class="blk sm">Settings</div><p>Not in this prototype yet.</p></div>
-    </section>
-    <div class="hpage" data-page="chats">
-      <button class="h-actions" id="hActions">Actions</button>
-      <div class="h-h">Consultations</div>
-      <div class="h-grid" id="homeGrid"></div>
-      <div class="h-list" id="homeList"></div>
-    </div>
-    <div class="hpage" data-page="home" hidden></div>
-    <div class="hpage" data-page="invest" hidden>
-      <div class="seg" role="tablist"><button class="on" data-seg="start">Start investing</button><button data-seg="yours">Your investments</button></div>
-      <div class="h-ph" data-segpage="start"><button class="blk" data-go="funds">Mutual funds</button><button class="blk" data-go="fd">Fixed deposit</button><p>Opens those sections of the app.</p></div>
-      <div class="h-ph" data-segpage="yours" hidden><div class="blk">Holdings</div><div class="blk sm">SIPs</div><div class="blk sm">Fixed deposits</div><p>Not in this prototype yet.</p></div>
-    </div>
-    <div class="hbottom">
-      <nav class="dock" aria-label="Main">
-        <button class="dbtn" data-tab="home" aria-label="Home"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 8.6 10 3l7 5.6V16a1 1 0 0 1-1 1h-3.6v-4.6H7.6V17H4a1 1 0 0 1-1-1V8.6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
-        <button class="dbtn on" data-tab="chats" aria-label="Chats"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3.2c4.1 0 7.2 2.6 7.2 5.9s-3.1 5.9-7.2 5.9c-.8 0-1.6-.1-2.3-.3L4 16.6l.9-3.1C3.6 12.4 2.8 10.8 2.8 9.1 2.8 5.8 5.9 3.2 10 3.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></button>
-        <button class="dbtn" data-tab="invest" aria-label="Invest"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14.5l4.6-4.6 3.2 3.2L17 6.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.6 6.9H17v4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="dask" id="homeAsk" type="button" aria-label="Ask Decade: start a new chat">
-          <svg width="19" height="19" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="#8d8888"/></svg>
-          <span>Ask Decade</span>
-        </button>
-      </nav>
-    </div>
-  </section>
-  <div id="menu"><button id="mNew">New consultation</button><button id="mOpen">Expand widget tray</button></div>
-  <div id="toast"></div>
+  <form id="bar" autocomplete="off">
+    <button type="button" class="plus press" aria-label="Attach"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M8.5 1.5v14M1.5 8.5h14" stroke="#212121" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <span class="av" aria-hidden="true"></span>
+    <input id="q" placeholder="Ask Decade" aria-label="Ask Decade" enterkeyhint="send">
+    <button type="submit" id="send" aria-label="Send"><svg class="mic" width="20" height="26" viewBox="0 0 20 26" fill="none"><rect x="5.5" y="1" width="9" height="15" rx="4.5" stroke="#8d8888" stroke-width="1.8"/><path d="M1.5 11.5a8.5 8.5 0 0 0 17 0M10 20v4.5" stroke="#8d8888" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="arr" width="14" height="18" viewBox="0 0 13 18"><path d="M1.78 17.79l10.35-7.07c1.14-.78 1.14-2.68 0-3.46L1.78.19C.84-.45-.3.62.07 1.81L2 8.02l3.71.97L2 9.96.07 16.17c-.37 1.2.76 2.27 1.71 1.62Z" fill="#fff"/></svg></button>
+  </form>
 </div>
-
 <script>
 (() => {
 'use strict';
-const $ = (s, r = document) => r.querySelector(s);
-const stage = $('#stage');
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const stage = $('#stage'), sheet = $('#sheet'), chat = $('#chat'), rail = $('#rail'), rin = $('#rin'), title = $('#title'), q = $('#q'), send = $('#send');
 const EMB = window.parent !== window && !/[?&]mock\b/.test(location.search); // ?mock = shown inside the phone-frame page
 if (EMB) document.body.classList.add('embedded');
-if (EMB) document.addEventListener('pointerup', () => { try { parent.postMessage({ decade: 'tap' }, '*'); } catch (_) {} }, { once: true, capture: true });
-document.addEventListener('touchstart', () => {}, { passive: true });
+const post = (m) => { if (EMB) try { parent.postMessage(m, '*'); } catch (_) {} };
+if (EMB) document.addEventListener('pointerup', () => post({ decade: 'tap' }), { once: true, capture: true });
+post({ decade: 'agentTop', dark: true });
 let K = 1;
 function fit() {
   if (EMB) { K = 1; stage.style.transform = ''; return; }
@@ -275,426 +166,257 @@ function fit() {
   stage.style.transform = `translate(${(w - 390 * K) / 2}px, ${(h - 849 * K) / 2}px) scale(${K})`;
 }
 fit(); addEventListener('resize', fit);
-
-const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
-const rnd = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
-const lakh = (n) => n >= 1e7 ? '₹' + (n / 1e7).toFixed(2) + ' Cr' : n >= 1e5 ? '₹' + (n / 1e5).toFixed(1) + ' L' : inr(n);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const now = () => { const d = new Date(); let h = d.getHours(), m = d.getMinutes(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${String(m).padStart(2, '0')} ${ap}`; };
-const CHEV = '<svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1l6 6-6 6" stroke="#212121" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const DOC = '<svg width="15" height="18" viewBox="0 0 15 18" fill="none"><path d="M9 1H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V6L9 1Z" stroke="#212121" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 1v5h5" stroke="#212121" stroke-width="1.5" stroke-linejoin="round"/></svg>';
-const TAIL = '<svg width="18" height="14" viewBox="0 0 18 14" fill="none"><path d="M0 0h14c0 5 1.5 10 4 14-6-1-11-4-14-8L0 0Z" fill="#212121"/></svg>';
-let uid = 0;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const inr = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
+function toast(t) { const el = document.createElement('div'); el.className = 'toast'; el.textContent = t; stage.appendChild(el); setTimeout(() => el.remove(), 1900); }
 
-/* ---------- replies ---------- */
-const KINDS = ['fund', 'line', 'bars', 'calc', 'table', 'donut', 'list'];
-const META = {
-  fund: { title: 'HSBC midcap direct growth', tile: 'FUND' },
-  line: { title: 'Your SIP vs Nifty 50', tile: 'COMPARE' },
-  bars: { title: 'FD rates · 1 year', tile: 'FD RATES' },
-  calc: { title: 'SIP calculator', tile: 'SIP CALC' },
-  table: { title: 'Flexi-cap funds compared', tile: 'COMPARE' },
-  donut: { title: 'Your portfolio split', tile: 'PORTFOLIO' },
-  list: { title: 'Emergency fund plan', tile: 'PLAN' },
+const LOGO = (c = '#4d1c14', s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 25 26" fill="none"><path d="M24.93 12.6c0 3.48-1.41 6.63-3.69 8.91a12.56 12.56 0 0 1-8.91 3.69H3.1V22.1l9.5-9.5-1.39-1.39-4.7 4.7H3.1V3.1L0 0h12.32c6.96 0 12.6 5.64 12.6 12.6Z" fill="${c}"/></svg>`;
+const TAIL_U = '<svg class="tail" width="24" height="14" viewBox="0 0 18 14" fill="none"><path d="M0 0h14c0 5 1.5 10 4 14-6-1-11-4-14-8L0 0Z" fill="#212121"/></svg>';
+const TAIL_A = '<svg class="tail" width="21" height="16" viewBox="0 0 18 14" fill="none"><path d="M0 0h14c0 5 1.5 10 4 14-6-1-11-4-14-8L0 0Z" fill="#fcfcfa"/></svg>';
+const DIA = '<svg class="dia" viewBox="0 0 13 18" width="13" height="18"><path d="M6.5 1 12 9l-5.5 8L1 9Z" fill="#f0476b" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+
+/* ---------- thumbnails (drawn in a 95 × 63 box, as in Figma) ---------- */
+const W60 = 'rgba(255,255,255,.6)', GL = 'rgba(77,28,20,.55)';
+const GFX = {
+  calc: `<svg width="95" height="63" viewBox="0 0 95 63"><rect x="28" y="11" width="18" height="18" rx="3" fill="${W60}"/><rect x="49" y="11" width="18" height="18" rx="3" fill="${W60}"/><rect x="28" y="34" width="18" height="18" rx="3" fill="${W60}"/><rect x="49" y="34" width="18" height="18" rx="3" fill="${W60}"/>
+    <g stroke="${GL}" stroke-width="1.3" stroke-linecap="round"><path d="M37 16.5v7M33.5 20h7M55.5 17.5l5 5M60.5 17.5l-5 5M33.5 43h7M54.5 43h7"/></g><circle cx="58" cy="39.8" r=".9" fill="${GL}"/><circle cx="58" cy="46.2" r=".9" fill="${GL}"/></svg>`,
+  bars: `<svg width="95" height="63" viewBox="0 0 95 63"><rect x="15" y="35" width="18" height="17" rx="3" fill="${W60}"/><rect x="38" y="25" width="18" height="27" rx="3" fill="${W60}"/><rect x="62" y="16" width="18" height="36" rx="3" fill="${W60}"/></svg>`,
+  line: `<svg width="95" height="63" viewBox="0 0 95 63"><path d="M-6 52C8 52 14 32 30 34s20 20 34 12 20-30 38-34" stroke="${W60}" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
 };
-const DESC = {
-  fund: 'With a 35.34% return over the past year, HSBC Midcap Direct Growth has demonstrated strong recent performance. Ranked 2nd among 221 midcap funds, it stands out as a strong performer in its category.\n\nA compelling option if you’re looking to explore growth opportunities in midcap companies.',
-  line: 'Over the last year your SIP returned 14.2%, about 2% ahead of the Nifty 50. Most of that came in the last two quarters. Switch the range to see the longer trend.',
-  bars: 'Shivalik SFB pays the most right now at 8.30% for a year. Small finance banks pay more, and deposits are DICGC insured up to ₹5 lakh per bank.',
-  calc: 'At 12% a year, a steady SIP compounds quickly after year 7. Drag the slider to see how the amount changes the final value.',
-  table: 'All three have similar 5-year returns. Fund B charges the lowest fee and has had the smallest falls, so it is the steadier pick.',
-  donut: 'You are 68% in equity. That is a bit high for a goal that is 3 years away. Moving some into debt would make the ride smoother.',
-  list: 'Aim for 6 months of expenses, kept somewhere you can reach in a day. Tick steps off as you go.',
-  none: 'An expense ratio is the yearly fee a fund takes from your money. 1% on ₹1 lakh is ₹1,000 a year. Direct plans charge less than regular ones.',
-};
-// [title, label, value, unit, button]
-const ACTS = {
-  fund: ['HSBC midcap direct growth', 'Start SIP', '₹5000', '/month', 'Invest'],
-  line: ['Your monthly SIP', 'Top up by', '₹1000', '/month', 'Top up'],
-  bars: ['Shivalik SFB · 1 year FD', 'Book FD at', '8.30%', ' a year', 'Book FD'],
-  calc: ['Start a monthly SIP', 'Start SIP', '₹5000', '/month', 'Invest'],
-  table: ['Flexi-cap shortlist', 'Add', '3 funds', ' to shortlist', 'Add'],
-  donut: ['Rebalance portfolio', 'Move to debt', '₹40,000', '', 'Rebalance'],
-  list: ['Emergency fund', 'Auto-transfer', '₹10,000', '/month', 'Set up'],
-  none: ['Talk to an advisor', 'Free call', '15', ' minutes', 'Book'],
-  remind: ['Review your SIP', 'Reminder', 'Mon, 1 Dec', ' · 9:00 AM', 'Set'],
-};
-const STATUS = { fund: 'Looking for the plans…', line: 'Pulling your returns…', bars: 'Checking FD rates…', calc: 'Running the numbers…', table: 'Comparing funds…', donut: 'Reading your portfolio…', list: 'Drafting a plan…', none: 'Thinking…', remind: 'Setting it up…' };
-function detect(q) {
-  const s = q.toLowerCase();
-  if (/remind|notify|alert me/.test(s)) return { kind: null, text: false, action: true, actKey: 'remind' };
-  if (/^(what|why|explain|define)\b|what is|what's|meaning/.test(s) && !/best|show|chart|compare|split|plan|fund for/.test(s)) return { kind: null, text: true, action: hash(s) % 2 === 0 };
-  let kind = null;
-  if (/best|top|which fund|fund for me|recommend/.test(s)) kind = 'fund';
-  else if (/sip|calculat|grow|how much|goal|retire/.test(s)) kind = 'calc';
-  else if (/compar|\bvs\b|versus|better/.test(s)) kind = 'table';
-  else if (/\bfd\b|fixed|rate|bank|deposit/.test(s)) kind = 'bars';
-  else if (/portfolio|allocat|split|diversif|holding/.test(s)) kind = 'donut';
-  else if (/plan|step|checklist|emergency|start/.test(s)) kind = 'list';
-  else if (/return|perform|chart|trend|did|nifty|market/.test(s)) kind = 'line';
-  const h = hash(s);
-  if (!kind) kind = KINDS[h % KINDS.length];
-  return { kind, text: (h >> 3) % 10 < 7, action: (h >> 7) % 10 < 5 };
+const NAMES = { calc: 'Calculate', bars: 'Compare', line: 'Performance' };
+const thumbs = []; // { el, kind, action, wid }
+function addThumb(kind, action) {
+  const el = document.createElement('button');
+  el.className = 'th gen born'; el.setAttribute('aria-label', NAMES[kind]);
+  el.innerHTML = `<span class="lb">${NAMES[kind]}</span><span class="g">${GFX[kind]}${action ? DIA : ''}</span>`;
+  rin.appendChild(el);
+  const t = { el, kind, action, wid: null }; thumbs.push(t);
+  el.addEventListener('click', () => { if (!moved) jump(t); });
+  layout(P); title.style.opacity = 0;
+  requestAnimationFrame(() => rail.scrollTo({ left: rail.scrollWidth, behavior: 'smooth' }));
+  return t;
 }
-const SUGG = [
-  { q: 'What is the best performing mutual fund for me?', p: { kind: 'fund', text: true, action: true } },
-  { q: 'Best FD rates right now', p: { kind: 'bars', text: false, action: true } },
-  { q: 'How much will a ₹5,000 SIP grow?', p: { kind: 'calc', text: true, action: false } },
-  { q: 'What is an expense ratio?', p: { kind: null, text: true, action: false } },
-  { q: 'Remind me to review my SIP', p: { kind: null, text: false, action: true, actKey: 'remind' } },
-  { q: 'Show my portfolio split', p: { kind: 'donut', text: true, action: true } },
-  { q: 'How did my SIP do vs Nifty?', p: { kind: 'line', text: false, action: false } },
-  { q: 'Compare 3 flexi-cap funds', p: { kind: 'table', text: true, action: false } },
-  { q: 'Plan an emergency fund', p: { kind: 'list', text: true, action: true } },
-];
-function makeWidget(kind, q) {
-  const w = { id: 'w' + (++uid), kind, title: META[kind].title, seed: hash(q + kind), loading: false, fresh: true };
-  if (kind === 'line') w.tab = 0; if (kind === 'bars') w.sel = 0; if (kind === 'calc') { w.amt = 5000; w.yrs = 10; }
-  if (kind === 'table') w.pick = 1; if (kind === 'donut') w.sel = 0; if (kind === 'list') w.done = [true, false, false, false];
-  return w;
-}
-function makeReply(q, p) {
-  const r = { role: 'a', id: 'm' + (++uid), q, loading: true, status: STATUS[p.actKey || p.kind || 'none'] };
-  if (p.kind) r.widget = makeWidget(p.kind, q);
-  if (p.text) r.text = DESC[p.kind || 'none'];
-  if (p.action) r.action = { key: p.actKey || p.kind || 'none', done: false };
-  return r;
+function jump(t) {
+  if (!t.wid) return;
+  const top = t.wid.offsetTop - 70;
+  chat.scrollTo({ top, behavior: 'smooth' });
+  t.wid.classList.add('hl'); setTimeout(() => t.wid.classList.remove('hl'), 1200);
 }
 
-/* ---------- render pieces ---------- */
-function tileGlyph(kind) {
-  const G = {
-    fund: '<rect x="2" y="3" width="14" height="14" rx="3" fill="#e8e8e6"/><path d="M22 7h42M22 13h30" stroke="#b5b5b5" stroke-width="2.5"/><path d="M2 24h70" stroke="#e6e6e6"/>',
-    line: '<path d="M0 12H72M0 20H72" stroke="#e6e6e6" stroke-width=".6"/><path d="M2 26 C10 14 14 22 22 16 S34 22 42 12 S56 6 70 2" stroke="#8a8a8a" stroke-width="1.4"/>',
-    bars: '<rect x="6" y="6" width="12" height="22" fill="#212121"/><rect x="24.5" y="11.5" width="11" height="16" stroke="#212121"/><rect x="42.5" y="15.5" width="11" height="12" stroke="#212121"/><rect x="60.5" y="19.5" width="9" height="8" stroke="#212121"/>',
-    calc: '<path d="M4 15h64" stroke="#212121" stroke-width="1.2"/><circle cx="40" cy="15" r="5" fill="#212121"/><path d="M4 25h26M4 5h16" stroke="#b5b5b5" stroke-width="2.5"/>',
-    table: '<rect x="1.5" y="1.5" width="69" height="27" rx="3" stroke="#212121"/><path d="M1 11h70M1 20h70M24 1v28M47 1v28" stroke="#212121" stroke-width=".7"/><rect x="24" y="2" width="23" height="26" fill="#212121" opacity=".2"/>',
-    donut: '<circle cx="14" cy="15" r="10" stroke="#e4e4e4" stroke-width="5"/><path d="M14 5 A10 10 0 1 1 5.3 20" stroke="#212121" stroke-width="5"/><path d="M32 8h30M32 15h36M32 22h20" stroke="#b5b5b5" stroke-width="2.5"/>',
-    list: '<rect x="3" y="3" width="8" height="8" rx="2" fill="#212121"/><rect x="3.75" y="18.75" width="6.5" height="6.5" rx="2" stroke="#212121" stroke-width="1.3"/><path d="M17 7h48M17 22h38" stroke="#b5b5b5" stroke-width="2.5"/>',
-  };
-  return `<svg width="72" height="32" viewBox="0 0 72 32" fill="none">${G[kind]}</svg>`;
-}
-function series(w, n) { const r = rnd(w.seed + w.tab * 97), pts = []; let v = 50; for (let i = 0; i < n; i++) { v += (r() - 0.38) * 14; v = Math.max(8, Math.min(92, v)); pts.push(v); } return pts; }
-function calcVals(w) { const n = w.yrs * 12, i = 0.12 / 12, fv = w.amt * ((Math.pow(1 + i, n) - 1) / i) * (1 + i), inv = w.amt * n; return { fv, inv }; }
-function body(w) {
-  switch (w.kind) {
-    case 'fund': return `<div class="row"><div><div class="num">35.34%</div><div class="lab">1Y return</div></div><div class="r"><div class="num big">2<span style="font-size:15px">/221</span></div><div class="lab">ranked in<br>Midcap</div></div></div>`;
-    case 'line': {
-      const tabs = ['1Y', '3Y', '5Y'], ret = ['+14.2%', '+41.8%', '+96.5%'][w.tab], pts = series(w, [12, 18, 24][w.tab]);
-      const d = pts.map((v, i) => `${i ? 'L' : 'M'}${(i / (pts.length - 1) * 300).toFixed(1)} ${(100 - v).toFixed(1)}`).join(' ');
-      const lbl = [['Dec', 'Apr', 'Aug', 'Nov'], ['2023', '2024', '2025', '2026'], ['2021', '2023', '2025', '2026']][w.tab];
-      return `<div class="row"><div><div class="num">${ret}</div><div class="lab">Return over ${tabs[w.tab]}</div></div><div class="tabs">${tabs.map((t, i) => `<button data-act="tab" data-v="${i}" class="${i === w.tab ? 'on' : ''}">${t}</button>`).join('')}</div></div>
-        <svg viewBox="0 0 300 100" preserveAspectRatio="none" style="width:100%;height:96px;margin-top:12px;display:block;overflow:visible"><path d="M0 33H300M0 66H300" stroke="#eeeceb" vector-effect="non-scaling-stroke"/><path d="M0 70 L300 45" stroke="#c9c9c9" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><path d="${d}" stroke="#212121" stroke-width="2" fill="none" vector-effect="non-scaling-stroke"/></svg>
-        <div class="axis">${lbl.map((x) => `<span>${x}</span>`).join('')}</div>`;
-    }
-    case 'bars': {
-      const it = [['Shivalik', 8.30], ['Jana', 8.25], ['Shriram', 7.85], ['SBI', 6.80]];
-      return `<div class="row"><div><div class="num">${it[w.sel][1].toFixed(2)}%</div><div class="lab">${it[w.sel][0]} · 1 year · tap a bar</div></div></div>
-        <div class="bars">${it.map((x, i) => `<button data-act="bar" data-v="${i}" class="${i === w.sel ? 'on' : 'hatch'}" style="height:${((x[1] - 5.5) / 3) * 100}%"><span>${x[1].toFixed(2)}</span></button>`).join('')}</div>
-        <div class="blab">${it.map((x) => `<span>${x[0]}</span>`).join('')}</div>`;
-    }
-    case 'calc': {
-      const { fv, inv } = calcVals(w);
-      return `<div class="row"><div><div class="lab">Monthly SIP</div><div class="num big" data-o="amt">${inr(w.amt)}</div></div><div class="yr">${[5, 10, 15].map((y) => `<button data-act="yrs" data-v="${y}" class="${y === w.yrs ? 'on' : ''}">${y}Y</button>`).join('')}</div></div>
-        <input class="rng" type="range" min="500" max="50000" step="500" value="${w.amt}" data-act="amt" aria-label="Monthly amount">
-        <div class="split"><i data-o="bi" style="width:${(inv / fv * 100).toFixed(1)}%"></i></div>
-        <div class="row"><div><div class="lab">Invested</div><div class="num" data-o="inv" style="font-size:17px">${lakh(inv)}</div></div><div class="r"><div class="lab">Est. value at 12%</div><div class="num" data-o="fv">${lakh(fv)}</div></div></div>`;
-    }
-    case 'table': {
-      const cols = ['Fund A', 'Fund B', 'Fund C'], rows = [['5Y return', '16.1%', '15.8%', '17.0%'], ['Fee', '0.9%', '0.5%', '1.1%'], ['Risk', 'High', 'Med', 'High'], ['Min. SIP', '₹500', '₹100', '₹1,000']];
-      const on = (j) => j - 1 === w.pick ? 'on' : '';
-      return `<table class="tbl"><tr><th></th>${cols.map((x, j) => `<th class="${on(j + 1)}"><button data-act="pick" data-v="${j}">${x}</button></th>`).join('')}</tr>${rows.map((r) => `<tr>${r.map((x, j) => `<td class="${j ? on(j) : ''}">${x}</td>`).join('')}</tr>`).join('')}</table>`;
-    }
-    case 'donut': {
-      const seg = [['Equity', 68, '#212121'], ['Debt', 18, '#645f5f'], ['Gold', 9, '#b5b2b2'], ['Cash', 5, '#eeeceb']];
-      let off = 0; const C = 2 * Math.PI * 40;
-      const arcs = seg.map((s, i) => { const len = s[1] / 100 * C; const a = `<circle cx="55" cy="55" r="40" fill="none" stroke="${s[2]}" stroke-width="${i === w.sel ? 20 : 14}" stroke-dasharray="${len - 2} ${C - len + 2}" stroke-dashoffset="${-off}" transform="rotate(-90 55 55)"/>`; off += len; return a; }).join('');
-      return `<div class="donut"><svg width="110" height="110" viewBox="0 0 110 110">${arcs}<text x="55" y="55" text-anchor="middle" font-size="17" font-weight="500" fill="#212121">${seg[w.sel][1]}%</text><text x="55" y="70" text-anchor="middle" font-size="10" fill="#645f5f">${seg[w.sel][0]}</text></svg>
-        <div class="legend">${seg.map((s, i) => `<button data-act="seg" data-v="${i}" class="${i === w.sel ? 'on' : ''}"><i style="background:${s[2]}"></i>${s[0]}<b>${s[1]}%</b></button>`).join('')}</div></div>`;
-    }
-    case 'list': {
-      const it = ['Work out 6 months of expenses', 'Open a liquid fund or sweep FD', 'Set up an auto-transfer', 'Review every 6 months'], dn = w.done.filter(Boolean).length;
-      return `<div class="lab">${dn} of 4 done</div><div class="prog"><i style="width:${dn / 4 * 100}%"></i></div><div class="chk">${it.map((x, i) => `<button data-act="chk" data-v="${i}" class="${w.done[i] ? 'on' : ''}"><i></i><span>${x}</span></button>`).join('')}</div>`;
-    }
+/* ---------- pull-down: P = 0 (collapsed) … 1 (widgets expanded with names) ---------- */
+let P = 0;
+const lerp = (a, b, k) => a + (b - a) * k;
+function layout(p) {
+  const has = thumbs.length > 0; if (!has) p = 0;
+  const top = lerp(124, 230, p);
+  sheet.style.top = top + 'px'; chat.style.height = (849 - top) + 'px';
+  rail.style.top = lerp(44, 112, p) + 'px'; rail.style.height = lerp(63, 97, p) + 'px';
+  rin.style.gap = lerp(7, 11, p) + 'px';
+  const w = lerp(95, 145, p), h = lerp(63, 97, p), lo = Math.max(0, (p - .35) / .65);
+  for (const t of thumbs) {
+    t.el.style.width = w + 'px'; t.el.style.height = h + 'px';
+    $('.lb', t.el).style.opacity = lo;
+    $('.g', t.el).style.transform = `translateY(${16 * p}px) scale(${1 + .22 * p})`;
+    const d = $('.dia', t.el); if (d) { d.style.left = lerp(75, 85, p) + 'px'; d.style.top = lerp(38, 36, p) + 'px'; }
   }
-  return '';
+  // collapsed thumbs sit between the two header buttons; expanded they start at the screen edge
+  rin.style.padding = `0 ${lerp(75, 17, p)}px`;
+  $('.t1', title).style.opacity = has ? 0 : 1;
+  $('#t2').style.opacity = has ? Math.max(0, (p - .5) * 2) : 0;
+  title.style.opacity = has ? (p > .02 ? 1 : 0) : 1;
+  rail.style.opacity = has ? 1 : 0;
+  $$('.fade').forEach((f) => { f.style.opacity = 1 - p; });
 }
-function widgetHTML(w, where) {
-  if (w.loading) return `<div class="lcard" data-w="${w.id}" data-where="${where}">Loading</div>`;
-  return `<div class="wg" data-w="${w.id}" data-where="${where}"><div class="ch"><span class="logo hatch"></span><b class="serif">${esc(w.title)}</b>${CHEV}</div><div class="cb">${body(w)}</div></div>`;
+let anim = 0;
+function animateTo(to) {
+  cancelAnimationFrame(anim);
+  const from = P, t0 = performance.now(), d = 420;
+  const step = (t) => { const k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 3); P = from + (to - from) * e; layout(P); if (k < 1) anim = requestAnimationFrame(step); };
+  anim = requestAnimationFrame(step);
 }
-function actionHTML(m) {
-  const a = ACTS[m.action.key], d = m.action.done;
-  return `<div class="act${d ? ' done' : ''}" data-m="${m.id}"><div class="ah"><span class="logo sm"></span><b class="serif">${esc(a[0])}</b></div>
-    <div class="ab"><div><small>${esc(a[1])}</small><div class="val"><b>${esc(a[2])}</b><span>${esc(a[3])}</span></div></div><button class="inv" data-act="pri">${d ? 'Done ✓' : esc(a[4])}</button></div></div>`;
-}
-function tileHTML(w, on) {
-  if (w.loading) return `<button class="tile load${on ? ' on' : ''}" data-tile="${w.id}"><small>LOADING</small></button>`;
-  return `<button class="tile${on ? ' on' : ''}${w.fresh ? ' new' : ''}" data-tile="${w.id}"><small>${META[w.kind].tile}</small>${tileGlyph(w.kind)}</button>`;
-}
-
-/* ---------- state ---------- */
-const chats = [];
-let cur = null;
-function seedChat(title, date, qs) {
-  const c = { id: 'c' + (++uid), title, date, msgs: [] };
-  qs.forEach(([q, p, t]) => { c.msgs.push({ role: 'u', text: q, time: t }); const r = makeReply(q, p); r.loading = false; if (r.widget) r.widget.fresh = false; c.msgs.push(r); });
-  return c;
-}
-chats.push(seedChat('Fixed deposit analysis', '23 Nov 2026', [['Where should I keep my emergency fund?', { kind: 'bars', text: true, action: true }, '']]));
-chats.push(seedChat('Mutual fund analysis', '16 Nov 2026', [['How did my SIP do vs Nifty?', { kind: 'line', text: true, action: false }, ''], ['Compare 3 flexi-cap funds', { kind: 'table', text: true, action: true }, '']]));
-chats.push(seedChat('Retirement SIP maths', '13 Nov 2026', [['How much SIP do I need to retire at 50?', { kind: 'calc', text: false, action: true }, ''], ['Show my portfolio split', { kind: 'donut', text: true, action: false }, '']]));
-chats.push(seedChat('FD vs debt fund', '9 Nov 2026', [['Compare an FD with a debt fund', { kind: 'table', text: true, action: true }, '']]));
-chats.push(seedChat('Emergency fund plan', '2 Nov 2026', [['Help me plan an emergency fund', { kind: 'list', text: true, action: false }, '']]));
-chats.push(seedChat('Why did markets fall?', '28 Oct 2026', [['Why did markets fall this week?', { kind: null, text: true, action: false }, '']]));
-chats.push(seedChat('Tax saving with ELSS', '21 Oct 2026', [['Should I use ELSS to save tax?', { kind: null, text: true, action: true }, '']]));
-chats.push(seedChat('Gold vs FD', '14 Oct 2026', [['Is gold better than an FD right now?', { kind: 'bars', text: true, action: false }, '']]));
-chats.push(seedChat('Home loan prepayment', '3 Oct 2026', [['Should I prepay my home loan or start a SIP?', { kind: 'calc', text: true, action: true }, '']]));
-const TODAY = (() => { const d = new Date(), m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']; return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`; })();
-function newChat() { cur = { id: 'c' + (++uid), title: 'New consultation', date: TODAY, msgs: [] }; renderAll(); }
-
-const chatEl = $('#chat');
-function renderChat() {
-  if (!cur.msgs.length) {
-    chatEl.innerHTML = `<div class="hello"><h1 class="serif">What do you want your money to do?</h1><p>Every answer can come with a widget, a short explanation and something you can act on. Widgets collect at the top.</p>
-      <div class="qs">${SUGG.slice(0, 3).map((s) => `<button class="pill" data-sugg="${esc(s.q)}">${esc(s.q)}</button>`).join('')}</div></div>`;
-    return;
-  }
-  chatEl.innerHTML = cur.msgs.map((m) => {
-    if (m.role === 'u') return `<div class="um"><div class="u">${esc(m.text)}${TAIL}</div></div>`;
-    if (m.loading) {
-      let s = `<div class="chip">${DOC}<span>${esc(m.status)}</span>${CHEV}</div>`;
-      if (m.widget) s += widgetHTML(m.widget, 'chat');
-      if (m.text) s += `<div class="desc sk"><i style="width:94%"></i><i style="width:86%"></i><i style="width:60%"></i></div>`;
-      if (m.action) s += `<div class="act sk"><div class="ah"><span class="logo sm"></span><div class="desc sk" style="flex:1"><i style="width:60%"></i></div></div><div class="ab"><div class="desc sk" style="flex:1"><i style="width:50%"></i></div><button class="inv" disabled style="border-color:#d8d6d4">&nbsp;</button></div></div>`;
-      return `<div class="a" data-m="${m.id}">${s}</div>`;
-    }
-    let s = '';
-    if (m.widget) s += widgetHTML(m.widget, 'chat');
-    if (m.text) s += m.text.split('\n\n').map((p) => `<p class="desc">${esc(p)}</p>`).join('');
-    if (m.action) s += actionHTML(m);
-    return `<div class="a" data-m="${m.id}">${s}</div>`;
-  }).join('');
-}
-function widgets() { return cur.msgs.filter((m) => m.widget).map((m) => m.widget); }
-function renderTiles() {
-  const ws = widgets(), ts = $('#tscroll');
-  setTray(ws.length > 0);
-  if (!ws.length) { ts.innerHTML = ''; activeId = null; return; }
-  ts.innerHTML = ws.map((w, i) => tileHTML(w, i === ws.length - 1)).join('');
-  activeId = ws[ws.length - 1].id;
-  requestAnimationFrame(() => { ts.scrollTo({ left: ts.scrollWidth, behavior: 'smooth' }); });
-}
-/* tray appears only once a widget exists; tile highlight follows the chat */
-let hasTray = false, activeId = null, lockSync = 0, syncRaf = 0;
-function setTray(on) {
-  if (on === hasTray) return; hasTray = on;
-  stage.classList.toggle('notray', !on);
-  if (!on && typeof setOpen === 'function' && open) setOpen(false);
-  if (stage.classList.contains('inchat')) postTop(on);
-}
-function centreTile(t, smooth = true) { const ts = $('#tscroll'); ts.scrollTo({ left: t.offsetLeft - (ts.clientWidth - t.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'auto' }); }
-function setActive(id, force) {
-  if (!id || (id === activeId && !force)) return; activeId = id;
-  const ts = $('#tscroll'); ts.querySelectorAll('.tile.on').forEach((x) => x.classList.remove('on'));
-  const t = ts.querySelector(`[data-tile="${id}"]`); if (t) { t.classList.add('on'); centreTile(t); }
-}
-function syncFromChat() {
-  syncRaf = 0; if (!hasTray || Date.now() < lockSync) return;
-  const els = [...chatEl.querySelectorAll('[data-where="chat"]')]; if (!els.length) return;
-  const mid = chatEl.scrollTop + chatEl.clientHeight * 0.45; let pick = els[0];
-  for (const el of els) if (el.offsetTop <= mid) pick = el;
-  if (chatEl.scrollTop + chatEl.clientHeight >= chatEl.scrollHeight - 4) pick = els[els.length - 1];
-  setActive(pick.dataset.w);
-}
-chatEl.addEventListener('scroll', () => { if (!syncRaf) syncRaf = requestAnimationFrame(syncFromChat); }, { passive: true });
-function renderSugg() {
-  const used = new Set(cur.msgs.filter((m) => m.role === 'u').map((m) => m.text));
-  $('#sugg').innerHTML = cur.msgs.length ? SUGG.filter((s) => !used.has(s.q)).map((s) => `<button class="pill" data-sugg="${esc(s.q)}">${esc(s.q)}</button>`).join('') : '';
-}
-function renderAll() { renderChat(); renderTiles(); renderSugg(); scrollEnd(); widgets().forEach((w) => { w.fresh = false; }); }
-function scrollEnd() { requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; }); }
-function refreshWidget(w) {
-  document.querySelectorAll(`[data-w="${w.id}"]`).forEach((el) => { const t = document.createElement('div'); t.innerHTML = widgetHTML(w, el.dataset.where); el.replaceWith(t.firstElementChild); });
-}
-
-/* ---------- sending ---------- */
-const input = $('#q'), sendBtn = $('#sendBtn');
-let busy = false;
-input.addEventListener('input', () => { sendBtn.disabled = !input.value.trim() || busy; });
-$('#form').addEventListener('submit', (e) => { e.preventDefault(); const q = input.value.trim(); if (q && !busy) { input.value = ''; sendBtn.disabled = true; input.blur(); send(q); } });
-function send(q, plan) {
-  busy = true;
-  if (!chats.includes(cur)) chats.unshift(cur);
-  if (cur.title === 'New consultation') cur.title = q.length > 30 ? q.slice(0, 29) + '…' : q;
-  cur.msgs.push({ role: 'u', text: q, time: now() });
-  const p = plan || (SUGG.find((s) => s.q === q) || {}).p || detect(q);
-  const r = makeReply(q, p); if (r.widget) r.widget.loading = true;
-  const chat = cur;
-  renderAll();
-  setTimeout(() => {
-    chat.msgs.push(r);
-    if (chat === cur) { renderChat(); renderTiles(); scrollEnd(); }
-    setTimeout(() => {
-      r.loading = false; if (r.widget) { r.widget.loading = false; r.widget.fresh = true; }
-      busy = false; sendBtn.disabled = !input.value.trim();
-      if (chat === cur) renderAll();
-    }, 1700 + (hash(q) % 700));
-  }, 350);
-}
-
-/* ---------- interactions ---------- */
-function findWidget(el) { const host = el.closest('[data-w]'); if (!host) return null; for (const c of [cur, ...chats]) for (const m of c.msgs) if (m.widget && m.widget.id === host.dataset.w) return m.widget; return null; }
-let toastT;
-function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 1600); }
-stage.addEventListener('click', (e) => {
-  if (suppress) { e.preventDefault(); e.stopPropagation(); return; }
-  if (!e.target.closest('#menu,#more')) $('#menu').classList.remove('on');
-  const t = e.target.closest('[data-act],[data-sugg],[data-tile],[data-goto],[data-chat]');
-  if (!t) return;
-  if (t.dataset.sugg) { if (!busy) send(t.dataset.sugg); return; }
-  if (t.dataset.tile) { const w = widgets().find((x) => x.id === t.dataset.tile); if (w && w.loading) { toast('Still generating…'); return; } lockSync = Date.now() + 900; setActive(t.dataset.tile, true); goTo(t.dataset.tile); return; }
-  
-  if (t.dataset.chat) { const c = [cur, ...chats].find((x) => x.id === t.dataset.chat); if (c) { cur = c; renderAll(); enterChat(); } return; }
-  const act = t.dataset.act;
-  if (act === 'pri') {
-    const card = t.closest('[data-m]'); const m = cur.msgs.find((x) => x.id === card.dataset.m); if (!m) return;
-    m.action.done = !m.action.done; const d = document.createElement('div'); d.innerHTML = actionHTML(m); card.replaceWith(d.firstElementChild);
-    if (m.action.done) toast(`${ACTS[m.action.key][4]} → opens that flow`); return;
-  }
-  const w = findWidget(t); if (!w) return; const v = +t.dataset.v;
-  if (act === 'tab') w.tab = v; else if (act === 'bar' || act === 'seg') w.sel = v; else if (act === 'yrs') w.yrs = v; else if (act === 'pick') w.pick = v; else if (act === 'chk') w.done[v] = !w.done[v]; else return;
-  refreshWidget(w);
-});
-stage.addEventListener('input', (e) => {
-  if (e.target.dataset.act !== 'amt') return;
-  const w = findWidget(e.target); if (!w) return; w.amt = +e.target.value; const { fv, inv } = calcVals(w);
-  document.querySelectorAll(`[data-w="${w.id}"]`).forEach((el) => {
-    el.querySelector('[data-o="amt"]').textContent = inr(w.amt); el.querySelector('[data-o="inv"]').textContent = lakh(inv);
-    el.querySelector('[data-o="fv"]').textContent = lakh(fv); el.querySelector('[data-o="bi"]').style.width = (inv / fv * 100).toFixed(1) + '%';
-    const r = el.querySelector('.rng'); if (r !== e.target) r.value = w.amt;
-  });
-});
-function goTo(id) {
-  const el = chatEl.querySelector(`[data-w="${id}"]`); if (!el) return;
-  chatEl.scrollTo({ top: el.offsetTop - 30, behavior: 'smooth' });
-  el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1100);
-}
-
-/* ---------- widget tray: drag the sheet down a little, tiles grow ---------- */
-const sheet = $('#sheet'), tiles = $('#tiles'), cmpEl = $('.cmp'), fades = [...document.querySelectorAll('.fade')];
-const DROP = 71, SCALE = 141 / 84, LIFT = 35; // matches the Figma "Widget center expanded" frames
-let open = false, drag = null, suppress = false, cur_e = 0, rafP = 0, settleT = 0;
-// spring easing, sampled into CSS linear() where supported
-const EASE = (() => {
-  const ok = window.CSS && CSS.supports && CSS.supports('transition-timing-function', 'linear(0, 1)');
-  if (!ok) return 'cubic-bezier(.2,.9,.25,1)';
-  const k = 190, c = 23, pts = []; let x = 0, v = 0; const dt = 1 / 600;
-  for (let i = 0; i <= 60; i++) { pts.push(x.toFixed(4)); for (let j = 0; j < 10; j++) { const a = -k * (x - 1) - c * v; v += a * dt; x += v * dt; } }
-  pts[pts.length - 1] = '1'; return `linear(${pts.join(',')})`;
-})();
-const DUR = 560;
-[sheet, tiles, cmpEl, ...fades].forEach((n) => { n.style.willChange = 'transform'; });
-fades.forEach((f) => { f.style.transformOrigin = f.classList.contains('l') ? '0 0' : '100% 0'; });
-function paint(e, anim) {
-  cur_e = e; const c = Math.max(0, Math.min(1, e));
-  const t = anim ? `transform ${DUR}ms ${EASE}, opacity 300ms ease` : 'none';
-  sheet.style.transition = anim ? `transform ${DUR}ms ${EASE}, top .55s var(--ease), height .55s var(--ease), border-radius .55s` : 'none';
-  sheet.style.transform = `translate3d(0,${e * DROP}px,0)`;
-  tiles.style.transition = t; tiles.style.transform = `translate3d(0,${e * LIFT}px,0) scale(${1 + e * (SCALE - 1)})`;
-  cmpEl.style.transition = t; cmpEl.style.transform = `translate3d(0,${-Math.max(0, e) * DROP}px,0)`;
-  fades.forEach((f) => { f.style.transition = t + ', opacity .4s'; f.style.transform = `scale(${(150 - c * 101) / 150},${(117 + c * 71) / 117})`; });
-  for (const b of [$('#burger'), $('#more')]) { b.style.transition = anim ? 'opacity .3s' : 'none'; b.style.opacity = 1 - c; b.style.pointerEvents = c > 0.5 ? 'none' : ''; }
-  stage.classList.toggle('tray-open', c > 0.5);
-}
-// the chat's bottom inset is a layout change, so only set it once the motion has settled
-function settleChat(v) { clearTimeout(settleT); if (!v) { chatEl.style.bottom = '0px'; return; } settleT = setTimeout(() => { chatEl.style.bottom = DROP + 'px'; }, DUR); }
-function setOpen(v) { open = v; paint(v ? 1 : 0, true); settleChat(v); centreActive(); }
-function centreActive() { const on = $('#tscroll .tile.on'); if (on) requestAnimationFrame(() => centreTile(on)); }
-function down(e) {
-  if (e.button > 0) return;
-  const g = e.target.closest('#grab,#tiles'); if (!g || !hasTray) return;
-  drag = { x0: e.clientX, y0: e.clientY, on: false, id: e.pointerId, hist: [[performance.now(), e.clientY]], base: cur_e };
-}
-function move(e) {
-  if (!drag || e.pointerId !== drag.id) return;
-  const dy = (e.clientY - drag.y0) / K, dx = (e.clientX - drag.x0) / K;
+let drag = null, moved = false;
+function down(y, fromHandle) { cancelAnimationFrame(anim); drag = { y0: y, p0: P, on: fromHandle, last: y, t: performance.now(), v: 0 }; moved = false; }
+function move(y, e) {
+  if (!drag) return;
+  const dy = y - drag.y0;
   if (!drag.on) {
-    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { drag = null; return; }
-    if (Math.abs(dy) < 4) return;
-    drag.on = true; drag.y0 = e.clientY; drag.base = cur_e; try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
-    // pick up from wherever an in-flight animation currently is
-    const m = new DOMMatrix(getComputedStyle(sheet).transform); drag.base = m.m42 / DROP; paint(drag.base, false);
+    if (Math.abs(dy) < 7) return;
+    // the sheet only follows the finger at the top of the chat: pull down to expand, push up to collapse
+    if (thumbs.length && chat.scrollTop <= 0 && ((dy > 0 && P < 1) || (dy < 0 && P > 0))) { drag.on = true; drag.y0 = y; drag.p0 = P; }
+    else { drag = null; return; }
   }
-  drag.hist.push([performance.now(), e.clientY]); if (drag.hist.length > 6) drag.hist.shift();
-  let x = drag.base + (e.clientY - drag.y0) / K / DROP;
-  if (x < 0) x = -(1 - 1 / (1 - x * 0.6)) / 0.6 * 0.35; // soft rubber band above
-  if (x > 1) x = 1 + (1 - 1 / (1 + (x - 1) * 0.8)) * 0.35; // and below
-  drag.x = x;
-  if (!rafP) rafP = requestAnimationFrame(() => { rafP = 0; if (drag) paint(drag.x, false); });
-  e.preventDefault();
+  if (e && e.cancelable) e.preventDefault();
+  moved = true;
+  const now = performance.now(); drag.v = (y - drag.last) / Math.max(1, now - drag.t); drag.last = y; drag.t = now;
+  let p = drag.p0 + (y - drag.y0) / 106;
+  if (p > 1) p = 1 + (p - 1) * .25; if (p < 0) p = p * .25;
+  P = p; layout(P);
 }
-function up(e) {
-  if (!drag || e.pointerId !== drag.id) return;
-  if (drag.on) {
-    cancelAnimationFrame(rafP); rafP = 0;
-    const hst = drag.hist, a = hst[0], b = hst[hst.length - 1];
-    const v = (b[1] - a[1]) / K / Math.max(16, b[0] - a[0]); // px per ms
-    const projected = (drag.x == null ? cur_e : drag.x) + (v * 120) / DROP; // where a flick would carry it
-    suppress = true; setTimeout(() => { suppress = false; }, 60);
-    setOpen(projected > 0.5);
+function up() {
+  if (!drag) return; const d = drag; drag = null;
+  if (!d.on) return;
+  const to = Math.abs(d.v) > .35 ? (d.v > 0 ? 1 : 0) : (P > .5 ? 1 : 0);
+  animateTo(to); setTimeout(() => { moved = false; }, 50);
+}
+const handle = $('#handle');
+sheet.addEventListener('touchstart', (e) => down(e.touches[0].clientY / K, !!e.target.closest('#handle')), { passive: true });
+sheet.addEventListener('touchmove', (e) => move(e.touches[0].clientY / K, e), { passive: false });
+sheet.addEventListener('touchend', up); sheet.addEventListener('touchcancel', up);
+sheet.addEventListener('mousedown', (e) => { if (e.target.closest('button, input, .chip')) return; down(e.clientY / K, !!e.target.closest('#handle')); });
+addEventListener('mousemove', (e) => { if (drag) move(e.clientY / K, e); });
+addEventListener('mouseup', up);
+handle.addEventListener('click', () => { if (!moved && thumbs.length) animateTo(P > .5 ? 0 : 1); });
+// trackpad / wheel: scrolling up past the top of the chat expands, scrolling down collapses first
+let wl = 0;
+chat.addEventListener('wheel', (e) => {
+  if (!thumbs.length) return;
+  const now = performance.now();
+  if (e.deltaY < -4 && chat.scrollTop <= 0 && P < 1) { e.preventDefault(); if (now - wl > 500) { wl = now; animateTo(1); } }
+  else if (e.deltaY > 4 && P > 0) { e.preventDefault(); if (now - wl > 500) { wl = now; animateTo(0); } }
+}, { passive: false });
+rail.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); rail.scrollLeft += e.deltaY; } }, { passive: false });
+
+/* ---------- widgets ---------- */
+function series(seed, n, drift) { // deterministic, bumpy NAV path
+  let s = seed, v = 0; const out = [];
+  const r = () => { s = (s * 16807) % 2147483647; return s / 2147483647 - .5; };
+  for (let i = 0; i < n; i++) { v += r() * 2.6 + drift; if (i % 9 === 4) v += r() * 7; out.push(v); }
+  return out;
+}
+const TF = { '1M': [11, -1.8, -.06], '6M': [23, 3.2, .03], '1Y': [7, .5, .005], '3Y': [41, 18.4, .14], '5Y': [5, 21.1, .2] };
+function chartSVG(tf) {
+  const [seed, , drift] = TF[tf], d = series(seed, 64, drift);
+  // shape it like the Figma chart for 1Y: a dip in the middle and a late recovery
+  if (tf === '1Y') for (let i = 0; i < d.length; i++) d[i] += -9 * Math.sin(Math.PI * Math.min(1, i / 56)) + (i > 58 ? (i - 58) * 3.2 : 0);
+  const lo = Math.min(...d), hi = Math.max(...d), W = 235, H = 197;
+  const pts = d.map((v, i) => [i / (d.length - 1) * W, 8 + (1 - (v - lo) / (hi - lo || 1)) * (H - 16)]);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
+  const neg = TF[tf][1] < 0, c = neg ? '#e5484d' : '#3fd519';
+  return { svg: `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="none"><defs><linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".32"/><stop offset="1" stop-color="${c}" stop-opacity=".02"/></linearGradient></defs>
+    <path d="${line}L${W} ${H}L0 ${H}Z" fill="url(#gf)"/><path class="ln" d="${line}" stroke="${c}" stroke-width="1.6" stroke-linejoin="round"/><path d="M0 ${H - .5}H${W}" stroke="#e4e1df"/></svg>`, neg };
+}
+const PP = '<svg width="34" height="22" viewBox="0 0 34 22"><ellipse cx="17" cy="13" rx="12" ry="7" fill="#3a8f3a"/><ellipse cx="17" cy="11" rx="9" ry="5" fill="#f2c94c"/><circle cx="29" cy="11" r="3.5" fill="#3a8f3a"/><circle cx="30" cy="10.3" r=".8" fill="#fff"/><path d="M8 16l-3 3M26 16l3 3" stroke="#3a8f3a" stroke-width="2" stroke-linecap="round"/></svg>';
+const WIDGETS = {
+  line() {
+    const el = document.createElement('div'); el.className = 'wg';
+    el.innerHTML = `<div class="hd"><span class="lo">${PP}</span><div><div class="nm">Parag Parikh Flexi Cap Fund</div><div class="mt">Direct • Equity • Flexi Cap</div></div></div>
+      <div class="rt"><svg width="19" height="19" viewBox="0 0 19 19" fill="none" class="ar"><path d="M4 15 15 4M7 4h8v8" stroke="#3fd519" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="p">0.5%</span><span class="tf">1Y</span></div>
+      <div class="ch"><div class="cv"></div><span class="yl" style="top:1px">₹95</span><span class="yl" style="top:91px">₹91</span><span class="yl" style="top:182px">₹86</span></div>
+      <div class="tfs">${Object.keys(TF).map((k) => `<button data-tf="${k}" class="${k === '1Y' ? 'on' : ''}">${k}</button>`).join('')}</div>
+      <button class="act press" data-act="alert">${LOGO('#fff', 14)} Remind me if it dips 5%</button>`;
+    const draw = (tf) => {
+      const { svg, neg } = chartSVG(tf), cv = $('.cv', el); cv.innerHTML = svg;
+      $('.p', el).textContent = Math.abs(TF[tf][1]) + '%'; $('.p', el).classList.toggle('neg', neg); $('.tf', el).textContent = tf;
+      const ar = $('.ar path', el); ar.setAttribute('stroke', neg ? '#e5484d' : '#3fd519'); $('.ar', el).style.transform = neg ? 'scaleY(-1)' : '';
+      const ln = $('.ln', cv), L = ln.getTotalLength(); ln.style.strokeDasharray = L; ln.style.strokeDashoffset = L;
+      ln.getBoundingClientRect(); ln.style.transition = 'stroke-dashoffset .9s cubic-bezier(.4,0,.2,1)'; ln.style.strokeDashoffset = 0;
+    };
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-tf]'); if (b) { $$('[data-tf]', el).forEach((x) => x.classList.toggle('on', x === b)); draw(b.dataset.tf); }
+      const a = e.target.closest('[data-act]'); if (a && !a.classList.contains('ok')) { a.classList.add('ok'); a.innerHTML = '<svg width="14" height="11" viewBox="0 0 14 11" fill="none"><path d="M1.5 5.5 5 9l7.5-7.5" stroke="#0b7a20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> You’ll get a nudge if it dips 5%'; }
+    });
+    requestAnimationFrame(() => draw('1Y'));
+    return el;
+  },
+  bars() {
+    const F = [['Your fund', 'Parag Parikh', 0.5, 1], ['Category avg', 'Flexi cap', -2.1, 0], ['Nifty 50', 'Index', -3.4, 0]];
+    const el = document.createElement('div'); el.className = 'wg';
+    const mx = 3.4;
+    el.innerHTML = `<h5>1 year return, side by side</h5><div class="sub">Parag Parikh Flexi Cap vs its category and the market</div>
+      <div class="bars">${F.map(([a, , r, me]) => `<div class="b ${me ? 'me' : ''}"><em>${r > 0 ? '+' : ''}${r}%</em><i data-h="${30 + Math.abs(r) / mx * 100}"></i></div>`).join('')}</div>
+      <div class="bl">${F.map(([a, b]) => `<span><b style="display:block;color:#282424;font-weight:500">${a}</b>${b}</span>`).join('')}</div>`;
+    requestAnimationFrame(() => requestAnimationFrame(() => $$('.bars i', el).forEach((i) => { i.style.height = i.dataset.h + 'px'; })));
+    return el;
+  },
+  calc() {
+    const el = document.createElement('div'); el.className = 'wg calc';
+    el.innerHTML = `<h5>SIP calculator</h5><div class="sub">At 12% a year, which is close to this fund’s long-run average</div>
+      <div class="row"><span>Every month</span><b id="ca">₹5,000</b></div><input type="range" min="500" max="50000" step="500" value="5000" aria-label="Monthly amount">
+      <div class="yrs">${[5, 10, 15, 20].map((y) => `<button data-y="${y}" class="${y === 10 ? 'on' : ''}">${y} yrs</button>`).join('')}</div>
+      <div class="res"><small>Could grow to</small><b class="fv">₹0</b><p class="iv"></p></div>
+      <button class="act press" data-act="sip">${LOGO('#fff', 14)} Start this SIP</button>`;
+    let amt = 5000, yrs = 10;
+    const calc = () => {
+      const r = .12 / 12, n = yrs * 12, fv = amt * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+      $('#ca', el).textContent = inr(amt); $('.fv', el).textContent = inr(fv);
+      $('.iv', el).textContent = `You put in ${inr(amt * n)}. The other ${inr(fv - amt * n)} is growth.`;
+    };
+    $('input', el).addEventListener('input', (e) => { amt = +e.target.value; calc(); });
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-y]'); if (b) { yrs = +b.dataset.y; $$('[data-y]', el).forEach((x) => x.classList.toggle('on', x === b)); calc(); }
+      if (e.target.closest('[data-act]')) { if (EMB) post({ decade: 'go', to: 'funds' }); else toast(`Opens a ${inr(amt)} monthly SIP in Mutual funds`); }
+    });
+    calc();
+    return el;
+  },
+};
+
+/* ---------- scripted answers ---------- */
+const SCRIPT = [
+  { re: /compar|vs\b|versus|other fund|better|peer/i, kind: 'bars', action: false,
+    steps: ['Creating research plan…', 'Pulling 1 year returns for flexi cap funds…', 'Lining them up…'],
+    text: 'Your fund fell less than most. Over the last year it is up 0.5%, while the average flexi cap fund is down 2.1% and the Nifty 50 is down 3.4%.' },
+  { re: /sip|calculat|grow|how much|invest more|monthly/i, kind: 'calc', action: true,
+    steps: ['Creating research plan…', 'Checking this fund’s long-run returns…', 'Setting up the calculator…'],
+    text: 'Here is how your monthly SIP could add up. Move the amount and pick a time frame to see the difference.' },
+  { re: /why|fund|happen|fell|fall|drop|perform|remind/i, kind: 'line', action: true,
+    steps: ['Creating research plan…', 'Reading your fund’s last 12 months…', 'Drawing the chart…'],
+    text: 'Siddarth, For the next few weeks the number will move around a bit, up and down. That’s normal and it doesn’t mean anything yet. The part that matters is the 1st of every month, and that’s already handled.' },
+];
+const SUGGEST = ['Why do you think this happened with my fund? why did you not remind me?', 'Compare it with other flexi cap funds', 'How much will a ₹5,000 SIP grow?'];
+let busy = false;
+function renderEmpty() {
+  chat.innerHTML = `<div class="hello" id="hello"><p>Try asking</p>${SUGGEST.map((s) => `<button class="chip press" data-s="${esc(s)}">${esc(s)}</button>`).join('')}</div>`;
+  const h = $('#hello'); h.style.bottom = '0'; chat.style.minHeight = '';
+  h.style.position = 'absolute'; h.style.top = 'auto'; h.style.bottom = '125px';
+}
+chat.addEventListener('click', (e) => { const c = e.target.closest('[data-s]'); if (c) ask(c.dataset.s); });
+const nowT = () => { const d = new Date(); return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
+function toBottom() { chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' }); }
+async function ask(text) {
+  text = text.trim(); if (!text || busy) return; busy = true;
+  const h = $('#hello'); if (h) h.remove();
+  q.value = ''; send.classList.remove('go'); q.blur();
+  const u = document.createElement('div');
+  u.innerHTML = `<div class="msg u">${esc(text)}${TAIL_U}</div><div class="read"><b>Read</b> ${nowT()}</div>`;
+  chat.appendChild(u); toBottom();
+  const s = SCRIPT.find((x) => x.re.test(text));
+  await sleep(450);
+  // thinking: a status line in the chat, and a shimmering thumbnail being generated in the drawer
+  const th = document.createElement('div'); th.className = 'think'; th.innerHTML = `<span class="lg">${LOGO('#4d1c14', 13)}</span><span>${s ? s.steps[0] : 'Thinking…'}</span>`;
+  chat.appendChild(th); toBottom();
+  let t = null;
+  if (s) { await sleep(500); t = addThumb(s.kind, s.action); }
+  for (const st of (s ? s.steps.slice(1) : [])) { await sleep(900); $('span:last-child', th).textContent = st; }
+  await sleep(s ? 800 : 1100);
+  th.remove();
+  const a = document.createElement('div'); a.className = 'msg a'; a.innerHTML = `<span class="tx"></span>${TAIL_A}`;
+  chat.appendChild(a);
+  const words = (s ? s.text : 'I can help with your FDs, mutual funds and SIPs. Try asking why a fund moved, how it compares, or how much a SIP could grow.').split(' ');
+  const tx = $('.tx', a);
+  for (let i = 0; i < words.length; i++) { tx.textContent = words.slice(0, i + 1).join(' '); if (i % 4 === 0) chat.scrollTop = chat.scrollHeight; await sleep(28); }
+  if (s) {
+    await sleep(250);
+    const w = WIDGETS[s.kind](); chat.appendChild(w); t.wid = w;
+    t.el.classList.remove('gen'); t.el.classList.add('done');
+    setTimeout(() => t.el.classList.remove('born'), 600);
+    await sleep(60); chat.scrollTo({ top: Math.max(0, w.offsetTop - 160), behavior: 'smooth' });
   }
-  drag = null;
+  busy = false;
 }
-stage.addEventListener('pointerdown', down);
-addEventListener('pointermove', move, { passive: false });
-addEventListener('pointerup', up); addEventListener('pointercancel', up);
-$('#grab').addEventListener('click', () => { if (!suppress) setOpen(!open); });
+$('#bar').addEventListener('submit', (e) => { e.preventDefault(); ask(q.value); });
+q.addEventListener('input', () => send.classList.toggle('go', q.value.trim().length > 0));
+$('.plus').addEventListener('click', () => toast('Attach a statement or a screenshot'));
+function reset() {
+  thumbs.length = 0; rin.innerHTML = ''; busy = false; P = 0; renderEmpty(); layout(0);
+}
+$('#more').addEventListener('click', () => { reset(); toast('New chat'); });
+$('#back').addEventListener('click', () => { if (EMB) post({ decade: 'menu' }); else reset(); });
 
-/* ---------- drawer + menu ---------- */
-/* ---------- home / landing ---------- */
-function renderHome() {
-  const all = chats.filter((c) => c.msgs.length);
-  const card = (c) => `<button class="sb-card" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${c.date}</small></button>`;
-  const item = (c) => `<button class="sb-item" data-chat="${c.id}"><b>${esc(c.title)}</b><small>${c.date}</small></button>`;
-  $('#homeGrid').innerHTML = all.slice(0, 4).map(card).join('');
-  $('#homeList').innerHTML = all.slice(4).map(item).join('');
-}
-function postTop(dark) { if (EMB) try { parent.postMessage({ decade: 'agentTop', dark }, '*'); } catch (_) {} }
-function goHome() {
-  if (open) setOpen(false);
-  $('#menu').classList.remove('on'); input.blur();
-  stage.classList.remove('inchat'); renderHome(); postTop(false);
-}
-function enterChat() { stage.classList.add('inchat'); postTop(hasTray); }
-function setTab(tab) {
-  document.querySelectorAll('.dock .dbtn').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
-  document.querySelectorAll('.hpage').forEach((pg) => { pg.hidden = pg.dataset.page !== tab; });
-}
-document.querySelectorAll('.dock .dbtn').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
-document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
-  document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b));
-  document.querySelectorAll('[data-segpage]').forEach((pg) => { pg.hidden = pg.dataset.segpage !== b.dataset.seg; });
-}));
-$('#pfBtn').addEventListener('click', () => $('#home').classList.add('pf'));
-$('#pfClose').addEventListener('click', () => $('#home').classList.remove('pf'));
-$('#homeAsk').addEventListener('click', () => { newChat(); input.focus(); enterChat(); });
-$('#hActions').addEventListener('click', () => toast('Actions isn’t in this prototype yet'));
-$('#burger').addEventListener('click', () => goHome());
-
-document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
-  const to = b.dataset.go;
-  if (to === 'portfolio') { toast('Portfolio isn’t in this prototype yet'); return; }
-  if (EMB) setTimeout(() => parent.postMessage({ decade: 'go', to }, '*'), 200); else toast(`Opens ${to === 'fd' ? 'Fixed deposit' : 'Mutual funds'} in the app`);
-}));
-$('#more').addEventListener('click', () => { $('#mOpen').style.display = hasTray ? '' : 'none'; $('#menu').classList.toggle('on'); });
-$('#mNew').addEventListener('click', () => { $('#menu').classList.remove('on'); if (cur.msgs.length) newChat(); toast('New consultation'); });
-$('#mOpen').addEventListener('click', () => { $('#menu').classList.remove('on'); setOpen(!open); });
-
-newChat(); renderHome();
-window.__agent = { send, setOpen, goHome, get cur() { return cur; } };
+renderEmpty(); layout(0);
+// deep link for reviews: ?demo asks the first question straight away
+if (/[?&]demo\b/.test(location.search)) setTimeout(() => ask(SUGGEST[0]), 500);
 })();
 </script>
-</body>
-</html>
+</body></html>
