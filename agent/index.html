@@ -106,6 +106,22 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
 .calc .res b{display:block;margin-top:4px;font:500 27px/32px Inter,sans-serif;color:#1b7a0e;letter-spacing:.02em}
 .calc .res p{margin:6px 0 0;font-size:12px;line-height:16px;color:#6f8a68}
 
+.why{margin-top:14px}
+.wr{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid #efedea}
+.wr:first-child{border-top:0}
+.wr .v{flex:none;width:52px;padding:4px 0;border-radius:8px;background:#eaf7e5;color:#2a9d12;font:500 13px/16px Inter,sans-serif;text-align:center}
+.wr .v.neg{background:#fdecec;color:#d23c41}
+.wr b{display:block;font:500 15px/20px Inter,sans-serif}.wr small{display:block;margin-top:2px;font-size:12px;line-height:16px;color:#787373}
+.dn{display:flex;align-items:center;gap:18px;margin-top:18px}
+.lg2{flex:1;display:flex;flex-direction:column;gap:12px}
+.lg2 div{display:flex;align-items:center;gap:8px;font-size:13px;color:#645f5f}
+.lg2 i{width:10px;height:10px;border-radius:3px}.lg2 b{margin-left:auto;font:500 14px/17px Inter,sans-serif;color:#282424}
+.nx{display:flex;gap:14px;align-items:center;margin-top:16px}
+.nx .cal{flex:none;width:52px;height:56px;border-radius:12px;border:1px solid #ececea;background:#fff;text-align:center;overflow:hidden}
+.nx .cal small{display:block;height:18px;background:#4d1c14;color:#fff;font:500 11px/18px Inter,sans-serif;letter-spacing:.06em}
+.nx .cal b{display:block;font:500 22px/36px Inter,sans-serif}
+.nx > div b{display:block;font:500 16px/21px Inter,sans-serif}.nx > div small{display:block;margin-top:3px;font-size:12px;line-height:16px;color:#787373}
+.row2{display:flex;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid #efedea;font-size:13px;color:#787373}.row2 b{font:500 14px/17px Inter,sans-serif;color:#282424}
 /* empty state */
 .hello{position:absolute;left:17px;right:17px;bottom:0;display:flex;flex-direction:column;align-items:flex-start;gap:9px;transition:opacity .3s}
 .hello p{margin:0 0 6px 3px;font:400 15px/21px Outfit,sans-serif;color:#8d8888}
@@ -183,8 +199,11 @@ const GFX = {
     <g stroke="${GL}" stroke-width="1.3" stroke-linecap="round"><path d="M37 16.5v7M33.5 20h7M55.5 17.5l5 5M60.5 17.5l-5 5M33.5 43h7M54.5 43h7"/></g><circle cx="58" cy="39.8" r=".9" fill="${GL}"/><circle cx="58" cy="46.2" r=".9" fill="${GL}"/></svg>`,
   bars: `<svg width="95" height="63" viewBox="0 0 95 63"><rect x="15" y="35" width="18" height="17" rx="3" fill="${W60}"/><rect x="38" y="25" width="18" height="27" rx="3" fill="${W60}"/><rect x="62" y="16" width="18" height="36" rx="3" fill="${W60}"/></svg>`,
   line: `<svg width="95" height="63" viewBox="0 0 95 63"><path d="M-6 52C8 52 14 32 30 34s20 20 34 12 20-30 38-34" stroke="${W60}" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+  donut: `<svg width="95" height="63" viewBox="0 0 95 63"><circle cx="47.5" cy="31.5" r="17" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="8"/><circle cx="47.5" cy="31.5" r="17" fill="none" stroke="${W60}" stroke-width="8" stroke-dasharray="72 107" transform="rotate(-90 47.5 31.5)"/></svg>`,
+  why: `<svg width="95" height="63" viewBox="0 0 95 63"><g fill="${W60}"><circle cx="24" cy="18" r="4"/><circle cx="24" cy="32" r="4"/><circle cx="24" cy="46" r="4"/><rect x="33" y="15" width="40" height="6" rx="3"/><rect x="33" y="29" width="30" height="6" rx="3"/><rect x="33" y="43" width="36" height="6" rx="3"/></g></svg>`,
+  sip: `<svg width="95" height="63" viewBox="0 0 95 63"><rect x="29" y="12" width="37" height="38" rx="5" fill="${W60}"/><rect x="29" y="12" width="37" height="10" rx="5" fill="rgba(255,255,255,.85)"/><path d="M37 9v7M58 9v7" stroke="rgba(255,255,255,.85)" stroke-width="3" stroke-linecap="round"/><g fill="${GL}"><circle cx="38" cy="30" r="1.6"/><circle cx="47.5" cy="30" r="1.6"/><circle cx="57" cy="30" r="1.6"/><circle cx="38" cy="40" r="1.6"/><circle cx="57" cy="40" r="1.6"/></g><circle cx="47.5" cy="40" r="4" fill="#4d1c14" opacity=".75"/></svg>`,
 };
-const NAMES = { calc: 'Calculate', bars: 'Compare', line: 'Performance' };
+const NAMES = { calc: 'Calculate', bars: 'Compare', line: 'Performance', donut: 'Holdings', why: 'What moved', sip: 'Next SIP' };
 const thumbs = []; // { el, kind, action, wid }
 function addThumb(kind, action) {
   const el = document.createElement('button');
@@ -329,6 +348,32 @@ const WIDGETS = {
     requestAnimationFrame(() => requestAnimationFrame(() => $$('.bars i', el).forEach((i) => { i.style.height = i.dataset.h + 'px'; })));
     return el;
   },
+  why() {
+    const R = [['US tech stocks fell 6% this quarter', 'About 13% of the fund is in Alphabet, Meta and Microsoft', -0.9], ['The rupee weakened against the dollar', 'This softens the hit on the foreign stocks', 0.4], ['Indian banks held steady', 'HDFC Bank and ICICI Bank are its two biggest holdings', 0.2]];
+    const el = document.createElement('div'); el.className = 'wg';
+    el.innerHTML = `<h5>What moved your fund</h5><div class="sub">The last 3 months, in order of impact</div>
+      <div class="why">${R.map(([a, b, v]) => `<div class="wr"><span class="v ${v < 0 ? 'neg' : ''}">${v > 0 ? '+' : ''}${v}%</span><div><b>${a}</b><small>${b}</small></div></div>`).join('')}</div>`;
+    return el;
+  },
+  donut() {
+    const H = [['Indian stocks', 67, '#3a3535'], ['Foreign stocks', 13, '#b98a80'], ['Debt and cash', 20, '#e4dcd6']];
+    let off = 0; const C = 2 * Math.PI * 46;
+    const arcs = H.map(([, v, c]) => { const a = `<circle cx="60" cy="60" r="46" fill="none" stroke="${c}" stroke-width="20" stroke-dasharray="0 ${C}" data-d="${v / 100 * C - 2} ${C}" stroke-dashoffset="${-off / 100 * C}" transform="rotate(-90 60 60)" style="transition:stroke-dasharray .9s cubic-bezier(.22,1,.36,1)"/>`; off += v; return a; }).join('');
+    const el = document.createElement('div'); el.className = 'wg';
+    el.innerHTML = `<h5>Where your money sits</h5><div class="sub">Parag Parikh Flexi Cap, as of 31 Oct 2026</div>
+      <div class="dn"><svg width="120" height="120" viewBox="0 0 120 120">${arcs}</svg><div class="lg2">${H.map(([n, v, c]) => `<div><i style="background:${c}"></i><span>${n}</span><b>${v}%</b></div>`).join('')}</div></div>`;
+    requestAnimationFrame(() => requestAnimationFrame(() => $$('circle[data-d]', el).forEach((c) => c.setAttribute('stroke-dasharray', c.dataset.d))));
+    return el;
+  },
+  sip() {
+    const el = document.createElement('div'); el.className = 'wg';
+    el.innerHTML = `<h5>Your next SIP</h5><div class="sub">Already set up, nothing to do</div>
+      <div class="nx"><div class="cal"><small>DEC</small><b>1</b></div><div><b>₹5,000 on 1 Dec 2026</b><small>From HDFC Bank xxxx4563 · 14th instalment</small></div></div>
+      <div class="row2"><span>Units at today’s price</span><b>≈ 54.6</b></div>
+      <button class="act press" data-act="topup">${LOGO('#fff', 14)} Add ₹2,000 this month</button>`;
+    el.addEventListener('click', (e) => { const a = e.target.closest('[data-act]'); if (a && !a.classList.contains('ok')) { a.classList.add('ok'); a.innerHTML = '<svg width="14" height="11" viewBox="0 0 14 11" fill="none"><path d="M1.5 5.5 5 9l7.5-7.5" stroke="#0b7a20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> ₹7,000 goes in on 1 Dec'; } });
+    return el;
+  },
   calc() {
     const el = document.createElement('div'); el.className = 'wg calc';
     el.innerHTML = `<h5>SIP calculator</h5><div class="sub">At 12% a year, which is close to this fund’s long-run average</div>
@@ -354,17 +399,21 @@ const WIDGETS = {
 
 /* ---------- scripted answers ---------- */
 const SCRIPT = [
-  { re: /compar|vs\b|versus|other fund|better|peer/i, kind: 'bars', action: false,
-    steps: ['Creating research plan…', 'Pulling 1 year returns for flexi cap funds…', 'Lining them up…'],
-    text: 'Your fund fell less than most. Over the last year it is up 0.5%, while the average flexi cap fund is down 2.1% and the Nifty 50 is down 3.4%.' },
-  { re: /sip|calculat|grow|how much|invest more|monthly/i, kind: 'calc', action: true,
+  { re: /review|whole|portfolio|everything|all my/i, kinds: ['line', 'why', 'bars', 'donut', 'sip', 'calc'],
+    steps: ['Creating research plan…', 'Reading your fund’s last 12 months…', 'Comparing it with its peers…', 'Checking what it holds…', 'Looking at your SIP…', 'Putting the widgets together…'],
+    text: 'Here is the full picture in six widgets. Short version: your fund is up a little this year while most of its peers are down, and your SIP keeps buying every month, so there is nothing you need to fix.' },
+  { re: /compar|vs\b|versus|other fund|better|peer/i, kinds: ['bars', 'donut'],
+    steps: ['Creating research plan…', 'Pulling 1 year returns for flexi cap funds…', 'Checking what each one holds…'],
+    text: 'Your fund fell less than most. Over the last year it is up 0.5%, while the average flexi cap fund is down 2.1% and the Nifty 50 is down 3.4%. Part of the reason is how its money is spread.' },
+  { re: /sip|calculat|grow|how much|invest more|monthly/i, kinds: ['calc', 'sip'],
     steps: ['Creating research plan…', 'Checking this fund’s long-run returns…', 'Setting up the calculator…'],
-    text: 'Here is how your monthly SIP could add up. Move the amount and pick a time frame to see the difference.' },
-  { re: /why|fund|happen|fell|fall|drop|perform|remind/i, kind: 'line', action: true,
-    steps: ['Creating research plan…', 'Reading your fund’s last 12 months…', 'Drawing the chart…'],
+    text: 'Here is how your monthly SIP could add up. Move the amount and pick a time frame to see the difference. Your next instalment is below too.' },
+  { re: /why|fund|happen|fell|fall|drop|perform|remind/i, kinds: ['line', 'why', 'sip'],
+    steps: ['Creating research plan…', 'Reading your fund’s last 12 months…', 'Finding what moved it…', 'Drawing the chart…'],
     text: 'Siddarth, For the next few weeks the number will move around a bit, up and down. That’s normal and it doesn’t mean anything yet. The part that matters is the 1st of every month, and that’s already handled.' },
 ];
-const SUGGEST = ['Why do you think this happened with my fund? why did you not remind me?', 'Compare it with other flexi cap funds', 'How much will a ₹5,000 SIP grow?'];
+const ACTION = { line: true, calc: true, sip: true }; // widgets with a clear action get the diamond badge
+const SUGGEST = ['Review my whole portfolio', 'Why do you think this happened with my fund? why did you not remind me?', 'Compare it with other flexi cap funds', 'How much will a ₹5,000 SIP grow?'];
 let busy = false;
 function renderEmpty() {
   chat.innerHTML = `<div class="hello" id="hello"><p>Try asking</p>${SUGGEST.map((s) => `<button class="chip press" data-s="${esc(s)}">${esc(s)}</button>`).join('')}</div>`;
@@ -386,9 +435,13 @@ async function ask(text) {
   // thinking: a status line in the chat, and a shimmering thumbnail being generated in the drawer
   const th = document.createElement('div'); th.className = 'think'; th.innerHTML = `<span class="lg">${LOGO('#4d1c14', 13)}</span><span>${s ? s.steps[0] : 'Thinking…'}</span>`;
   chat.appendChild(th); toBottom();
-  let t = null;
-  if (s) { await sleep(500); t = addThumb(s.kind, s.action); }
-  for (const st of (s ? s.steps.slice(1) : [])) { await sleep(900); $('span:last-child', th).textContent = st; }
+  const ts = [];
+  const steps = s ? s.steps.slice(1) : [];
+  if (s) for (let i = 0; i < Math.max(s.kinds.length, steps.length); i++) {
+    await sleep(i ? 520 : 500);
+    if (i < s.kinds.length) ts.push(addThumb(s.kinds[i], !!ACTION[s.kinds[i]]));
+    if (i < steps.length) $('span:last-child', th).textContent = steps[i];
+  }
   await sleep(s ? 800 : 1100);
   th.remove();
   const a = document.createElement('div'); a.className = 'msg a'; a.innerHTML = `<span class="tx"></span>${TAIL_A}`;
@@ -396,11 +449,13 @@ async function ask(text) {
   const words = (s ? s.text : 'I can help with your FDs, mutual funds and SIPs. Try asking why a fund moved, how it compares, or how much a SIP could grow.').split(' ');
   const tx = $('.tx', a);
   for (let i = 0; i < words.length; i++) { tx.textContent = words.slice(0, i + 1).join(' '); if (i % 4 === 0) chat.scrollTop = chat.scrollHeight; await sleep(28); }
-  if (s) {
-    await sleep(250);
-    const w = WIDGETS[s.kind](); chat.appendChild(w); t.wid = w;
+  let first = null;
+  for (const t of ts) {
+    await sleep(first ? 650 : 250);
+    const w = WIDGETS[t.kind](); chat.appendChild(w); t.wid = w; first = first || w;
     t.el.classList.remove('gen'); t.el.classList.add('done');
     setTimeout(() => t.el.classList.remove('born'), 600);
+    t.el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     await sleep(60); chat.scrollTo({ top: Math.max(0, w.offsetTop - 160), behavior: 'smooth' });
   }
   busy = false;
