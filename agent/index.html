@@ -399,21 +399,38 @@ const WIDGETS = {
   },
 };
 
-/* ---------- scripted answers ---------- */
-const SCRIPT = [
-  { re: /review|whole|portfolio|everything|all my/i, kinds: ['line', 'why', 'bars', 'donut', 'sip', 'calc'],
-    steps: ['Creating research plan…', 'Reading your fund’s last 12 months…', 'Comparing it with its peers…', 'Checking what it holds…', 'Looking at your SIP…', 'Putting the widgets together…'],
-    text: 'Here is the full picture in six widgets. Short version: your fund is up a little this year while most of its peers are down, and your SIP keeps buying every month, so there is nothing you need to fix.' },
-  { re: /compar|vs\b|versus|other fund|better|peer/i, kinds: ['bars', 'donut'],
-    steps: ['Creating research plan…', 'Pulling 1 year returns for flexi cap funds…', 'Checking what each one holds…'],
-    text: 'Your fund fell less than most. Over the last year it is up 0.5%, while the average flexi cap fund is down 2.1% and the Nifty 50 is down 3.4%. Part of the reason is how its money is spread.' },
-  { re: /sip|calculat|grow|how much|invest more|monthly/i, kinds: ['calc', 'sip'],
-    steps: ['Creating research plan…', 'Checking this fund’s long-run returns…', 'Setting up the calculator…'],
-    text: 'Here is how your monthly SIP could add up. Move the amount and pick a time frame to see the difference. Your next instalment is below too.' },
-  { re: /why|fund|happen|fell|fall|drop|perform|remind/i, kinds: ['line', 'why', 'sip'],
-    steps: ['Creating research plan…', 'Reading your fund’s last 12 months…', 'Finding what moved it…', 'Drawing the chart…'],
-    text: 'Siddarth, For the next few weeks the number will move around a bit, up and down. That’s normal and it doesn’t mean anything yet. The part that matters is the 1st of every month, and that’s already handled.' },
+/* ---------- scripted answers: one widget + its description per prompt ---------- */
+const ORDER = ['line', 'why', 'bars', 'donut', 'sip', 'calc'];
+const ROUTES = [
+  { re: /review|whole|portfolio|everything|all my/i, kinds: ['donut', 'line', 'why', 'bars', 'sip', 'calc'] },
+  { re: /compar|vs\b|versus|other fund|better|peer/i, kinds: ['bars', 'donut'] },
+  { re: /sip|calculat|grow|how much|invest more|monthly/i, kinds: ['calc', 'sip'] },
+  { re: /why|happen|fell|fall|drop|remind|moved/i, kinds: ['why', 'line', 'sip'] },
+  { re: /fund|perform|doing|return|how is/i, kinds: ['line', 'why'] },
+  { re: /hold|own|spread|stocks|allocat/i, kinds: ['donut'] },
 ];
+const KSTEPS = {
+  line: ['Creating research plan…', 'Reading your fund’s last 12 months…', 'Drawing the chart…'],
+  why: ['Creating research plan…', 'Looking at the last 3 months…', 'Finding what moved it…'],
+  bars: ['Creating research plan…', 'Pulling 1 year returns for flexi cap funds…', 'Lining them up…'],
+  donut: ['Creating research plan…', 'Checking what the fund holds…'],
+  sip: ['Creating research plan…', 'Looking at your SIP…'],
+  calc: ['Creating research plan…', 'Checking this fund’s long-run returns…', 'Setting up the calculator…'],
+};
+const KTEXT = {
+  line: 'Your fund is up 0.5% over the last year. It dipped in the middle of the year and has been recovering since. Switch the range to see the longer trend.',
+  why: 'Three things moved it over the last 3 months. US tech stocks pulled it down 0.9%, while a weaker rupee and steady Indian banks added back 0.6%.',
+  bars: 'Your fund fell less than most. Over the last year it is up 0.5%, while the average flexi cap fund is down 2.1% and the Nifty 50 is down 3.4%.',
+  donut: '67% of your money is in Indian stocks, 13% in foreign stocks and 20% in debt and cash. That spread is part of why it held up better than its peers.',
+  sip: 'Your next SIP of ₹5,000 goes out on 1 Dec 2026 from HDFC Bank. It is already set up, so there is nothing you need to do.',
+  calc: 'Here is how a monthly SIP could add up at 12% a year. Move the amount and pick a time frame to see the difference.',
+};
+// pick the widget for this prompt: the first one its topic suggests that this chat hasn't shown yet
+function pickKind(text) {
+  const r = ROUTES.find((x) => x.re.test(text)); const pref = r ? r.kinds : ORDER;
+  const seen = new Set(thumbs.map((t) => t.kind));
+  return pref.find((k) => !seen.has(k)) || ORDER.find((k) => !seen.has(k)) || pref[0];
+}
 const LOADING = { line: 'Drawing the chart…', why: 'Finding what moved it…', bars: 'Building the comparison…', donut: 'Checking what it holds…', sip: 'Getting your next SIP…', calc: 'Setting up the calculator…' };
 const ACTION = { line: true, calc: true, sip: true }; // widgets with a clear action get the diamond badge
 const SUGGEST = ['Review my whole portfolio', 'Why do you think this happened with my fund? why did you not remind me?', 'Compare it with other flexi cap funds', 'How much will a ₹5,000 SIP grow?'];
@@ -433,36 +450,32 @@ async function ask(text) {
   const u = document.createElement('div');
   u.innerHTML = `<div class="msg u">${esc(text)}${TAIL_U}</div><div class="read"><b>Read</b> ${nowT()}</div>`;
   chat.appendChild(u); toBottom();
-  const s = SCRIPT.find((x) => x.re.test(text));
+  const kind = pickKind(text), steps = KSTEPS[kind];
   await sleep(450);
-  // thinking: a status line in the chat, and a shimmering thumbnail being generated in the drawer
-  const th = document.createElement('div'); th.className = 'think'; th.innerHTML = `<span class="lg">${LOGO('#4d1c14', 13)}</span><span>${s ? s.steps[0] : 'Thinking…'}</span>`;
+  // thinking: a status line in the chat
+  const th = document.createElement('div'); th.className = 'think'; th.innerHTML = `<span class="lg">${LOGO('#4d1c14', 13)}</span><span>${steps[0]}</span>`;
   chat.appendChild(th); toBottom();
-  const steps = s ? s.steps.slice(1) : [];
-  for (let i = 0; i < steps.length; i++) { await sleep(i ? 520 : 500); $('span:last-child', th).textContent = steps[i]; }
-  await sleep(s ? 700 : 1100);
-  th.remove();
+  for (let i = 1; i < steps.length; i++) { await sleep(600); $('span:last-child', th).textContent = steps[i]; }
+  await sleep(400);
+  // the widget: a loading card in the chat and a loading tile in the tray, then the widget itself
+  const t = addThumb(kind, !!ACTION[kind]);
+  const ld = document.createElement('div'); ld.className = 'wload'; ld.textContent = LOADING[kind];
+  th.replaceWith(ld);
+  await sleep(60); chat.scrollTo({ top: Math.max(0, ld.offsetTop - 160), behavior: 'smooth' });
+  await sleep(1100);
+  ld.classList.add('out'); await sleep(200);
+  const w = WIDGETS[kind](); ld.replaceWith(w); t.wid = w;
+  t.el.classList.remove('gen'); t.el.classList.add('done');
+  setTimeout(() => t.el.classList.remove('born'), 600);
+  t.el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  await sleep(60); chat.scrollTo({ top: Math.max(0, w.offsetTop - 160), behavior: 'smooth' });
+  // then its description, written in word by word
+  await sleep(450);
   const a = document.createElement('div'); a.className = 'msg a'; a.innerHTML = `<span class="tx"></span>${TAIL_A}`;
   chat.appendChild(a);
-  const words = (s ? s.text : 'I can help with your FDs, mutual funds and SIPs. Try asking why a fund moved, how it compares, or how much a SIP could grow.').split(' ');
-  const tx = $('.tx', a);
+  const words = KTEXT[kind].split(' '), tx = $('.tx', a);
   for (let i = 0; i < words.length; i++) { tx.textContent = words.slice(0, i + 1).join(' '); if (i % 4 === 0) chat.scrollTop = chat.scrollHeight; await sleep(28); }
-  // one widget at a time: a loading card in the chat and a loading tile in the tray, then the widget
-  const kinds = s ? s.kinds : [];
-  for (let i = 0; i < kinds.length; i++) {
-    await sleep(i ? 450 : 300);
-    const t = addThumb(kinds[i], !!ACTION[kinds[i]]);
-    const ld = document.createElement('div'); ld.className = 'wload'; ld.textContent = LOADING[kinds[i]] || 'Working on it…';
-    chat.appendChild(ld);
-    await sleep(60); chat.scrollTo({ top: Math.max(0, ld.offsetTop - 160), behavior: 'smooth' });
-    await sleep(1000);
-    ld.classList.add('out'); await sleep(200);
-    const w = WIDGETS[t.kind](); ld.replaceWith(w); t.wid = w;
-    t.el.classList.remove('gen'); t.el.classList.add('done');
-    setTimeout(() => t.el.classList.remove('born'), 600);
-    t.el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    await sleep(60); chat.scrollTo({ top: Math.max(0, w.offsetTop - 160), behavior: 'smooth' });
-  }
+  chat.scrollTop = chat.scrollHeight;
   busy = false;
 }
 $('#bar').addEventListener('submit', (e) => { e.preventDefault(); ask(q.value); });
